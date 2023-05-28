@@ -1,7 +1,8 @@
+import { readFileSync, rmSync } from "fs";
 import { Client, Intents } from "oceanic.js";
 
 import { Commands } from "./Command";
-import { PREFIX } from "./constants";
+import { PREFIX, UPDATE_CHANNEL_ID_FILE } from "./constants";
 import { moderateMessage, moderateNick } from "./moderate";
 import { reply, silently } from "./util";
 
@@ -21,7 +22,7 @@ export const Vaius = new Client({
 });
 
 let ownerId: string;
-Vaius.once("ready", () => {
+Vaius.once("ready", async () => {
     Vaius.rest.oauth.getApplication().then(app => {
         ownerId = app.ownerID;
     });
@@ -29,6 +30,15 @@ Vaius.once("ready", () => {
     console.log("hi");
     console.log(`Connected as ${Vaius.user.tag} (${Vaius.user.id})`);
     console.log(`I am in ${Vaius.guilds.size} guilds`);
+
+    try {
+        const updateChannelId = readFileSync(UPDATE_CHANNEL_ID_FILE, "utf-8").trim();
+        await Vaius.rest.channels.createMessage(updateChannelId, {
+            content: "I'm back !!! :DDD"
+        });
+
+        rmSync(UPDATE_CHANNEL_ID_FILE);
+    } catch { }
 });
 
 const whitespaceRe = /\s+/;

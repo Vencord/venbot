@@ -1,6 +1,8 @@
 import { execSync } from "child_process";
+import { writeFileSync } from "fs";
 
 import { defineCommand } from "../Command";
+import { UPDATE_CHANNEL_ID_FILE } from "../constants";
 import { codeblock, reply, silently } from "../util";
 
 defineCommand({
@@ -19,6 +21,8 @@ defineCommand({
             await silently(reply(msg, {
                 content: "Updated!! Now restarting..."
             }));
+
+            writeFileSync(UPDATE_CHANNEL_ID_FILE, msg.channel!.id);
 
             execSync("pm2 restart vaius");
         } catch (e) {
