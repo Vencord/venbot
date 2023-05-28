@@ -31,7 +31,7 @@ Vaius.once("ready", () => {
     console.log(`I am in ${Vaius.guilds.size} guilds`);
 });
 
-const spaces = /\s+/;
+const whitespaceRe = /\s+/;
 
 Vaius.on("messageCreate", async msg => {
     if (msg.author.bot) return;
@@ -39,7 +39,8 @@ Vaius.on("messageCreate", async msg => {
 
     if (!msg.content?.toLowerCase().startsWith(PREFIX)) return;
 
-    const args = msg.content.slice(PREFIX.length).trim().split(spaces);
+    const content = msg.content.slice(PREFIX.length).trim();
+    const args = content.split(whitespaceRe);
     const cmd = Commands[args.shift()!];
     if (!cmd) return;
 
@@ -47,7 +48,10 @@ Vaius.on("messageCreate", async msg => {
         return void reply(msg, { content: "💢" });
 
     try {
-        await cmd.execute(msg, ...args);
+        if (cmd.rawContent)
+            await cmd.execute(msg, content);
+        else
+            await cmd.execute(msg, ...args);
     } catch (e) {
         console.error(
             `Failed to run ${cmd.name}`,

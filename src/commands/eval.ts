@@ -7,7 +7,8 @@ defineCommand({
     name: "eval",
     aliases: ["e", "$"],
     ownerOnly: true,
-    async execute(msg, ...code) {
+    rawContent: true,
+    async execute(msg, code) {
         const console: any = {
             _lines: [] as string[],
             _log(...things: string[]) {
@@ -23,7 +24,7 @@ defineCommand({
 
         const { client, channel, author, content, guild, member } = msg;
 
-        let script = code.join(" ").trim().replace(/(^`{3}(js|javascript)?|`{3}$)/g, "");
+        let script = code.replace(/(^`{3}(js|javascript)?|`{3}$)/g, "");
         if (script.includes("await")) script = `(async () => { ${script} })()`;
 
         try {

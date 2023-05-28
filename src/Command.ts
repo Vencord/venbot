@@ -5,6 +5,7 @@ export interface Command {
     aliases?: string[];
     ownerOnly?: boolean;
     execute(message: Message, ...args: string[]): Promise<any>;
+    rawContent?: boolean;
 }
 
 export const Commands = {} as Record<string, Command>;
