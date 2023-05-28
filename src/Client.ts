@@ -49,7 +49,7 @@ Vaius.on("messageCreate", async msg => {
 
     try {
         if (cmd.rawContent)
-            await cmd.execute(msg, content);
+            await cmd.execute(msg, content.slice(cmd.name.length).trim());
         else
             await cmd.execute(msg, ...args);
     } catch (e) {
