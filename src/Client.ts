@@ -41,7 +41,9 @@ Vaius.on("messageCreate", async msg => {
 
     const content = msg.content.slice(PREFIX.length).trim();
     const args = content.split(whitespaceRe);
-    const cmd = Commands[args.shift()!];
+
+    const cmdName = args.shift()?.toLowerCase()!;
+    const cmd = Commands[cmdName];
     if (!cmd) return;
 
     if (cmd.ownerOnly && msg.author.id !== ownerId)
@@ -49,7 +51,7 @@ Vaius.on("messageCreate", async msg => {
 
     try {
         if (cmd.rawContent)
-            await cmd.execute(msg, content.slice(cmd.name.length).trim());
+            await cmd.execute(msg, content.slice(cmdName.length).trim());
         else
             await cmd.execute(msg, ...args);
     } catch (e) {
