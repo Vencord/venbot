@@ -10,7 +10,7 @@ defineCommand({
         if (!msg.inCachedGuildChannel()) return;
 
         if (!msg.member.permissions.has("BAN_MEMBERS"))
-            return reply(msg, { content: "nop" });
+            return reply(msg, { content: "okay banned <:ban:1112433028917121114>" });
 
         let possibleDays = Number(args[0]) || 0;
         if (possibleDays > 0 && possibleDays < 8)
