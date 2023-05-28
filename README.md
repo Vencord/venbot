@@ -1,7 +1,6 @@
 # Vaius
 
-If you are looking at this repo on github, note that it's just a mirror.
-The actual repo is [on codeberg](https://codeberg.org/Ven/Vaius) and pull requests and issues should go there!
+Vaius is a Discord bot used on the [Vencord](https://vencord.dev) Discord server!
 
 This bot is extremely specific and not configurable so there is really no reason for you to want to self host it
 
