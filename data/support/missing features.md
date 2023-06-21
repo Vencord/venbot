@@ -1,8 +1,8 @@
 ---
-aliases: screenshare, presence, keybinds, mf
+aliases: keybinds, mf
 ---
 
-If screen-sharing, rich presence, global keybinds and possibly some more features aren't working for you, it's likely you installed the Vencord Desktop app.
+If global keybinds and possibly some more features aren't working for you, it's likely you installed the Vencord Desktop app.
 
 Vencord Desktop is a standalone independent app that is missing some features from the regular Discord app.
 
