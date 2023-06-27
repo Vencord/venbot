@@ -2,7 +2,7 @@ import { createCanvas, Image, loadImage, registerFont } from "canvas";
 
 const WIDTH = 400;
 const HEIGHT = 260;
-const FONT = '"gg sans", "Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif';
+const FONT = '"gg sans", "Twemoji Mozilla", "Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif';
 
 let img: Image;
 
@@ -67,6 +67,10 @@ function draw(channels: Channels) {
 export async function drawNotSupportImage(channels: Channels) {
     if (!img) {
         img = await loadImage("./data/assets/not-support-template.png");
+
+        registerFont("./data/assets/twemoji.ttf", {
+            family: "Twemoji Mozilla"
+        });
 
         for (const weight of ["500", "600"]) {
             registerFont(`./data/assets/gg-sans-${weight}.ttf`, {
