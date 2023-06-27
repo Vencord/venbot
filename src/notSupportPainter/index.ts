@@ -37,29 +37,29 @@ function draw(channels: Channels) {
         }
     }
 
-    function drawCategory(name: string, x: number, y: number) {
+    function drawCategory(name: string, y: number) {
         ctx.save();
 
         ctx.font = "600 12px " + FONT;
         // ctx.letterSpacing = "0.24px";
-        ctx.fillText(fitString(name.toUpperCase(), 218), x, y);
+        ctx.fillText(fitString(name.toUpperCase(), 218), 18, y);
 
         ctx.restore();
     }
 
-    function drawChannel(name: string, x: number, y: number) {
+    function drawChannel(name: string, y: number) {
         ctx.save();
 
         ctx.font = "500 16px " + FONT;
-        ctx.fillText(fitString(name, 165), x, y);
+        ctx.fillText(fitString(name, 163), 42, y);
 
         ctx.restore();
     }
 
-    drawCategory(channels.destCategory, 18, 83);
-    drawChannel(channels.destChannel, 40, 112);
-    drawCategory(channels.currentCategory, 18, 215);
-    drawChannel(channels.currentChannel, 40, 244);
+    drawCategory(channels.destCategory, 83);
+    drawChannel(channels.destChannel, 112);
+    drawCategory(channels.currentCategory, 215);
+    drawChannel(channels.currentChannel, 244);
 
     return canvas.toBuffer();
 }
