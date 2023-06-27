@@ -20,7 +20,8 @@ defineCommand({
                     name: "notsupport.png",
                     contents: image
                 }
-            ]
+            ],
+            messageReference: msg.messageReference
         });
     }
 });
