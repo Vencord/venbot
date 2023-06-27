@@ -29,6 +29,7 @@ defineCommand({
         });
 
         msg.channel.createMessage({
+            content: "👉 <#1026515880080842772>",
             files: [
                 {
                     name: "notsupport.png",
