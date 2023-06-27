@@ -19,6 +19,7 @@ function draw(channels: Channels) {
 
     ctx.drawImage(img, 0, 0, WIDTH, HEIGHT);
     ctx.fillStyle = "#949ba4";
+    ctx.textDrawingMode = "glyph";
 
     function fitString(str: string, maxWidth: number) {
         let { width } = ctx.measureText(str);
