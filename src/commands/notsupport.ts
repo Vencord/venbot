@@ -1,7 +1,9 @@
 import { createCanvas, Image, loadImage, registerFont } from "canvas";
+import { ChannelTypes } from "oceanic.js";
 
 import { defineCommand } from "../Command";
 
+const SUPPORT_CHANNEL_ID = "1026515880080842772";
 const WIDTH = 400;
 const HEIGHT = 260;
 const FONT = '"gg sans", "Twemoji Mozilla", "Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif';
@@ -21,15 +23,18 @@ defineCommand({
     async execute(msg) {
         if (!msg.inCachedGuildChannel()) return;
 
+        const supportChannel = msg.client.getChannel(SUPPORT_CHANNEL_ID);
+        if (!supportChannel || supportChannel.type !== ChannelTypes.GUILD_TEXT) return;
+
         const image = await drawNotSupportImage({
             currentCategory: msg.channel.parent?.name || "No Category",
             currentChannel: msg.channel.name,
-            destCategory: "support",
-            destChannel: "🏥-support-🏥"
+            destCategory: supportChannel.parent?.name || "No Category",
+            destChannel: supportChannel.name
         });
 
         msg.channel.createMessage({
-            content: "👉 <#1026515880080842772>",
+            content: `👉 <#${SUPPORT_CHANNEL_ID}>`,
             files: [
                 {
                     name: "notsupport.png",
