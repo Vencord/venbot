@@ -11,8 +11,10 @@ const FONT = '"gg sans", "Twemoji Mozilla", "Noto Sans", "Helvetica Neue", Helve
 let img: Image;
 
 interface Channels {
+    destCaption: string;
     destCategory: string;
     destChannel: string;
+    currentCaption: string;
     currentCategory: string;
     currentChannel: string;
 }
@@ -20,20 +22,33 @@ interface Channels {
 defineCommand({
     name: "notsupport",
     aliases: ["ns", "nots"],
-    async execute(msg, channelId) {
+    async execute(msg, channelId, ...captionElements) {
         if (!msg.inCachedGuildChannel()) return;
 
-        let channel = channelId && msg.guild.channels.get(channelId.match(/\d+/)?.[0] || "");
-        channel ||= msg.client.getChannel(SUPPORT_CHANNEL_ID) as AnyGuildChannelWithoutThreads;
+        let channel = msg.client.getChannel(SUPPORT_CHANNEL_ID) as AnyGuildChannelWithoutThreads;
+        let caption = captionElements.join(" ");
+        if (channelId) {
+            const customChannel = msg.guild.channels.get(channelId.match(/\d+/)?.[0] || "");
+            if (customChannel) {
+                channel = customChannel;
+            } else {
+                caption = channelId + " " + caption;
+            }
+        }
 
         if (!channel || !channel.name) return;
+
+        const [destCaption, currentCaption] = caption.split("|").map(s => s.trim());
 
         const image = await drawNotSupportImage({
             currentCategory: msg.channel.parent?.name || "No Category",
             currentChannel: msg.channel.name,
             destCategory: channel.parent?.name || "No Category",
-            destChannel: channel.name
+            destChannel: channel.name,
+            destCaption: destCaption || "you want to be here",
+            currentCaption: currentCaption || "you are here"
         });
+
         msg.channel.createMessage({
             content: `👉 ${channel.mention}`,
             files: [
@@ -91,10 +106,23 @@ function draw(channels: Channels) {
         ctx.restore();
     }
 
+    function drawText(color: string, text: string, x: number, y: number) {
+        ctx.save();
+
+        ctx.font = "600 25px " + FONT;
+        ctx.fillStyle = color;
+        ctx.fillText(fitString(text, WIDTH - x), x, y);
+
+        ctx.restore();
+    }
+
     drawCategory(channels.destCategory, 83);
     drawChannel(channels.destChannel, 112);
     drawCategory(channels.currentCategory, 215);
     drawChannel(channels.currentChannel, 244);
+
+    drawText("lime", channels.destCaption, 120, 20);
+    drawText("red", channels.currentCaption, 220, 180);
 
     return canvas.toBuffer();
 }
