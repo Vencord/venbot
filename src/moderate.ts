@@ -1,7 +1,6 @@
 import { readdir, readFile } from "fs/promises";
 import { Member, Message, MessageTypes } from "oceanic.js";
 import { join } from "path";
-import { fetch } from "undici";
 
 import { Vaius } from "./Client";
 import { DATA_DIR } from "./constants";
@@ -37,10 +36,10 @@ const ChannelRules: Record<string, (m: Message) => string | void> = {
             case MessageTypes.THREAD_CREATED:
                 return "";
         }
-        if (m.content.includes("```css")) return;
+        if (m.content.includes("```")) return;
         if (m.content.includes("https://")) return;
         if (m.attachments?.some(a => a.filename?.endsWith(".css"))) return;
-        return "Please only post css snippets. To ask questions or discuss snippets, make a thread.";
+        return "Please only post css snippets. They must be enclosed in a proper codeblock. To ask questions or discuss snippets, make a thread.";
     }
 };
 
@@ -76,19 +75,6 @@ export async function moderateMessage(msg: Message) {
     }
 
     moderateImageHosts(msg);
-
-    for (const [, a] of msg.attachments) {
-        const content = await fetch(a.url, {
-            headers: {
-                Range: "bytes=0-13"
-            }
-        }).then(r => r.text());
-
-        if (content === "-----BEGIN PGP") {
-            silently(msg.delete());
-            return;
-        }
-    }
 }
 
 export async function moderateNick(member: Member) {

@@ -1,6 +1,8 @@
 import { CreateMessageOptions, Message, User } from "oceanic.js";
 import { fetch } from "undici";
 
+const ZWSP = "\u200B";
+
 export function reply(msg: Message, opts: CreateMessageOptions): Promise<Message> {
     return msg.channel!.createMessage({
         ...opts,
@@ -17,7 +19,7 @@ export function sleep(ms: number) {
 }
 
 const BACKTICKS = "```";
-export const codeblock = (s: string, lang = "js") => `${BACKTICKS}${lang}\n${s}${BACKTICKS}`;
+export const codeblock = (s: string, lang = "js") => `${BACKTICKS}${lang}\n${s.replaceAll("`", "`" + ZWSP)}${BACKTICKS}`;
 
 export async function sendManyLines(msg: Message, lines: string[]) {
     let s = "";
@@ -32,8 +34,6 @@ export async function sendManyLines(msg: Message, lines: string[]) {
     }
     if (s) await doSend();
 }
-
-const ZWSP = "\u200B";
 
 export function formatTable(rows: string[][]) {
     const highestLengths = Array.from({ length: rows[0].length }, (_, i) => Math.max(...rows.map(r => r[i].length)));
