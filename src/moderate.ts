@@ -91,11 +91,10 @@ export async function moderateMessage(msg: Message) {
     }
 }
 
-const saneName = /\w/;
 export async function moderateNick(member: Member) {
     if (!member.guild.permissionsOf(Vaius.user.id).has("MANAGE_NICKNAMES")) return;
 
-    const name = member.nick ?? member.username;
+    const name = member.displayName;
     const normalizedName = name.normalize("NFKC");
 
     const isLame = normalizedName.startsWith("!");
