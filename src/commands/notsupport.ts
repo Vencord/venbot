@@ -121,8 +121,8 @@ function draw(channels: Channels) {
     drawCategory(channels.currentCategory, 215);
     drawChannel(channels.currentChannel, 244);
 
-    drawText("lime", channels.destCaption, 120, 20);
-    drawText("red", channels.currentCaption, 220, 180);
+    drawText("lime", channels.destCaption.slice(0, 100), 120, 20);
+    drawText("red", channels.currentCaption.slice(0, 100), 220, 180);
 
     return canvas.toBuffer();
 }
