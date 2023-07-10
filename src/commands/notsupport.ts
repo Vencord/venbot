@@ -1,5 +1,5 @@
 import { createCanvas, Image, loadImage, registerFont } from "canvas";
-import { ChannelTypes } from "oceanic.js";
+import { AnyGuildChannelWithoutThreads } from "oceanic.js";
 
 import { defineCommand } from "../Command";
 
@@ -20,21 +20,22 @@ interface Channels {
 defineCommand({
     name: "notsupport",
     aliases: ["ns", "nots"],
-    async execute(msg) {
+    async execute(msg, channelId) {
         if (!msg.inCachedGuildChannel()) return;
 
-        const supportChannel = msg.client.getChannel(SUPPORT_CHANNEL_ID);
-        if (!supportChannel || supportChannel.type !== ChannelTypes.GUILD_TEXT) return;
+        let channel = channelId && msg.guild.channels.get(channelId.match(/\d+/)?.[0] || "");
+        channel ||= msg.client.getChannel(SUPPORT_CHANNEL_ID) as AnyGuildChannelWithoutThreads;
+
+        if (!channel || !channel.name) return;
 
         const image = await drawNotSupportImage({
             currentCategory: msg.channel.parent?.name || "No Category",
             currentChannel: msg.channel.name,
-            destCategory: supportChannel.parent?.name || "No Category",
-            destChannel: supportChannel.name
+            destCategory: channel.parent?.name || "No Category",
+            destChannel: channel.name
         });
-
         msg.channel.createMessage({
-            content: `👉 <#${SUPPORT_CHANNEL_ID}>`,
+            content: `👉 ${channel.mention}`,
             files: [
                 {
                     name: "notsupport.png",
