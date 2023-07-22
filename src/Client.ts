@@ -11,7 +11,7 @@ export const Vaius = new Client({
     gateway: {
         intents:
             Intents.MESSAGE_CONTENT | Intents.GUILDS | Intents.DIRECT_MESSAGES |
-            Intents.GUILD_MEMBERS | Intents.GUILD_MESSAGES | Intents.GUILD_PRESENCES | Intents.GUILD_MESSAGE_REACTIONS
+            Intents.GUILD_MEMBERS | Intents.GUILD_MESSAGES | Intents.GUILD_PRESENCES
     },
     allowedMentions: {
         everyone: false,

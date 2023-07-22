@@ -1,7 +1,6 @@
 import { createCanvas, Image, loadImage, registerFont } from "canvas";
-import { AnyGuildChannelWithoutThreads, AnyTextableGuildChannel, MessageReference } from "oceanic.js";
+import { AnyGuildChannelWithoutThreads } from "oceanic.js";
 
-import { Vaius } from "../Client";
 import { defineCommand } from "../Command";
 
 const SUPPORT_CHANNEL_ID = "1026515880080842772";
@@ -40,52 +39,29 @@ defineCommand({
         if (!channel || !channel.name) return;
 
         const [destCaption, currentCaption] = caption.split("|").map(s => s.trim());
-        await sendNotSupport(msg.channel, channel, msg.messageReference, destCaption, currentCaption);
-    }
-});
 
-const NOT_SUPPORT_EMOJI_ID = "1132288507172364360";
-Vaius.on("messageReactionAdd", async (msg, user, reaction) => {
-    if (reaction.id === NOT_SUPPORT_EMOJI_ID && msg.guild && msg.channel) {
-        const currChannel = Vaius.getChannel(msg.channel.id) as AnyTextableGuildChannel;
-        if (!currChannel?.guildID) return;
+        const image = await drawNotSupportImage({
+            currentCategory: msg.channel.parent?.name || "No Category",
+            currentChannel: msg.channel.name,
+            destCategory: channel.parent?.name || "No Category",
+            destChannel: channel.name,
+            destCaption: destCaption || "you want to be here",
+            currentCaption: currentCaption || "you are here"
+        });
 
-        await sendNotSupport(currChannel, Vaius.getChannel(SUPPORT_CHANNEL_ID) as AnyGuildChannelWithoutThreads, {
-            channelID: msg.channel.id,
-            guildID: msg.guild.id,
-            messageID: msg.id,
-            failIfNotExists: true
+        msg.channel.createMessage({
+            content: `👉 ${channel.mention}`,
+            files: [
+                {
+                    name: "notsupport.png",
+                    contents: image
+                }
+            ],
+            messageReference: msg.messageReference
         });
     }
 });
 
-async function sendNotSupport(
-    currentChannel: AnyTextableGuildChannel,
-    destChannel: AnyGuildChannelWithoutThreads,
-    messageReference?: MessageReference,
-    destCaption?: string,
-    currentCaption?: string,
-) {
-    const image = await drawNotSupportImage({
-        currentCategory: currentChannel.parent?.name || "No Category",
-        currentChannel: currentChannel.name,
-        destCategory: destChannel.parent?.name || "No Category",
-        destChannel: destChannel.name,
-        destCaption: destCaption || "you want to be here",
-        currentCaption: currentCaption || "you are here"
-    });
-
-    currentChannel.createMessage({
-        content: `👉 ${destChannel.mention}`,
-        files: [
-            {
-                name: "notsupport.png",
-                contents: image
-            }
-        ],
-        messageReference: messageReference
-    });
-}
 
 function draw(channels: Channels) {
     const canvas = createCanvas(WIDTH, HEIGHT);
