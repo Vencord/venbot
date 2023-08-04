@@ -3,7 +3,12 @@ import { fetch } from "undici";
 
 const ZWSP = "\u200B";
 
-export function reply(msg: Message, opts: CreateMessageOptions): Promise<Message> {
+export function reply(msg: Message, opts: CreateMessageOptions | string): Promise<Message> {
+    if (typeof opts === "string")
+        opts = {
+            content: opts
+        };
+
     return msg.channel!.createMessage({
         ...opts,
         messageReference: {

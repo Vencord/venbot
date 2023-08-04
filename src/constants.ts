@@ -7,3 +7,11 @@ export const PROD = process.env.NODE_ENV === "production";
 export const PREFIX = PROD ? "v" : "$";
 
 export const UPDATE_CHANNEL_ID_FILE = "./dist/update_channel_id";
+
+export const SUPPORT_CHANNEL_ID = "1026515880080842772";
+export const BOT_CHANNEL_ID = "1024286218801926184";
+
+export const SUPPORT_ALLOWED_CHANNELS = [
+    SUPPORT_CHANNEL_ID,
+    BOT_CHANNEL_ID
+];

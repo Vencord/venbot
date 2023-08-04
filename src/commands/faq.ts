@@ -1,6 +1,6 @@
 import { defineCommand } from "../Command";
-import { VENCORD_SITE } from "../constants";
-import { makeCachedJsonFetch } from "../util";
+import { SUPPORT_ALLOWED_CHANNELS, SUPPORT_CHANNEL_ID, VENCORD_SITE } from "../constants";
+import { makeCachedJsonFetch, reply } from "../util";
 
 interface Faq {
     question: string;
@@ -15,6 +15,8 @@ defineCommand({
     aliases: ["f"],
     async execute(msg, query) {
         if (!msg.inCachedGuildChannel()) return;
+        if (!SUPPORT_ALLOWED_CHANNELS.includes(msg.channel.id))
+            return reply(msg, `This is not the <#${SUPPORT_CHANNEL_ID}> channel.`);
 
         const faq = await fetchFaq();
 

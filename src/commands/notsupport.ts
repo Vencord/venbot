@@ -2,8 +2,8 @@ import { createCanvas, Image, loadImage, registerFont } from "canvas";
 import { AnyGuildChannelWithoutThreads } from "oceanic.js";
 
 import { defineCommand } from "../Command";
+import { SUPPORT_CHANNEL_ID } from "../constants";
 
-const SUPPORT_CHANNEL_ID = "1026515880080842772";
 const WIDTH = 400;
 const HEIGHT = 260;
 const FONT = '"gg sans", "Twemoji Mozilla", "Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif';
