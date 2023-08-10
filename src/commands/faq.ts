@@ -37,7 +37,7 @@ defineCommand({
             return msg.channel.createMessage({
                 embeds: [{
                     title: match.question,
-                    description: match.answer,
+                    description: match.answer.replace(/(?<!\n)\n(?!\n)/g, ""),
                     color: 0xdd7878
                 }],
             });
