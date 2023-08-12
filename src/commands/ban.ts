@@ -9,9 +9,6 @@ defineCommand({
     async execute(msg, ...args) {
         if (!msg.inCachedGuildChannel()) return;
 
-        if (!msg.member.permissions.has("BAN_MEMBERS"))
-            return reply(msg, { content: "okay banned <:ban:1112433028917121114>" });
-
         let possibleDays = Number(args[0]) || 0;
         if (possibleDays > 0 && possibleDays < 8)
             args.shift();
@@ -35,6 +32,9 @@ defineCommand({
 
         const results = [] as string[];
         for (const id of ids) {
+            if (!msg.member.permissions.has("BAN_MEMBERS") && msg.author.id !== id)
+                continue;
+
             await silently(
                 msg.client.rest.channels.createDM(id)
                     .then(dm => dm.createMessage({
