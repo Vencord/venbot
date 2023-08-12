@@ -32,7 +32,8 @@ defineCommand({
 
         const results = [] as string[];
         for (const id of ids) {
-            if (!msg.member.permissions.has("BAN_MEMBERS") && msg.author.id !== id)
+            const hasPerms = msg.member.permissions.has("BAN_MEMBERS");
+            if (!hasPerms && msg.author.id !== id)
                 continue;
 
             await silently(
@@ -42,10 +43,13 @@ defineCommand({
                     }))
             );
 
-            await msg.guild.createBan(id, { reason, deleteMessageDays: possibleDays as 0 })
-                .catch(e => results.push(`Failed to ban ${id}: \`${String(e)}\``));
+            if (hasPerms)
+                await msg.guild.createBan(id, { reason, deleteMessageDays: possibleDays as 0 })
+                    .catch(e => results.push(`Failed to ban ${id}: \`${String(e)}\``));
+            else
+                await msg.guild.removeMember(id, "self ban");
         }
 
-        return reply(msg, { content: results.join("\n") || "Done!" });
+        return reply(msg, { content: results.join("\n") || "Done! <:BAN:1112433028917121114>" });
     }
 });
