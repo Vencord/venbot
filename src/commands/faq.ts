@@ -37,7 +37,13 @@ defineCommand({
             return msg.channel.createMessage({
                 embeds: [{
                     title: match.question,
-                    description: match.answer.replace(/(?<!\n)\n(?!\n)/g, ""),
+                    description:
+                        match.answer
+                            // temporarily replace newlines inside codeblocks with a placeholder, so the second replace
+                            // doesn't remove them
+                            .replace(/```.+?```/gs, m => m.replaceAll("\n", "%NEWLINE%"))
+                            .replace(/(?<!\n)\n(?!\n)/g, "")
+                            .replaceAll("%NEWLINE%", "\n"),
                     color: 0xdd7878
                 }],
             });
