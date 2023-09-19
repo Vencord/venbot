@@ -8,6 +8,7 @@ defineCommand({
     aliases: ["yeet"],
     async execute(msg, ...args) {
         if (!msg.inCachedGuildChannel()) return;
+        if (!msg.member.permissions.has("BAN_MEMBERS")) return;
 
         let possibleDays = Number(args[0]) || 0;
         if (possibleDays > 0 && possibleDays < 8)
@@ -32,10 +33,6 @@ defineCommand({
 
         const results = [] as string[];
         for (const id of ids) {
-            const hasPerms = msg.member.permissions.has("BAN_MEMBERS");
-            if (!hasPerms && msg.author.id !== id)
-                continue;
-
             await silently(
                 msg.client.rest.channels.createDM(id)
                     .then(dm => dm.createMessage({
@@ -43,11 +40,8 @@ defineCommand({
                     }))
             );
 
-            if (hasPerms)
-                await msg.guild.createBan(id, { reason, deleteMessageDays: possibleDays as 0 })
-                    .catch(e => results.push(`Failed to ban ${id}: \`${String(e)}\``));
-            else
-                await msg.guild.removeMember(id, "self ban");
+            await msg.guild.createBan(id, { reason, deleteMessageDays: possibleDays as 0 })
+                .catch(e => results.push(`Failed to ban ${id}: \`${String(e)}\``));
         }
 
         return reply(msg, { content: results.join("\n") || "Done! <:BAN:1112433028917121114>" });
