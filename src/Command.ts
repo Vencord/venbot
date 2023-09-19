@@ -8,9 +8,16 @@ export interface Command {
     rawContent?: boolean;
 }
 
-export const Commands = {} as Record<string, Command>;
+export interface FullCommand extends Command {
+    rateLimits: Set<string>;
+}
 
-export function defineCommand<C extends Command>(cmd: C) {
+export const Commands = {} as Record<string, FullCommand>;
+
+export function defineCommand<C extends Command>(c: C) {
+    const cmd = c as any as FullCommand;
+    cmd.rateLimits = new Set();
+
     Commands[cmd.name] = cmd;
     cmd.aliases?.forEach(alias => Commands[alias] = cmd);
 }

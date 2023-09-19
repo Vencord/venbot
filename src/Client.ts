@@ -1,16 +1,14 @@
 import { readFileSync, rmSync } from "fs";
-import { Client, Intents } from "oceanic.js";
+import { Client } from "oceanic.js";
 
 import { Commands } from "./Command";
-import { PREFIX, UPDATE_CHANNEL_ID_FILE } from "./constants";
+import { PREFIX, SUPPORT_ALLOWED_CHANNELS, UPDATE_CHANNEL_ID_FILE } from "./constants";
 import { moderateMessage, moderateNick } from "./moderate";
 import { reply, silently } from "./util";
 
 export const Vaius = new Client({
     auth: "Bot " + process.env.DISCORD_TOKEN,
-    gateway: {
-        intents: ["ALL"]
-    },
+    gateway: { intents: ["ALL"] },
     allowedMentions: {
         everyone: false,
         repliedUser: false,
@@ -55,7 +53,17 @@ Vaius.on("messageCreate", async msg => {
     if (!cmd) return;
 
     if (cmd.ownerOnly && msg.author.id !== ownerId)
-        return void reply(msg, { content: "💢" });
+        return;
+
+    const noRateLimit = SUPPORT_ALLOWED_CHANNELS.includes(msg.channel?.id!) || msg.member?.permissions.has("MANAGE_MESSAGES");
+
+    if (!noRateLimit) {
+        if (cmd.rateLimits.has(msg.author.id))
+            return;
+
+        cmd.rateLimits.add(msg.author.id);
+        setTimeout(() => cmd.rateLimits.delete(msg.author.id), 10_000);
+    }
 
     try {
         if (cmd.rawContent)

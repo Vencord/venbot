@@ -2,7 +2,7 @@ import { readdir, readFile } from "fs/promises";
 import { join } from "path";
 
 import { defineCommand } from "../Command";
-import { DATA_DIR, SUPPORT_ALLOWED_CHANNELS, SUPPORT_CHANNEL_ID } from "../constants";
+import { DATA_DIR, SUPPORT_ALLOWED_CHANNELS } from "../constants";
 import { reply } from "../util";
 
 const instructions = {} as Record<string, string>;
@@ -13,8 +13,7 @@ defineCommand({
     aliases: ["s"],
     async execute(msg, ...guide) {
         if (!msg.inCachedGuildChannel()) return;
-        if (!SUPPORT_ALLOWED_CHANNELS.includes(msg.channel.id))
-            return reply(msg, `This is not the <#${SUPPORT_CHANNEL_ID}> channel.`);
+        if (!SUPPORT_ALLOWED_CHANNELS.includes(msg.channel.id)) return;
 
         const content = instructions[guide.join(" ").toLowerCase()];
         if (content)
