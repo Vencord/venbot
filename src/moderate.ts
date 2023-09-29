@@ -97,6 +97,11 @@ export async function moderateMessage(msg: Message) {
         return;
     }
 
+    // don't moderate mods
+    // above checks are still applied to mods because they are kind of severe,
+    // and if a mod does them, they possibly had their account compromised
+    if (msg.member.permissions.has("MANAGE_MESSAGES")) return;
+
     for (const mod of [moderateInvites, moderateImageHosts]) {
         if (await mod(msg)) return;
     }
