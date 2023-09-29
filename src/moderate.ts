@@ -1,9 +1,9 @@
 import { readdir, readFile } from "fs/promises";
-import { Member, Message, MessageTypes } from "oceanic.js";
+import { EmbedOptions, Member, Message, MessageTypes } from "oceanic.js";
 import { join } from "path";
 
 import { Vaius } from "./Client";
-import { DATA_DIR } from "./constants";
+import { DATA_DIR, HOURS, MINUTES, SECONDS } from "./constants";
 import { sendDm, silently, until } from "./util";
 
 const mentions = /<@!?(\d{17,20})>/g;
@@ -43,6 +43,25 @@ const ChannelRules: Record<string, (m: Message) => string | void> = {
     }
 };
 
+const MOD_LOG_CHANNEL = "1156349646965325824";
+function logMessage(content: string, ...embeds: EmbedOptions[]) {
+    Vaius.rest.channels.createMessage(MOD_LOG_CHANNEL, {
+        content,
+        embeds
+    });
+}
+
+function makeEmbedForMessage(message: Message): EmbedOptions {
+    return {
+        author: {
+            name: message.author.tag,
+            iconURL: message.author.avatarURL()
+        },
+        description: message.content
+    };
+}
+
+
 export async function moderateMessage(msg: Message) {
     if (!msg.inCachedGuildChannel()) return;
     if (!msg.channel.permissionsOf(Vaius.user.id).has("MANAGE_MESSAGES")) return;
@@ -64,17 +83,23 @@ export async function moderateMessage(msg: Message) {
     const dupeCounts = Object.values(dupeCount);
     if (dupeCounts.length > 10) {
         silently(msg.delete());
-        silently(msg.member.edit({ communicationDisabledUntil: until(1000 * 60 * 60 * 5), reason: "mass ping" }));
+        silently(msg.member.edit({ communicationDisabledUntil: until(5 * HOURS), reason: "mass ping" }));
+        logMessage(
+            `${msg.author.mention} mass pinged ${dupeCounts.length} users in ${msg.channel.mention}`,
+            makeEmbedForMessage(msg)
+        );
         return;
     }
 
     if (Object.values(dupeCount).some(x => x > 3)) {
         silently(msg.delete());
-        silently(msg.member.edit({ communicationDisabledUntil: until(1000 * 30), reason: "ping spam" }));
+        silently(msg.member.edit({ communicationDisabledUntil: until(30 * SECONDS), reason: "ping spam" }));
         return;
     }
 
-    moderateImageHosts(msg);
+    for (const mod of [moderateInvites, moderateImageHosts]) {
+        if (await mod(msg)) return;
+    }
 }
 
 export async function moderateNick(member: Member) {
@@ -92,10 +117,44 @@ export async function moderateNick(member: Member) {
 }
 
 export async function moderateImageHosts(msg: Message) {
-    if (imageHostRegex.test(msg.content))
-        silently(msg.delete().then(() =>
-            sendDm(msg.author, {
-                content: "cdn.discordapp.com is a free and great way to share images! (Please stop using stupid image hosts)"
-            })
-        ));
+    if (!imageHostRegex.test(msg.content))
+        return false;
+
+    return silently(msg.delete().then(() =>
+        sendDm(msg.author, {
+            content: "cdn.discordapp.com is a free and great way to share images! (Please stop using stupid image hosts)"
+        })
+    ));
+}
+
+const inviteRe = /discord(?:(?:app)?\.com\/invite|\.gg)\/([a-z0-9]+)/ig;
+const allowedGuilds = [
+    "1015060230222131221", // vencord
+    "811255666990907402", // aliucord
+    "1015931589865246730", // vendetta
+    "86004744966914048", // betterdiscord
+    "1000926524452647132", // replugged
+    "538759280057122817", // powercord
+    "950850315601711176", // enmity
+    "920674107111137340", // stupidity archive
+    "820732039253852171", // armcord
+];
+
+export async function moderateInvites(msg: Message) {
+    for (const [,code] of msg.content.matchAll(inviteRe)) {
+        const inviteData = await Vaius.rest.channels.getInvite(code, {}).catch(() => null);
+        if (!inviteData?.guildID || !inviteData.guild) continue;
+
+        if (!allowedGuilds.includes(inviteData.guildID)) {
+            silently(msg.delete());
+            silently(msg.member!.edit({ communicationDisabledUntil: until(5 * MINUTES), reason: "invite" }));
+            logMessage(
+                `${msg.author.mention} posted an invite to ${inviteData.guild.name} in ${msg.channel!.mention}`,
+                makeEmbedForMessage(msg)
+            );
+            return true;
+        }
+    }
+
+    return false;
 }
