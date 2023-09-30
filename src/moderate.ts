@@ -132,7 +132,7 @@ export async function moderateImageHosts(msg: Message) {
     ));
 }
 
-const inviteRe = /discord(?:(?:app)?\.com\/invite|\.gg)\/([a-z0-9]+)/ig;
+const inviteRe = /discord(?:(?:app)?\.com\/invite|\.gg)\/([a-z0-9-]+)/ig;
 const allowedGuilds = [
     "1015060230222131221", // vencord
     "811255666990907402", // aliucord
@@ -146,7 +146,7 @@ const allowedGuilds = [
 ];
 
 export async function moderateInvites(msg: Message) {
-    for (const [,code] of msg.content.matchAll(inviteRe)) {
+    for (const [, code] of msg.content.matchAll(inviteRe)) {
         const inviteData = await Vaius.rest.channels.getInvite(code, {}).catch(() => null);
         if (!inviteData?.guildID || !inviteData.guild) continue;
 
