@@ -12,7 +12,7 @@ defineCommand({
         if (!msg.member.permissions.has("MANAGE_MESSAGES"))
             return reply(msg, { content: "nuh-uh!!" });
 
-        const limit = Number(amount);
+        const limit = Number(amount) + 1;
         if (!limit) return reply(msg, { content: "?" });
 
         const filter: ((msg: Message) => boolean) | undefined = (() => {
