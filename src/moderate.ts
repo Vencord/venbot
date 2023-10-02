@@ -133,7 +133,7 @@ export async function moderateImageHosts(msg: Message) {
 }
 
 const inviteRe = /discord(?:(?:app)?\.com\/invite|\.gg)\/([a-z0-9-]+)/ig;
-const allowedGuilds = [
+const allowedGuilds = new Set([
     "1015060230222131221", // vencord
     "811255666990907402", // aliucord
     "1015931589865246730", // vendetta
@@ -144,14 +144,18 @@ const allowedGuilds = [
     "920674107111137340", // stupidity archive
     "820732039253852171", // armcord
     "458997239738793984", // strencher
-];
+    "917308687423533086", // manti (reviewdb)
+    "613425648685547541", // ddevs
+    "891039687785996328", // kernel
+    "244230771232079873", // progamers hangout
+]);
 
 export async function moderateInvites(msg: Message) {
     for (const [, code] of msg.content.matchAll(inviteRe)) {
         const inviteData = await Vaius.rest.channels.getInvite(code, {}).catch(() => null);
         if (!inviteData?.guildID || !inviteData.guild) continue;
 
-        if (!allowedGuilds.includes(inviteData.guildID)) {
+        if (!allowedGuilds.has(inviteData.guildID)) {
             silently(msg.delete());
             silently(msg.member!.edit({ communicationDisabledUntil: until(5 * MINUTES), reason: "invite" }));
             logMessage(
