@@ -143,6 +143,7 @@ const allowedGuilds = [
     "950850315601711176", // enmity
     "920674107111137340", // stupidity archive
     "820732039253852171", // armcord
+    "458997239738793984", // strencher
 ];
 
 export async function moderateInvites(msg: Message) {
