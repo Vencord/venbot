@@ -41,7 +41,7 @@ defineCommand({
                             // temporarily replace newlines inside codeblocks with a placeholder, so the second replace
                             // doesn't remove them
                             .replace(/```.+?```/gs, m => m.replaceAll("\n", "%NEWLINE%"))
-                            .replace(/(?<!\n)\n(?!\n)/g, "")
+                            .replace(/(?<!\n)\n(?![\n\-*])/g, "")
                             .replaceAll("%NEWLINE%", "\n"),
                     color: 0xdd7878
                 }],
