@@ -56,12 +56,12 @@ async function createModmail(interaction: GuildButtonInteraction) {
 
     const chan = await interaction.guild.createChannel(ChannelTypes.GUILD_TEXT, {
         parentID: cat.id,
-        name: interaction.user.id,
-        permissionOverwrites: [{
-            id: interaction.user.id,
-            type: OverwriteTypes.MEMBER,
-            allow: Permissions.VIEW_CHANNEL | Permissions.SEND_MESSAGES
-        }]
+        name: interaction.user.id
+    });
+
+    await chan.editPermission(interaction.user.id, {
+        type: OverwriteTypes.MEMBER,
+        allow: Permissions.VIEW_CHANNEL | Permissions.SEND_MESSAGES
     });
 
     chan.createMessage({
