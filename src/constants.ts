@@ -17,6 +17,8 @@ export const SUPPORT_ALLOWED_CHANNELS = [
     BOT_CHANNEL_ID
 ];
 
+export const MOD_ROLE_ID = "1026509424686284924";
+
 export const SECONDS = 1000;
 export const MINUTES = 60 * SECONDS;
 export const HOURS = 60 * MINUTES;

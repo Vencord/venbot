@@ -3,7 +3,7 @@ import { ButtonStyles, ChannelTypes, ComponentInteraction, ComponentTypes, Inter
 
 import { Vaius } from "./Client";
 import { defineCommand } from "./Command";
-import { MOD_LOG_CHANNEL_ID } from "./constants";
+import { MOD_LOG_CHANNEL_ID, MOD_ROLE_ID } from "./constants";
 
 const INTERACTION_ID = "modmail:open_ticket";
 const THREAD_PARENT_ID = "1161412933050437682";
@@ -65,7 +65,7 @@ async function createModmail(interaction: GuildButtonInteraction) {
     // FIXME: workaround for oceanic bug where newly created channels wont be cached. remove once fixed
     threadParent.threads.set(thread.id, thread);
 
-    await thread.createMessage({
+    const msg = await thread.createMessage({
         content: `👋 ${interaction.user.mention}\n\nPlease describe your issue in as much detail as possible. A moderator will be with you shortly.`,
         components: [{
             type: ComponentTypes.ACTION_ROW,
@@ -82,6 +82,14 @@ async function createModmail(interaction: GuildButtonInteraction) {
         allowedMentions: {
             users: [interaction.user.id]
         }
+    });
+
+
+    await msg.edit({
+        allowedMentions: {
+            roles: [MOD_ROLE_ID],
+        },
+        content: msg.content + `\n<@&${MOD_ROLE_ID}>`
     });
 
     await interaction.createFollowup({
