@@ -89,7 +89,7 @@ async function createModmail(interaction: GuildButtonInteraction) {
         allowedMentions: {
             roles: [MOD_ROLE_ID],
         },
-        content: msg.content.replace("moderator", `\n<@&${MOD_ROLE_ID}>`)
+        content: msg.content.replace("moderator", `<@&${MOD_ROLE_ID}>`)
     });
 
     await interaction.createFollowup({
