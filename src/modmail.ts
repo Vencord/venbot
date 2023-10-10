@@ -1,15 +1,16 @@
-import { ButtonStyles, ChannelTypes, ComponentInteraction, ComponentTypes, InteractionTypes, MessageFlags, OverwriteTypes, Permissions, TextChannel } from "oceanic.js";
+import { createHash } from "crypto";
+import { ButtonStyles, ChannelTypes, ComponentInteraction, ComponentTypes, InteractionTypes, MessageFlags, TextChannel } from "oceanic.js";
 
 import { Vaius } from "./Client";
 import { defineCommand } from "./Command";
 
 const INTERACTION_ID = "modmail:open_ticket";
-const MODMAIL_CATEGORY_ID = "1161415408012775595";
+const THREAD_PARENT_ID = "1161434789979639978";
 
 type GuildButtonInteraction = ComponentInteraction<ComponentTypes.BUTTON, TextChannel>;
 
 defineCommand({
-    name: "modmail:postMessage",
+    name: "modmail:post",
     ownerOnly: true,
     execute() {
         return Vaius.rest.channels.createMessage("1161412933050437682", {
@@ -33,18 +34,19 @@ defineCommand({
     }
 });
 
-function getCategory() {
-    const c = Vaius.getChannel(MODMAIL_CATEGORY_ID);
+function getThreadParent() {
+    const c = Vaius.getChannel(THREAD_PARENT_ID);
     if (!c) throw new Error("Modmail category not found");
-    if (c.type !== ChannelTypes.GUILD_CATEGORY) throw new Error("Modmail category is not a category");
 
-    return c;
+    return c as TextChannel;
 }
 
 async function createModmail(interaction: GuildButtonInteraction) {
-    const cat = getCategory();
+    const threadParent = getThreadParent();
 
-    const existingChannel = interaction.guild.channels.find(c => c.name === interaction.user.id);
+    const ticketId = createHash("sha1").update(`${process.env.MODMAIL_HASH_SALT || ""}:${interaction.user.id}`).digest("hex");
+
+    const existingChannel = threadParent.threads.find(t => t.name === ticketId);
     if (existingChannel) {
         return interaction.createMessage({
             content: `You already have a modmail ticket open: ${existingChannel.mention}`,
@@ -54,17 +56,15 @@ async function createModmail(interaction: GuildButtonInteraction) {
 
     await interaction.defer(MessageFlags.EPHEMERAL);
 
-    const chan = await interaction.guild.createChannel(ChannelTypes.GUILD_TEXT, {
-        parentID: cat.id,
-        name: interaction.user.id
+    const thread = await threadParent.startThreadWithoutMessage({
+        type: ChannelTypes.PRIVATE_THREAD,
+        name: ticketId,
+        invitable: false
     });
+    // FIXME: workaround for oceanic bug where newly created channels wont be cached. remove once fixed
+    threadParent.threads.add(thread);
 
-    await chan.editPermission(interaction.user.id, {
-        type: OverwriteTypes.MEMBER,
-        allow: Permissions.VIEW_CHANNEL | Permissions.SEND_MESSAGES
-    });
-
-    chan.createMessage({
+    await thread.createMessage({
         content: `👋 ${interaction.user.mention}\n\nPlease describe your issue in as much detail as possible. A moderator will be with you shortly.`,
         components: [{
             type: ComponentTypes.ACTION_ROW,
@@ -72,7 +72,7 @@ async function createModmail(interaction: GuildButtonInteraction) {
                 type: ComponentTypes.BUTTON,
                 label: "Close ticket",
                 style: ButtonStyles.DANGER,
-                customID: `modmail:close:${chan.id}`,
+                customID: `modmail:close:${thread.id}`,
                 emoji: {
                     name: "📩"
                 }
@@ -83,10 +83,12 @@ async function createModmail(interaction: GuildButtonInteraction) {
         }
     });
 
-    interaction.createFollowup({
-        content: `📩 👉 ${chan.mention}.`,
+    await interaction.createFollowup({
+        content: `📩 👉 ${thread.mention}.`,
         flags: MessageFlags.EPHEMERAL
     });
+
+    await threadParent.createMessage({ content: `📩 ${interaction.user.mention} opened a ticket: ${thread.mention}` });
 }
 
 async function closeModmail(interaction: GuildButtonInteraction) {
