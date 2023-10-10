@@ -1,5 +1,6 @@
 import "~commands";
 import "./dotenv";
+import "./modmail";
 
 import {
     ApplicationCommandTypes,
