@@ -7,6 +7,7 @@ import { MOD_ROLE_ID } from "./constants";
 
 const INTERACTION_ID = "modmail:open_ticket";
 const THREAD_PARENT_ID = "1161412933050437682";
+const LOG_CHANNEL_ID = "1161449871182659655";
 
 type GuildButtonInteraction = ComponentInteraction<ComponentTypes.BUTTON, TextChannel>;
 
@@ -34,6 +35,12 @@ defineCommand({
         });
     }
 });
+
+async function log(content: string) {
+    return Vaius.rest.channels.createMessage(LOG_CHANNEL_ID, {
+        content
+    });
+}
 
 function getThreadParent() {
     const c = Vaius.getChannel(THREAD_PARENT_ID);
@@ -97,6 +104,8 @@ async function createModmail(interaction: GuildButtonInteraction) {
         content: `📩 👉 ${thread.mention}.`,
         flags: MessageFlags.EPHEMERAL
     });
+
+    await log(`${interaction.user.mention} opened ticket ${thread.name} - ${thread.mention}`);
 }
 
 async function closeModmail(interaction: GuildButtonInteraction) {
@@ -104,6 +113,8 @@ async function closeModmail(interaction: GuildButtonInteraction) {
         return;
 
     await interaction.channel.delete();
+
+    await log(`${interaction.user.mention} closed ticket ${interaction.channel.name}`);
 }
 
 Vaius.on("interactionCreate", async interaction => {
