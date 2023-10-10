@@ -62,7 +62,7 @@ async function createModmail(interaction: GuildButtonInteraction) {
         invitable: false
     });
     // FIXME: workaround for oceanic bug where newly created channels wont be cached. remove once fixed
-    threadParent.threads.add(thread);
+    threadParent.threads.set(thread.id, thread);
 
     await thread.createMessage({
         content: `👋 ${interaction.user.mention}\n\nPlease describe your issue in as much detail as possible. A moderator will be with you shortly.`,
