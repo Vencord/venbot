@@ -3,7 +3,7 @@ import { ButtonStyles, ChannelTypes, ComponentInteraction, ComponentTypes, Inter
 
 import { Vaius } from "./Client";
 import { defineCommand } from "./Command";
-import { MOD_LOG_CHANNEL_ID, MOD_ROLE_ID } from "./constants";
+import { MOD_ROLE_ID } from "./constants";
 
 const INTERACTION_ID = "modmail:open_ticket";
 const THREAD_PARENT_ID = "1161412933050437682";
@@ -89,15 +89,13 @@ async function createModmail(interaction: GuildButtonInteraction) {
         allowedMentions: {
             roles: [MOD_ROLE_ID],
         },
-        content: msg.content + `\n<@&${MOD_ROLE_ID}>`
+        content: msg.content.replace("moderator", `\n<@&${MOD_ROLE_ID}>`)
     });
 
     await interaction.createFollowup({
         content: `📩 👉 ${thread.mention}.`,
         flags: MessageFlags.EPHEMERAL
     });
-
-    await Vaius.rest.channels.createMessage(MOD_LOG_CHANNEL_ID, { content: `📩 ${interaction.user.mention} opened a ticket: ${thread.mention}` });
 }
 
 async function closeModmail(interaction: GuildButtonInteraction) {
