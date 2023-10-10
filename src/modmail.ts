@@ -1,4 +1,4 @@
-import { ButtonStyles, ChannelTypes, ComponentInteraction, ComponentTypes, InteractionTypes, MessageFlags, TextChannel } from "oceanic.js";
+import { ButtonStyles, ChannelTypes, ComponentInteraction, ComponentTypes, InteractionTypes, MessageFlags, OverwriteTypes, Permissions, TextChannel } from "oceanic.js";
 
 import { Vaius } from "./Client";
 import { defineCommand } from "./Command";
@@ -57,6 +57,11 @@ async function createModmail(interaction: GuildButtonInteraction) {
     const chan = await interaction.guild.createChannel(ChannelTypes.GUILD_TEXT, {
         parentID: cat.id,
         name: interaction.user.id,
+        permissionOverwrites: [{
+            id: interaction.user.id,
+            type: OverwriteTypes.MEMBER,
+            allow: Permissions.VIEW_CHANNEL | Permissions.SEND_MESSAGES
+        }]
     });
 
     chan.createMessage({
