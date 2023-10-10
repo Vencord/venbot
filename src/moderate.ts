@@ -3,7 +3,7 @@ import { EmbedOptions, Member, Message, MessageTypes } from "oceanic.js";
 import { join } from "path";
 
 import { Vaius } from "./Client";
-import { DATA_DIR, HOURS, MINUTES, SECONDS } from "./constants";
+import { DATA_DIR, HOURS, MINUTES, MOD_LOG_CHANNEL_ID, SECONDS } from "./constants";
 import { sendDm, silently, until } from "./util";
 
 const mentions = /<@!?(\d{17,20})>/g;
@@ -43,9 +43,8 @@ const ChannelRules: Record<string, (m: Message) => string | void> = {
     }
 };
 
-const MOD_LOG_CHANNEL = "1156349646965325824";
 function logMessage(content: string, ...embeds: EmbedOptions[]) {
-    Vaius.rest.channels.createMessage(MOD_LOG_CHANNEL, {
+    Vaius.rest.channels.createMessage(MOD_LOG_CHANNEL_ID, {
         content,
         embeds
     });

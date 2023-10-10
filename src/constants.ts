@@ -10,6 +10,7 @@ export const UPDATE_CHANNEL_ID_FILE = "./dist/update_channel_id";
 
 export const SUPPORT_CHANNEL_ID = "1026515880080842772";
 export const BOT_CHANNEL_ID = "1024286218801926184";
+export const MOD_LOG_CHANNEL_ID = "1156349646965325824";
 
 export const SUPPORT_ALLOWED_CHANNELS = [
     SUPPORT_CHANNEL_ID,

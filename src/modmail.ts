@@ -3,9 +3,10 @@ import { ButtonStyles, ChannelTypes, ComponentInteraction, ComponentTypes, Inter
 
 import { Vaius } from "./Client";
 import { defineCommand } from "./Command";
+import { MOD_LOG_CHANNEL_ID } from "./constants";
 
 const INTERACTION_ID = "modmail:open_ticket";
-const THREAD_PARENT_ID = "1161434789979639978";
+const THREAD_PARENT_ID = "1161412933050437682";
 
 type GuildButtonInteraction = ComponentInteraction<ComponentTypes.BUTTON, TextChannel>;
 
@@ -13,7 +14,7 @@ defineCommand({
     name: "modmail:post",
     ownerOnly: true,
     execute() {
-        return Vaius.rest.channels.createMessage("1161412933050437682", {
+        return Vaius.rest.channels.createMessage(THREAD_PARENT_ID, {
             embeds: [{
                 title: "Get in touch",
                 description: "Got a question or problem regarding this server? Get in touch with our moderators by opening a ticket!\n\n# WARNING\nThis form is NOT FOR VENCORD SUPPORT. To get Vencord support, use <#1026515880080842772>.",
@@ -88,7 +89,7 @@ async function createModmail(interaction: GuildButtonInteraction) {
         flags: MessageFlags.EPHEMERAL
     });
 
-    await threadParent.createMessage({ content: `📩 ${interaction.user.mention} opened a ticket: ${thread.mention}` });
+    await Vaius.rest.channels.createMessage(MOD_LOG_CHANNEL_ID, { content: `📩 ${interaction.user.mention} opened a ticket: ${thread.mention}` });
 }
 
 async function closeModmail(interaction: GuildButtonInteraction) {
