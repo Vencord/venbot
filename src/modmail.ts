@@ -42,10 +42,11 @@ function getThreadParent() {
     return c as TextChannel;
 }
 
+const getTicketId = (userId: string) => createHash("sha1").update(`${process.env.MODMAIL_HASH_SALT || ""}:${userId}`).digest("hex");
 async function createModmail(interaction: GuildButtonInteraction) {
     const threadParent = getThreadParent();
 
-    const ticketId = createHash("sha1").update(`${process.env.MODMAIL_HASH_SALT || ""}:${interaction.user.id}`).digest("hex");
+    const ticketId = getTicketId(interaction.user.id);
 
     const existingChannel = threadParent.threads.find(t => t.name === ticketId);
     if (existingChannel) {
@@ -99,9 +100,10 @@ async function createModmail(interaction: GuildButtonInteraction) {
 }
 
 async function closeModmail(interaction: GuildButtonInteraction) {
-    const chanId = interaction.data.customID.split(":")[2];
+    if (!interaction.member.permissions.has("MANAGE_CHANNELS") && interaction.channel.name !== getTicketId(interaction.user.id))
+        return;
 
-    await interaction.client.rest.channels.delete(chanId);
+    await interaction.channel.delete();
 }
 
 Vaius.on("interactionCreate", async interaction => {
