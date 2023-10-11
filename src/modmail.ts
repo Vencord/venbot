@@ -1,5 +1,5 @@
 import { createHash } from "crypto";
-import { ButtonStyles, ChannelTypes, ComponentInteraction, ComponentTypes, InteractionTypes, MessageFlags, TextChannel } from "oceanic.js";
+import { ActivityTypes, ApplicationCommandTypes, ButtonStyles, ChannelTypes, CommandInteraction, ComponentInteraction, ComponentTypes, InteractionTypes, MessageFlags, TextChannel } from "oceanic.js";
 
 import { Vaius } from "./Client";
 import { defineCommand } from "./Command";
@@ -9,7 +9,7 @@ const INTERACTION_ID = "modmail:open_ticket";
 const THREAD_PARENT_ID = "1161412933050437682";
 const LOG_CHANNEL_ID = "1161449871182659655";
 
-type GuildButtonInteraction = ComponentInteraction<ComponentTypes.BUTTON, TextChannel>;
+type GuildInteraction = ComponentInteraction<ComponentTypes.BUTTON, TextChannel> | CommandInteraction<TextChannel>;
 
 defineCommand({
     name: "modmail:post",
@@ -50,7 +50,7 @@ function getThreadParent() {
 }
 
 const getTicketId = (userId: string) => createHash("sha1").update(`${process.env.MODMAIL_HASH_SALT || ""}:${userId}`).digest("hex");
-async function createModmail(interaction: GuildButtonInteraction) {
+async function createModmail(interaction: GuildInteraction) {
     const threadParent = getThreadParent();
 
     const ticketId = getTicketId(interaction.user.id);
@@ -108,7 +108,7 @@ async function createModmail(interaction: GuildButtonInteraction) {
     await log(`${interaction.user.mention} opened ticket ${thread.name} - ${thread.mention}`);
 }
 
-async function closeModmail(interaction: GuildButtonInteraction) {
+async function closeModmail(interaction: GuildInteraction) {
     if (!interaction.member.permissions.has("MANAGE_CHANNELS") && interaction.channel.name !== getTicketId(interaction.user.id))
         return;
 
@@ -118,11 +118,29 @@ async function closeModmail(interaction: GuildButtonInteraction) {
 }
 
 Vaius.on("interactionCreate", async interaction => {
-    if (interaction.type !== InteractionTypes.MESSAGE_COMPONENT || !interaction.guild) return;
+    if (!interaction.guild) return;
+
+    if (interaction.type === InteractionTypes.APPLICATION_COMMAND && interaction.data.name === "modmail")
+        return createModmail(interaction as GuildInteraction);
+
+    if (interaction.type !== InteractionTypes.MESSAGE_COMPONENT) return;
 
     if (interaction.data.customID === INTERACTION_ID)
-        createModmail(interaction as GuildButtonInteraction);
+        createModmail(interaction as GuildInteraction);
     else if (interaction.data.customID.startsWith("modmail:close:"))
-        closeModmail(interaction as GuildButtonInteraction);
+        closeModmail(interaction as GuildInteraction);
 });
 
+
+Vaius.once("ready", () => {
+    Vaius.editStatus("online", [{
+        type: ActivityTypes.LISTENING,
+        name: "/modmail"
+    }]);
+
+    Vaius.application.createGuildCommand("1015060230222131221", {
+        type: ApplicationCommandTypes.CHAT_INPUT,
+        name: "modmail",
+        description: "Open a modmail ticket",
+    });
+});

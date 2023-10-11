@@ -20,7 +20,7 @@ if (PROD) {
     });
 
     Vaius.on("interactionCreate", i =>
-        i.type === InteractionTypes.APPLICATION_COMMAND && i.createMessage({
+        i.type === InteractionTypes.APPLICATION_COMMAND && i.data.name === "owo" && i.createMessage({
             content: "owo"
         })
     );
