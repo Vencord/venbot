@@ -3,7 +3,7 @@ import { ActivityTypes, ApplicationCommandTypes, ButtonStyles, ChannelTypes, Com
 
 import { Vaius } from "./Client";
 import { defineCommand } from "./Command";
-import { MOD_ROLE_ID } from "./constants";
+import { MOD_ROLE_ID, PROD } from "./constants";
 
 const INTERACTION_ID = "modmail:open_ticket";
 const THREAD_PARENT_ID = "1161412933050437682";
@@ -132,15 +132,16 @@ Vaius.on("interactionCreate", async interaction => {
 });
 
 
-Vaius.once("ready", () => {
-    Vaius.editStatus("online", [{
-        type: ActivityTypes.LISTENING,
-        name: "/modmail"
-    }]);
+if (PROD)
+    Vaius.once("ready", () => {
+        Vaius.editStatus("online", [{
+            type: ActivityTypes.LISTENING,
+            name: "/modmail"
+        }]);
 
-    Vaius.application.createGuildCommand("1015060230222131221", {
-        type: ApplicationCommandTypes.CHAT_INPUT,
-        name: "modmail",
-        description: "Open a modmail ticket",
+        Vaius.application.createGuildCommand("1015060230222131221", {
+            type: ApplicationCommandTypes.CHAT_INPUT,
+            name: "modmail",
+            description: "Open a modmail ticket",
+        });
     });
-});
