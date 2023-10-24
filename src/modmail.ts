@@ -120,6 +120,7 @@ async function createModmail(interaction: GuildInteraction) {
 async function createModmailConfirm(interaction: GuildInteraction) {
     interaction.createMessage({
         content: "Why are you creating this ticket?",
+        flags: MessageFlags.EPHEMERAL,
         components: [{
             type: ComponentTypes.ACTION_ROW,
             components: [{
