@@ -1,6 +1,7 @@
 import "~commands";
 import "./dotenv";
 import "./modmail";
+import "./sticky";
 
 import {
     ApplicationCommandTypes,
