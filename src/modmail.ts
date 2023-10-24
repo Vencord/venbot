@@ -1,13 +1,22 @@
 import { createHash } from "crypto";
-import { ActivityTypes, ApplicationCommandTypes, ButtonStyles, ChannelTypes, CommandInteraction, ComponentInteraction, ComponentTypes, InteractionTypes, MessageFlags, TextChannel } from "oceanic.js";
+import { ActivityTypes, ApplicationCommandTypes, ButtonStyles, ChannelTypes, CommandInteraction, ComponentInteraction, ComponentTypes, GuildComponentSelectMenuInteraction, InteractionTypes, MessageFlags, TextChannel } from "oceanic.js";
 
 import { Vaius } from "./Client";
 import { defineCommand } from "./Command";
-import { MOD_ROLE_ID, PROD } from "./constants";
+import { DEV_CHANNEL_ID, MOD_ROLE_ID, PROD, SUPPORT_CHANNEL_ID } from "./constants";
 
-const INTERACTION_ID = "modmail:open_ticket";
-const THREAD_PARENT_ID = "1161412933050437682";
-const LOG_CHANNEL_ID = "1161449871182659655";
+const enum Ids {
+    OPEN_TICKET = "modmail:open_ticket",
+    OPEN_CONFIRM = "modmail:open_confirm",
+    REASON_MONKEY = "modmail:iamamonkey",
+    REASON_MOD = "modmail:mod",
+    REASON_DONOR = "modmail:donor"
+}
+
+const COMMAND_NAME = PROD ? "modmail" : "devmodmail";
+
+const THREAD_PARENT_ID = PROD ? "1161412933050437682" : DEV_CHANNEL_ID;
+const LOG_CHANNEL_ID = PROD ? "1161449871182659655" : DEV_CHANNEL_ID;
 
 type GuildInteraction = ComponentInteraction<ComponentTypes.BUTTON, TextChannel> | CommandInteraction<TextChannel>;
 
@@ -26,7 +35,7 @@ defineCommand({
                     type: ComponentTypes.BUTTON,
                     label: "Open a ticket",
                     style: ButtonStyles.PRIMARY,
-                    customID: INTERACTION_ID,
+                    customID: Ids.OPEN_TICKET,
                     emoji: {
                         name: "📩"
                     }
@@ -108,6 +117,60 @@ async function createModmail(interaction: GuildInteraction) {
     await log(`${interaction.user.mention} opened ticket ${thread.name} - ${thread.mention}`);
 }
 
+async function createModmailConfirm(interaction: GuildInteraction) {
+    interaction.createMessage({
+        content: "Why are you creating this ticket?",
+        components: [{
+            type: ComponentTypes.ACTION_ROW,
+            components: [{
+                type: ComponentTypes.STRING_SELECT,
+                customID: "modmail:open_confirm",
+                options: [
+                    {
+                        label: "I need help with Vencord",
+                        value: Ids.REASON_MONKEY + 1
+                    },
+                    {
+                        label: "I just want to test modmail",
+                        value: Ids.REASON_MONKEY + 2
+                    },
+                    {
+                        label: "I want to ask a question about Vencord",
+                        value: Ids.REASON_MONKEY + 3
+                    },
+                    {
+                        label: "I donated and want to redeem my rewards",
+                        value: Ids.REASON_DONOR
+                    },
+                    {
+                        label: "I need to talk to a moderator",
+                        value: Ids.REASON_MOD
+                    }
+                ]
+            }]
+        }]
+    });
+}
+
+async function onModmailConfirm(interaction: GuildComponentSelectMenuInteraction) {
+    const reason = interaction.data.values.getStrings()[0];
+    if (reason.startsWith(Ids.REASON_MONKEY)) {
+        return await interaction.createMessage({
+            content: `This form is NOT FOR VENCORD SUPPORT OR TESTING. To get Vencord support, use <#${SUPPORT_CHANNEL_ID}>`,
+            flags: MessageFlags.EPHEMERAL
+        });
+    }
+
+    if (reason === Ids.REASON_DONOR) {
+        return await interaction.createMessage({
+            content: "Thanks a lot for donating! Please private message <@343383572805058560> to redeem your perks! Make sure you have your DMs open or it won't work.",
+            flags: MessageFlags.EPHEMERAL
+        });
+    }
+
+    createModmail(interaction as any as GuildInteraction);
+}
+
 async function closeModmail(interaction: GuildInteraction) {
     if (!interaction.member.permissions.has("MANAGE_CHANNELS") && interaction.channel.name !== getTicketId(interaction.user.id))
         return;
@@ -120,28 +183,32 @@ async function closeModmail(interaction: GuildInteraction) {
 Vaius.on("interactionCreate", async interaction => {
     if (!interaction.guild) return;
 
-    if (interaction.type === InteractionTypes.APPLICATION_COMMAND && interaction.data.name === "modmail")
-        return createModmail(interaction as GuildInteraction);
+    if (interaction.type === InteractionTypes.APPLICATION_COMMAND && interaction.data.name === COMMAND_NAME)
+        return createModmailConfirm(interaction as GuildInteraction);
 
     if (interaction.type !== InteractionTypes.MESSAGE_COMPONENT) return;
 
-    if (interaction.data.customID === INTERACTION_ID)
-        createModmail(interaction as GuildInteraction);
+    if (interaction.data.customID === Ids.OPEN_TICKET)
+        createModmailConfirm(interaction as GuildInteraction);
+    else if (interaction.data.customID === Ids.OPEN_CONFIRM)
+        onModmailConfirm(interaction as GuildComponentSelectMenuInteraction);
     else if (interaction.data.customID.startsWith("modmail:close:"))
         closeModmail(interaction as GuildInteraction);
 });
 
 
-if (PROD)
-    Vaius.once("ready", () => {
+
+Vaius.once("ready", () => {
+    if (PROD) {
         Vaius.editStatus("online", [{
             type: ActivityTypes.LISTENING,
             name: "/modmail"
         }]);
+    }
 
-        Vaius.application.createGuildCommand("1015060230222131221", {
-            type: ApplicationCommandTypes.CHAT_INPUT,
-            name: "modmail",
-            description: "Open a modmail ticket",
-        });
+    Vaius.application.createGuildCommand("1015060230222131221", {
+        type: ApplicationCommandTypes.CHAT_INPUT,
+        name: COMMAND_NAME,
+        description: "Open a modmail ticket",
     });
+});
