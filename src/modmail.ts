@@ -15,6 +15,7 @@ const enum Ids {
 
 const COMMAND_NAME = PROD ? "modmail" : "devmodmail";
 
+const MODMAIL_BAN_ROLE_ID = "1161815552919076867";
 const THREAD_PARENT_ID = PROD ? "1161412933050437682" : DEV_CHANNEL_ID;
 const LOG_CHANNEL_ID = PROD ? "1161449871182659655" : DEV_CHANNEL_ID;
 
@@ -118,6 +119,13 @@ async function createModmail(interaction: GuildInteraction) {
 }
 
 async function createModmailConfirm(interaction: GuildInteraction) {
+    if (interaction.member.roles.includes(MODMAIL_BAN_ROLE_ID)) {
+        return interaction.createMessage({
+            content: "You are banned from using modmail.",
+            flags: MessageFlags.EPHEMERAL
+        });
+    }
+
     interaction.createMessage({
         content: "Why are you creating this ticket?",
         flags: MessageFlags.EPHEMERAL,
