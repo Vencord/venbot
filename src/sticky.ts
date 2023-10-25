@@ -9,6 +9,12 @@ const MESSAGE = `
 - Try reinstalling Vencord by using the Repair option in the installer
 - Read the latest <#1024351821873037462>
 - Read the [FAQ](<https://vencord.dev/faq>)
+
+READ THE ANNOUNCEMENTS
+READ THE ANNOUNCEMENTS
+READ THE ANNOUNCEMENTS
+READ THE ANNOUNCEMENTS
+READ THE ANNOUNCEMENTS
 `.trim();
 
 let lastMsgId: string | null = null;
