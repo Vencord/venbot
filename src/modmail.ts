@@ -140,12 +140,8 @@ async function createModmailConfirm(interaction: GuildInteraction) {
                         value: Ids.REASON_MONKEY + 1
                     },
                     {
-                        label: "I just want to test modmail",
-                        value: Ids.REASON_MONKEY + 2
-                    },
-                    {
                         label: "I want to ask a question about Vencord",
-                        value: Ids.REASON_MONKEY + 3
+                        value: Ids.REASON_MONKEY + 2
                     },
                     {
                         label: "I donated and want to redeem my rewards",
@@ -154,7 +150,11 @@ async function createModmailConfirm(interaction: GuildInteraction) {
                     {
                         label: "I need to talk to a moderator",
                         value: Ids.REASON_MOD
-                    }
+                    },
+                    {
+                        label: "I just want to test modmail",
+                        value: Ids.REASON_MONKEY + 3
+                    },
                 ]
             }]
         }]
