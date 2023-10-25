@@ -5,16 +5,7 @@ import { SUPPORT_CHANNEL_ID } from "./constants";
 import { debounce } from "./util";
 
 const MESSAGE = `
-**BEFORE ASKING FOR HELP:**
-- Try reinstalling Vencord by using the Repair option in the installer
-- Read the latest <#1024351821873037462>
-- Read the [FAQ](<https://vencord.dev/faq>)
-
-## READ THE ANNOUNCEMENTS
-## READ THE ANNOUNCEMENTS
-## READ THE ANNOUNCEMENTS
-## READ THE ANNOUNCEMENTS
-## READ THE ANNOUNCEMENTS
+# YES. THINGS ARE BROKEN. <#1024351821873037462>
 `.trim();
 
 let lastMsgId: string | null = null;
