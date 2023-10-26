@@ -5,11 +5,9 @@ import { SUPPORT_CHANNEL_ID } from "./constants";
 import { debounce } from "./util";
 
 const MESSAGE = `
-## Before asking for help
-READ <#1024351821873037462>
-READ <#1024351821873037462>
-BetterFolders is broken, yes. Wait.
-Themes are broken, yes. Wait for theme devs to fix them.
+ ## UPDATE YOUR VENCORD IF YOU'RE CRASHING, <#1024351821873037462>
+ ## UPDATE YOUR VENCORD IF YOU'RE CRASHING
+ ## UPDATE YOUR VENCORD IF YOU'RE CRASHING
 `.trim();
 
 let lastMsgId: string | null = null;
