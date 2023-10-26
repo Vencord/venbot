@@ -3,7 +3,7 @@ import { EmbedOptions, Member, Message, MessageTypes } from "oceanic.js";
 import { join } from "path";
 
 import { Vaius } from "./Client";
-import { DATA_DIR, HOURS, MINUTES, MOD_LOG_CHANNEL_ID, SECONDS } from "./constants";
+import { DATA_DIR, MINUTES, MOD_LOG_CHANNEL_ID } from "./constants";
 import { sendDm, silently, until } from "./util";
 
 const mentions = /<@!?(\d{17,20})>/g;
@@ -71,34 +71,6 @@ export async function moderateMessage(msg: Message) {
         return;
     }
 
-    const allMentions = [...msg.content.matchAll(mentions)];
-
-    const dupeCount = allMentions.reduce((acc, [, id]) => {
-        acc[id] ??= 0;
-        acc[id]++;
-        return acc;
-    }, {} as Record<string, number>);
-
-    const dupeCounts = Object.values(dupeCount);
-    if (dupeCounts.length > 10) {
-        silently(msg.delete());
-        silently(msg.member.edit({ communicationDisabledUntil: until(5 * HOURS), reason: "mass ping" }));
-        logMessage(
-            `${msg.author.mention} mass pinged ${dupeCounts.length} users in ${msg.channel.mention}`,
-            makeEmbedForMessage(msg)
-        );
-        return;
-    }
-
-    if (Object.values(dupeCount).some(x => x > 3)) {
-        silently(msg.delete());
-        silently(msg.member.edit({ communicationDisabledUntil: until(30 * SECONDS), reason: "ping spam" }));
-        return;
-    }
-
-    // don't moderate mods
-    // above checks are still applied to mods because they are kind of severe,
-    // and if a mod does them, they possibly had their account compromised
     if (msg.member.permissions.has("MANAGE_MESSAGES")) return;
 
     for (const mod of [moderateInvites, moderateImageHosts]) {

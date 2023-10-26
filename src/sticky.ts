@@ -5,7 +5,11 @@ import { SUPPORT_CHANNEL_ID } from "./constants";
 import { debounce } from "./util";
 
 const MESSAGE = `
-# YES. THINGS ARE BROKEN. <#1024351821873037462>
+## Before asking for help
+READ <#1024351821873037462>
+READ <#1024351821873037462>
+FakeNitro and BetterFolders are broken, yes. Wait.
+Themes are broken, yes. Wait for theme devs to fix them.
 `.trim();
 
 let lastMsgId: string | null = null;
