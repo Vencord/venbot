@@ -5,8 +5,7 @@ import { SUPPORT_CHANNEL_ID } from "./constants";
 import { debounce } from "./util";
 
 const MESSAGE = `
- ## UPDATE YOUR VENCORD IF YOU'RE CRASHING, <#1024351821873037462>
- ## UPDATE YOUR VENCORD IF YOU'RE CRASHING
+ ## IF YOU'RE CRASHING, LOOK AT <#1024351821873037462>
  ## UPDATE YOUR VENCORD IF YOU'RE CRASHING
  ## IF YOUR THEME IS BROKEN, WAIT FOR YOUR THEME DEVELOPER TO FIX IT <#1026515880080842772>
 `.trim();
@@ -18,7 +17,7 @@ const repostMessage = debounce(async (channel: AnyTextableGuildChannel) => {
 
     const msg = await channel.createMessage({ content: MESSAGE });
     lastMsgId = msg.id;
-}, 2000);
+}, 5000);
 
 Vaius.on("messageCreate", async msg => {
     if (msg.channelID !== SUPPORT_CHANNEL_ID || msg.author.bot || !msg.inCachedGuildChannel()) return;
