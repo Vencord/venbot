@@ -8,7 +8,7 @@ const MESSAGE = `
 ## Before asking for help
 READ <#1024351821873037462>
 READ <#1024351821873037462>
-FakeNitro and BetterFolders are broken, yes. Wait.
+BetterFolders is broken, yes. Wait.
 Themes are broken, yes. Wait for theme devs to fix them.
 `.trim();
 
