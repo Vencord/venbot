@@ -119,7 +119,6 @@ async function createModmail(interaction: GuildInteraction) {
 }
 
 async function createModmailConfirm(interaction: GuildInteraction) {
-    return;
     if (interaction.member.roles.includes(MODMAIL_BAN_ROLE_ID)) {
         return interaction.createMessage({
             content: "You are banned from using modmail.",
