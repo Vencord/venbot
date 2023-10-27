@@ -109,7 +109,6 @@ const allowedGuilds = new Set([
     "811255666990907402", // aliucord
     "1015931589865246730", // vendetta
     "86004744966914048", // betterdiscord
-    "1000926524452647132", // replugged
     "538759280057122817", // powercord
     "950850315601711176", // enmity
     "920674107111137340", // stupidity archive
