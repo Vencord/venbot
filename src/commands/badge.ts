@@ -23,6 +23,7 @@ const saveBadges = () => writeFileSync(BadgeJson, JSON.stringify(BadgeData));
 const Name = PROD ? "badge" : "devbadge";
 const NameAdd = Name + "-add";
 const NameEdit = Name + "-edit";
+const NameRemove = Name + "-remove";
 
 const description = "fuck you discord";
 
@@ -30,11 +31,11 @@ Vaius.on("interactionCreate", async i => {
     const { guild, type, data } = i;
     if (!guild) return;
 
-    if (!("name" in data) || (data.name !== NameAdd && data.name !== NameEdit)) return;
+    if (!("name" in data) || (data.name !== NameAdd && data.name !== NameEdit && data.name !== NameRemove)) return;
 
     if (type === InteractionTypes.APPLICATION_COMMAND_AUTOCOMPLETE) {
-        const user = data.options.getUser("user");
-        const existingBadges = BadgeData[user?.id!];
+        const user = data.options.getUserOption("user");
+        const existingBadges = BadgeData[user?.value!];
 
         return i.result(existingBadges?.map((b, i) => ({ name: b.tooltip, value: String(i) }) ?? []));
     }
@@ -42,10 +43,20 @@ Vaius.on("interactionCreate", async i => {
     if (type !== InteractionTypes.APPLICATION_COMMAND) return;
 
     const user = data.options.getUser("user", true);
+    const oldBadgeIndex = data.options.getInteger("old-badge");
+
+    if (data.name === NameRemove) {
+        BadgeData[user.id].splice(oldBadgeIndex! + 1, 1);
+        saveBadges();
+        return i.createMessage({
+            content: "Done!",
+            flags: MessageFlags.EPHEMERAL
+        });
+    }
+
     const tooltip = data.options.getString("tooltip", true);
     const image = data.options.getAttachment("image");
     const imageUrl = data.options.getString("image-url");
-    const oldBadgeIndex = data.options.getInteger("old-badge");
 
     const url = image?.url ?? imageUrl;
 
@@ -64,7 +75,7 @@ Vaius.on("interactionCreate", async i => {
     const hash = createHash("sha1").update(imgData).digest("hex");
 
     BadgeData[user.id] ??= [];
-    const index = oldBadgeIndex ?? BadgeData[user.id].length;
+    const index = (oldBadgeIndex ?? BadgeData[user.id].length) + 1;
 
     const existingBadge = BadgeData[user.id][index];
     if (existingBadge) {
@@ -81,6 +92,11 @@ Vaius.on("interactionCreate", async i => {
     };
 
     saveBadges();
+
+    i.createMessage({
+        content: "Done!",
+        flags: MessageFlags.EPHEMERAL
+    });
 });
 
 Vaius.once("ready", () => {
@@ -132,5 +148,22 @@ Vaius.once("ready", () => {
         description,
         defaultMemberPermissions: "0", // admins only,
         options: CommonOptions
+    });
+
+    Vaius.application.createGuildCommand("1015060230222131221", {
+        type: ApplicationCommandTypes.CHAT_INPUT,
+        name: NameRemove,
+        description,
+        defaultMemberPermissions: "0",
+        options: [
+            CommonOptions[0],
+            {
+                name: "old-badge",
+                description,
+                type: ApplicationCommandOptionTypes.INTEGER,
+                autocomplete: true,
+                required: true
+            }
+        ]
     });
 });
