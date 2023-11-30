@@ -3,7 +3,7 @@ import { readFileSync, rmSync, writeFileSync } from "fs";
 import { ApplicationCommandOptions, ApplicationCommandOptionTypes, ApplicationCommandTypes, InteractionTypes, MessageFlags } from "oceanic.js";
 import { fetch } from "undici";
 
-import { Vaius } from "../Client";
+import { OwnerId, Vaius } from "../Client";
 import { PROD } from "../constants";
 
 const BasePath = "/var/www/badges.vencord.dev";
@@ -28,6 +28,8 @@ const NameRemove = Name + "-remove";
 const description = "fuck you discord";
 
 Vaius.on("interactionCreate", async i => {
+    if (i.user.id !== OwnerId) return;
+
     const { guild, type, data } = i;
     if (!guild) return;
 

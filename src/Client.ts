@@ -17,10 +17,10 @@ export const Vaius = new Client({
     }
 });
 
-let ownerId: string;
+export let OwnerId: string;
 Vaius.once("ready", async () => {
     Vaius.rest.oauth.getApplication().then(app => {
-        ownerId = app.ownerID;
+        OwnerId = app.ownerID;
     });
 
     console.log("hi");
@@ -52,7 +52,7 @@ Vaius.on("messageCreate", async msg => {
     const cmd = Commands[cmdName];
     if (!cmd) return;
 
-    if (cmd.ownerOnly && msg.author.id !== ownerId)
+    if (cmd.ownerOnly && msg.author.id !== OwnerId)
         return;
 
     const noRateLimit = SUPPORT_ALLOWED_CHANNELS.includes(msg.channel?.id!) || msg.member?.permissions.has("MANAGE_MESSAGES");
