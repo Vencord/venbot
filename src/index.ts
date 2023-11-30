@@ -1,5 +1,5 @@
-import "~commands";
 import "./dotenv";
+import "~commands";
 import "./modmail";
 import "./sticky";
 
