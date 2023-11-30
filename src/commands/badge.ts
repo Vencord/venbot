@@ -46,7 +46,7 @@ Vaius.on("interactionCreate", async i => {
     const oldBadgeIndex = data.options.getInteger("old-badge");
 
     if (data.name === NameRemove) {
-        BadgeData[user.id].splice(oldBadgeIndex! + 1, 1);
+        BadgeData[user.id].splice(oldBadgeIndex!, 1);
         saveBadges();
         return i.createMessage({
             content: "Done!",
@@ -75,7 +75,7 @@ Vaius.on("interactionCreate", async i => {
     const hash = createHash("sha1").update(imgData).digest("hex");
 
     BadgeData[user.id] ??= [];
-    const index = (oldBadgeIndex ?? BadgeData[user.id].length) + 1;
+    const index = oldBadgeIndex ?? BadgeData[user.id].length;
 
     const existingBadge = BadgeData[user.id][index];
     if (existingBadge) {
@@ -83,7 +83,7 @@ Vaius.on("interactionCreate", async i => {
         rmSync(`${badgesForUser(user.id)}/${fileName}`, { force: true });
     }
 
-    const fileName = `${index}-${hash}.${ext}`;
+    const fileName = `${index + 1}-${hash}.${ext}`;
     writeFileSync(`${badgesForUser(user.id)}/${fileName}`, imgData);
 
     BadgeData[user.id][index] = {
