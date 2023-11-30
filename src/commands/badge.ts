@@ -93,7 +93,7 @@ Vaius.on("interactionCreate", async i => {
 
     saveBadges();
 
-    i.createMessage({
+    i.createFollowup({
         content: "Done!",
         flags: MessageFlags.EPHEMERAL
     });
