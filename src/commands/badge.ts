@@ -28,7 +28,7 @@ const description = "fuck you discord";
 
 Vaius.on("interactionCreate", async i => {
     const { guild, type, data } = i;
-    if (guild) return;
+    if (!guild) return;
 
     if (!("name" in data) || (data.name !== NameAdd && data.name !== NameEdit)) return;
 
