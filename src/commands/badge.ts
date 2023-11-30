@@ -48,8 +48,18 @@ Vaius.on("interactionCreate", async i => {
     const oldBadgeIndex = data.options.getInteger("old-badge");
 
     if (data.name === NameRemove) {
+        const existingBadge = BadgeData[user.id][oldBadgeIndex!];
+        if (!existingBadge) return i.createMessage({
+            content: "Badge not found",
+            flags: MessageFlags.EPHEMERAL
+        });
+
+        const fileName = new URL(existingBadge.badge).pathname.split("/").pop()!;
+        rmSync(`${badgesForUser(user.id)}/${fileName}`, { force: true });
+
         BadgeData[user.id].splice(oldBadgeIndex!, 1);
         saveBadges();
+
         return i.createMessage({
             content: "Done!",
             flags: MessageFlags.EPHEMERAL
