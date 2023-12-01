@@ -1,5 +1,5 @@
 import { createHash } from "crypto";
-import { readFileSync, rmSync, writeFileSync } from "fs";
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from "fs";
 import { ApplicationCommandOptions, ApplicationCommandOptionTypes, ApplicationCommandTypes, InteractionTypes, MessageFlags } from "oceanic.js";
 import { fetch } from "undici";
 
@@ -96,6 +96,7 @@ Vaius.on("interactionCreate", async i => {
     }
 
     const fileName = `${index + 1}-${hash}.${ext}`;
+    mkdirSync(badgesForUser(user.id), { recursive: true });
     writeFileSync(`${badgesForUser(user.id)}/${fileName}`, imgData);
 
     BadgeData[user.id][index] = {
