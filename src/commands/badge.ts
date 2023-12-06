@@ -58,6 +58,7 @@ Vaius.on("interactionCreate", async i => {
         renameSync(badgesForUser(oldUser.id), badgesForUser(newUser.id));
 
         BadgeData[newUser.id] = BadgeData[oldUser.id];
+        BadgeData[newUser.id].forEach(b => b.badge = b.badge.replace(oldUser.id, newUser.id));
         delete BadgeData[oldUser.id];
         saveBadges();
 
