@@ -1,5 +1,5 @@
 import { createHash } from "crypto";
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from "fs";
+import { mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "fs";
 import { ApplicationCommandOptions, ApplicationCommandOptionTypes, ApplicationCommandTypes, InteractionTypes, MessageFlags } from "oceanic.js";
 import { fetch } from "undici";
 
@@ -24,6 +24,7 @@ const Name = PROD ? "badge" : "devbadge";
 const NameAdd = Name + "-add";
 const NameEdit = Name + "-edit";
 const NameRemove = Name + "-remove";
+const NameMove = Name + "-move";
 
 const description = "fuck you discord";
 
@@ -33,7 +34,7 @@ Vaius.on("interactionCreate", async i => {
     const { guild, type, data } = i;
     if (!guild) return;
 
-    if (!("name" in data) || (data.name !== NameAdd && data.name !== NameEdit && data.name !== NameRemove)) return;
+    if (!("name" in data) || !data.name.startsWith(Name + "-")) return;
 
     if (type === InteractionTypes.APPLICATION_COMMAND_AUTOCOMPLETE) {
         const user = data.options.getUserOption("user");
@@ -43,6 +44,28 @@ Vaius.on("interactionCreate", async i => {
     }
 
     if (type !== InteractionTypes.APPLICATION_COMMAND) return;
+
+    if (data.name === NameMove) {
+        const oldUser = data.options.getUser("old-user", true);
+        const newUser = data.options.getUser("new-user", true);
+
+        if (!BadgeData[oldUser.id]?.length)
+            return i.createMessage({
+                content: "Badge not found",
+                flags: MessageFlags.EPHEMERAL
+            });
+
+        renameSync(badgesForUser(oldUser.id), badgesForUser(newUser.id));
+
+        BadgeData[newUser.id] = BadgeData[oldUser.id];
+        delete BadgeData[oldUser.id];
+        saveBadges();
+
+        return i.createMessage({
+            content: "Done!",
+            flags: MessageFlags.EPHEMERAL
+        });
+    }
 
     const user = data.options.getUser("user", true);
     const oldBadgeIndex = data.options.getInteger("old-badge");
@@ -177,6 +200,27 @@ Vaius.once("ready", () => {
                 autocomplete: true,
                 required: true
             }
+        ]
+    });
+
+    Vaius.application.createGuildCommand("1015060230222131221", {
+        type: ApplicationCommandTypes.CHAT_INPUT,
+        name: NameMove,
+        description,
+        defaultMemberPermissions: "0", // admins only,
+        options: [
+            {
+                name: "old-user",
+                type: ApplicationCommandOptionTypes.USER,
+                description,
+                required: true
+            },
+            {
+                name: "new-user",
+                type: ApplicationCommandOptionTypes.USER,
+                description,
+                required: true
+            },
         ]
     });
 });
