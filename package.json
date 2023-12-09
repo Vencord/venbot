@@ -13,7 +13,7 @@
     "dependencies": {
         "canvas": "^2.11.2",
         "dotenv": "^16.3.1",
-        "oceanic.js": "1.7.2-dev.6ec3877",
+        "oceanic.js": "1.8.1",
         "pako": "^2.1.0",
         "undici": "^5.22.1"
     },

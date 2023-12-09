@@ -43,7 +43,7 @@ const ChannelRules: Record<string, (m: Message) => string | void> = {
     }
 };
 
-function logMessage(content: string, ...embeds: EmbedOptions[]) {
+export function logModerationAction(content: string, ...embeds: EmbedOptions[]) {
     Vaius.rest.channels.createMessage(MOD_LOG_CHANNEL_ID, {
         content,
         embeds
@@ -128,7 +128,7 @@ export async function moderateInvites(msg: Message) {
         if (!allowedGuilds.has(inviteData.guildID)) {
             silently(msg.delete());
             silently(msg.member!.edit({ communicationDisabledUntil: until(5 * MINUTES), reason: "invite" }));
-            logMessage(
+            logModerationAction(
                 `${msg.author.mention} posted an invite to ${inviteData.guild.name} in ${msg.channel!.mention}`,
                 makeEmbedForMessage(msg)
             );

@@ -3,7 +3,7 @@ import { Client } from "oceanic.js";
 
 import { Commands } from "./Command";
 import { PREFIX, SUPPORT_ALLOWED_CHANNELS, UPDATE_CHANNEL_ID_FILE } from "./constants";
-import { moderateMessage, moderateNick } from "./moderate";
+import { logModerationAction, moderateMessage, moderateNick } from "./moderate";
 import { reply, silently } from "./util";
 
 export const Vaius = new Client({
@@ -82,3 +82,17 @@ Vaius.on("messageCreate", async msg => {
 
 Vaius.on("guildMemberUpdate", m => moderateNick(m));
 Vaius.on("guildMemberAdd", m => moderateNick(m));
+
+Vaius.on("autoModerationActionExecution", async (guild, channel, user, data) => {
+    const includesPing = data.content.includes("@everyone") || data.content.includes("@here");
+    const includesInvite = data.content.includes("discord.gg/") || data.content.includes("discord.com/invite");
+
+    if (includesPing && includesInvite) {
+        await Vaius.rest.guilds.createBan(guild.id, user.id, {
+            reason: "tried to ping everyone with an invite (spam bot)",
+            deleteMessageDays: 1
+        });
+
+        logModerationAction(`Banned <@${user.id}> for trying to ping everyone with an invite.`);
+    }
+});
