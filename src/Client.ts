@@ -1,5 +1,5 @@
 import { readFileSync, rmSync } from "fs";
-import { Client } from "oceanic.js";
+import { AutoModerationActionTypes, Client } from "oceanic.js";
 
 import { Commands } from "./Command";
 import { PREFIX, SUPPORT_ALLOWED_CHANNELS, UPDATE_CHANNEL_ID_FILE } from "./constants";
@@ -84,6 +84,8 @@ Vaius.on("guildMemberUpdate", m => moderateNick(m));
 Vaius.on("guildMemberAdd", m => moderateNick(m));
 
 Vaius.on("autoModerationActionExecution", async (guild, channel, user, data) => {
+    if (data.action.type !== AutoModerationActionTypes.SEND_ALERT_MESSAGE) return;
+
     const includesPing = data.content.includes("@everyone") || data.content.includes("@here");
     const includesInvite = data.content.includes("discord.gg/") || data.content.includes("discord.com/invite");
 
