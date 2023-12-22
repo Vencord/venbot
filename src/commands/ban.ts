@@ -5,7 +5,7 @@ const idRe = /^(?:<@!?)?(\d{17,20})>?$/;
 
 defineCommand({
     name: "ban",
-    aliases: ["yeet"],
+    aliases: ["yeet", "🍌"],
     async execute(msg, ...args) {
         if (!msg.inCachedGuildChannel()) return;
         if (!msg.member.permissions.has("BAN_MEMBERS")) return;
