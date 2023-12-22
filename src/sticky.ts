@@ -4,7 +4,7 @@ import { Vaius } from "./Client";
 import { SUPPORT_CHANNEL_ID } from "./constants";
 import { debounce } from "./util";
 
-const IS_ENABLED = Boolean(true);
+const IS_ENABLED = Boolean(false);
 const MESSAGE = `
  ## Read <#1024351821873037462> bbefore asking for help
 `.trim();
