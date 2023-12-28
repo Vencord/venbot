@@ -118,7 +118,8 @@ const allowedGuilds = new Set([
     "613425648685547541", // ddevs
     "891039687785996328", // kernel
     "244230771232079873", // progamers hangout
-    "1096357702931841148" // decor
+    "1096357702931841148", // decor
+    "449175561529589761" // blackbox
 ]);
 
 export async function moderateInvites(msg: Message) {
