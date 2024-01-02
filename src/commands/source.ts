@@ -6,7 +6,7 @@ defineCommand({
     aliases: ["source"],
     async execute(msg) {
         return reply(msg, {
-            content: "I am free software! You can find my Source code at https://codeberg.org/Ven/Vaius"
+            content: "I am free software! You can find my Source code at https://codeberg.org/Vee/Vaius"
         });
     }
 });
