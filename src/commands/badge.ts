@@ -90,17 +90,23 @@ Vaius.on("interactionCreate", async i => {
         });
     }
 
-    const tooltip = data.options.getString("tooltip", true);
+    let tooltip = data.options.getString("tooltip");
     const image = data.options.getAttachment("image");
     const imageUrl = data.options.getString("image-url");
 
-    const url = image?.url ?? imageUrl;
+    let url = image?.url ?? imageUrl;
 
-    if (!url)
-        return i.createMessage({
-            content: "bruh",
-            flags: MessageFlags.EPHEMERAL
-        });
+    if (!url || !tooltip) {
+        const existing = oldBadgeIndex != null && BadgeData[user.id]?.[oldBadgeIndex];
+        if (!existing || (!url && !tooltip))
+            return i.createMessage({
+                content: "bruh",
+                flags: MessageFlags.EPHEMERAL
+            });
+
+        url ??= existing.badge;
+        tooltip ??= existing.tooltip;
+    }
 
     i.defer(MessageFlags.EPHEMERAL);
 
@@ -124,7 +130,7 @@ Vaius.on("interactionCreate", async i => {
     writeFileSync(`${badgesForUser(user.id)}/${fileName}`, imgData);
 
     BadgeData[user.id][index] = {
-        tooltip,
+        tooltip: tooltip,
         badge: `https://badges.vencord.dev/badges/${user.id}/${fileName}`
     };
 
@@ -137,54 +143,60 @@ Vaius.on("interactionCreate", async i => {
 });
 
 Vaius.once("ready", () => {
-    const CommonOptions = [
-        {
-            name: "user",
-            type: ApplicationCommandOptionTypes.USER,
-            description,
-            required: true
-        },
-        {
-            name: "tooltip",
-            type: ApplicationCommandOptionTypes.STRING,
-            description,
-            required: true
-        },
-        {
-            name: "image",
-            type: ApplicationCommandOptionTypes.ATTACHMENT,
-            description
-        },
-        {
-            name: "image-url",
-            type: ApplicationCommandOptionTypes.STRING,
-            description
-        }
-    ] satisfies ApplicationCommandOptions[];
-
-    Vaius.application.createGuildCommand("1015060230222131221", {
-        type: ApplicationCommandTypes.CHAT_INPUT,
-        name: NameEdit,
+    const RequiredUser: ApplicationCommandOptions = {
+        name: "user",
+        type: ApplicationCommandOptionTypes.USER,
         description,
-        defaultMemberPermissions: "0", // admins only,
-        options: ([
-            ...CommonOptions,
-            {
-                name: "old-badge",
-                description,
-                type: ApplicationCommandOptionTypes.INTEGER,
-                autocomplete: true,
-                required: true
-            }
-        ] as ApplicationCommandOptions[]).sort((a, b) => Number(b.required ?? false) - Number(a.required ?? false))
-    });
+        required: true
+    };
+    const Tooltip = (required: boolean) => ({
+        name: "tooltip",
+        type: ApplicationCommandOptionTypes.STRING,
+        description,
+        required
+    } as ApplicationCommandOptions);
+    const Image: ApplicationCommandOptions = {
+        name: "image",
+        type: ApplicationCommandOptionTypes.ATTACHMENT,
+        description
+    };
+    const ImageUrl: ApplicationCommandOptions = {
+        name: "image-url",
+        type: ApplicationCommandOptionTypes.STRING,
+        description
+    };
 
     Vaius.application.createGuildCommand("1015060230222131221", {
         type: ApplicationCommandTypes.CHAT_INPUT,
         name: NameAdd,
         description,
         defaultMemberPermissions: "0", // admins only,
-        options: CommonOptions
+        options: [
+            RequiredUser,
+            Tooltip(true),
+            ImageUrl,
+            Image,
+        ]
+    });
+
+    Vaius.application.createGuildCommand("1015060230222131221", {
+        type: ApplicationCommandTypes.CHAT_INPUT,
+        name: NameEdit,
+        description,
+        defaultMemberPermissions: "0", // admins only,
+        options: [
+            RequiredUser,
+            {
+                name: "old-badge",
+                description,
+                type: ApplicationCommandOptionTypes.INTEGER,
+                autocomplete: true,
+                required: true
+            },
+            Tooltip(false),
+            ImageUrl,
+            Image,
+        ]
     });
 
     Vaius.application.createGuildCommand("1015060230222131221", {
@@ -193,7 +205,7 @@ Vaius.once("ready", () => {
         description,
         defaultMemberPermissions: "0",
         options: [
-            CommonOptions[0],
+            RequiredUser,
             {
                 name: "old-badge",
                 description,
