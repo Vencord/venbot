@@ -3,8 +3,8 @@ import { mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "fs";
 import { ApplicationCommandOptions, ApplicationCommandOptionTypes, ApplicationCommandTypes, InteractionTypes, MessageFlags } from "oceanic.js";
 import { fetch } from "undici";
 
-import { OwnerId, Vaius } from "../Client";
-import { PROD } from "../constants";
+import { OwnerId, Vaius } from "../../Client";
+import { PROD } from "../../constants";
 
 const BasePath = "/var/www/badges.vencord.dev";
 const BadgeJson = `${BasePath}/badges.json`;
