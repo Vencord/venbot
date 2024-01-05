@@ -27,5 +27,6 @@ export const HOURS = 60 * MINUTES;
 export const Emoji = {
     X: "❌",
     CheckMark: "✅",
-    QuestionMark: "❓"
+    QuestionMark: "❓",
+    Anger: "💢",
 } as const;

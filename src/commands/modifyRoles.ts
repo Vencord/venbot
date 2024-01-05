@@ -1,4 +1,4 @@
-import { Guild } from "oceanic.js";
+import { Guild, Member } from "oceanic.js";
 
 import { defineCommand } from "../Command";
 import { Emoji } from "../constants";
@@ -28,6 +28,13 @@ function parseArgs(guild: Guild, args: string[]) {
     return { role, users: users as string[] };
 }
 
+function canManageRole(roleId: string, member: Member) {
+    const g = member.guild;
+    const pos = g.roles.get(roleId)!.position;
+
+    return member.roles.some(r => g.roles.get(r)!.position > pos);
+}
+
 defineCommand({
     name: "role-add",
     aliases: ["+", "ra", "ar"],
@@ -36,6 +43,7 @@ defineCommand({
     async execute(msg, ...args) {
         const { role, users } = parseArgs(msg.guild, args);
         if (!role) return msg.createReaction(Emoji.QuestionMark).catch(swallow);
+        if (!canManageRole(role, msg.member)) return msg.createReaction(Emoji.Anger).catch(swallow);
 
         const failed = [] as string[];
         for (const u of users) {
@@ -57,6 +65,7 @@ defineCommand({
     async execute(msg, ...args) {
         const { role, users } = parseArgs(msg.guild, args);
         if (!role) return msg.createReaction(Emoji.QuestionMark).catch(swallow);
+        if (!canManageRole(role, msg.member)) return msg.createReaction(Emoji.Anger).catch(swallow);
 
         const failed = [] as string[];
         for (const u of users) {
