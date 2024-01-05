@@ -55,7 +55,6 @@ Vaius.on("messageCreate", async msg => {
     if (cmd.guildOnly && !msg.inCachedGuildChannel()) return;
     if (cmd.permissions && msg.inCachedGuildChannel()) {
         if (cmd.permissions.some(p => !msg.channel.permissionsOf(msg.member).has(p))) {
-            console.log("nop");
             return;
         }
     }
