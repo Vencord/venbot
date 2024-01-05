@@ -1,7 +1,11 @@
 import { CreateMessageOptions, Message, User } from "oceanic.js";
 import { fetch } from "undici";
 
-const ZWSP = "\u200B";
+export const ZWSP = "\u200B";
+export const ID_REGEX = /^(?:<@!?)?(\d{17,20})>?$/;
+
+export const NOOP = () => { };
+export const swallow = NOOP;
 
 export function reply(msg: Message, opts: CreateMessageOptions | string): Promise<Message> {
     if (typeof opts === "string")
@@ -24,7 +28,7 @@ export function sleep(ms: number) {
 }
 
 const BACKTICKS = "```";
-export const codeblock = (s: string, lang = "js") => `${BACKTICKS}${lang}\n${s.replaceAll("`", "`" + ZWSP)}${BACKTICKS}`;
+export const codeblock = (s: string, lang = "") => `${BACKTICKS}${lang}\n${s.replaceAll("`", "`" + ZWSP)}${BACKTICKS}`;
 
 export async function sendManyLines(msg: Message, lines: string[]) {
     let s = "";

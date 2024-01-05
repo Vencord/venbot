@@ -6,9 +6,8 @@ import { reply } from "../util";
 defineCommand({
     name: "prune",
     aliases: ["purge", "clear", "delete"],
+    guildOnly: true,
     async execute(msg, amount, modifier, extra) {
-        if (!msg.inCachedGuildChannel()) return;
-
         if (!msg.member.permissions.has("MANAGE_MESSAGES"))
             return reply(msg, { content: "nuh-uh!!" });
 

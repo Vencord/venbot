@@ -22,9 +22,8 @@ interface Channels {
 defineCommand({
     name: "notsupport",
     aliases: ["ns", "nots"],
+    guildOnly: true,
     async execute(msg, channelId, ...captionElements) {
-        if (!msg.inCachedGuildChannel()) return;
-
         let channel = msg.client.getChannel(SUPPORT_CHANNEL_ID) as AnyGuildChannelWithoutThreads;
         let caption = captionElements.join(" ");
         if (channelId) {

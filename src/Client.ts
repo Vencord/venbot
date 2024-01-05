@@ -52,6 +52,14 @@ Vaius.on("messageCreate", async msg => {
     const cmd = Commands[cmdName];
     if (!cmd) return;
 
+    if (cmd.guildOnly && !msg.inCachedGuildChannel()) return;
+    if (cmd.permissions && msg.inCachedGuildChannel()) {
+        if (cmd.permissions.some(p => !msg.channel.permissionsOf(msg.member).has(p))) {
+            console.log("nop");
+            return;
+        }
+    }
+
     if (cmd.ownerOnly && msg.author.id !== OwnerId)
         return;
 

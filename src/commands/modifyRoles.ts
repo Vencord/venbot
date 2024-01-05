@@ -1,0 +1,69 @@
+import { Guild } from "oceanic.js";
+
+import { defineCommand } from "../Command";
+import { Emoji } from "../constants";
+import { codeblock, ID_REGEX, reply, swallow } from "../util";
+
+const Aliases = {
+    donor: "1042507929485586532",
+    d: "1042507929485586532",
+
+    cute: "1026504932959977532",
+    c: "1026504932959977532",
+
+    needy: "1088566810976194693"
+};
+
+function parseArgs(guild: Guild, args: string[]) {
+    const userStart = args.findIndex(a => ID_REGEX.test(a));
+    if (userStart === -1)
+        return { role: "", users: [] };
+
+    const roleName = args.slice(0, userStart).join(" ").toLowerCase();
+    const role = Aliases[roleName as keyof typeof Aliases] ?? guild.roles.find(r => r.name.toLowerCase().includes(roleName))?.id;
+    const users = args.slice(userStart);
+
+    return { role, users };
+}
+
+defineCommand({
+    name: "role-add",
+    aliases: ["+", "ra", "ar"],
+    guildOnly: true,
+    permissions: ["MANAGE_ROLES"],
+    async execute(msg, ...args) {
+        const { role, users } = parseArgs(msg.guild, args);
+        if (!role) return msg.createReaction(Emoji.QuestionMark).catch(swallow);
+
+        const failed = [] as string[];
+        for (const u of users) {
+            await msg.guild.addMemberRole(u, role, `Added by ${msg.author.tag}`)
+                .catch(e => failed.push(String(e)));
+        }
+
+        if (!failed.length) return void msg.createReaction(Emoji.CheckMark).catch(swallow);
+
+        return reply(msg, "Failed to give some users that role:\n" + codeblock(failed.join("\n")));
+    },
+});
+
+defineCommand({
+    name: "role-remove",
+    aliases: ["-", "rr"],
+    guildOnly: true,
+    permissions: ["MANAGE_ROLES"],
+    async execute(msg, ...args) {
+        const { role, users } = parseArgs(msg.guild, args);
+        if (!role) return msg.createReaction(Emoji.QuestionMark).catch(swallow);
+
+        const failed = [] as string[];
+        for (const u of users) {
+            await msg.guild.removeMemberRole(u, role, `Removed by ${msg.author.tag}`)
+                .catch(() => failed.push(u));
+        }
+
+        if (!failed.length) return void msg.createReaction(Emoji.CheckMark).catch(swallow);
+
+        return reply(msg, "Failed to remove that role from some users:\n" + codeblock(failed.join("\n")));
+    },
+});

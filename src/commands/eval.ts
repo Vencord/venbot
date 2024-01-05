@@ -35,7 +35,7 @@ defineCommand({
 
         const res = inspect(result).slice(0, 1990);
 
-        let output = codeblock(res);
+        let output = codeblock(res, "js");
         const consoleOutput = console._lines.join("\n").slice(0, Math.max(0, 1990 - output.length));
 
         if (consoleOutput) output += `\n${codeblock(consoleOutput)}`;

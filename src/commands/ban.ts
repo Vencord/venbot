@@ -1,15 +1,12 @@
 import { defineCommand } from "../Command";
-import { reply, silently } from "../util";
-
-const idRe = /^(?:<@!?)?(\d{17,20})>?$/;
+import { ID_REGEX, reply, silently } from "../util";
 
 defineCommand({
     name: "ban",
     aliases: ["yeet", "🍌"],
+    guildOnly: true,
+    permissions: ["BAN_MEMBERS"],
     async execute(msg, ...args) {
-        if (!msg.inCachedGuildChannel()) return;
-        if (!msg.member.permissions.has("BAN_MEMBERS")) return;
-
         let possibleDays = Number(args[0]) || 0;
         if (possibleDays > 0 && possibleDays < 8)
             args.shift();
@@ -19,7 +16,7 @@ defineCommand({
         const ids = [] as string[];
         let reason = "Absolutely beaned";
         for (let i = 0; i < args.length; i++) {
-            const id = args[i].match(idRe)?.[1];
+            const id = args[i].match(ID_REGEX)?.[1];
             if (id) {
                 ids.push(id);
             } else {

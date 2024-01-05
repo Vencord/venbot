@@ -12,8 +12,7 @@ defineCommand({
     name: "support",
     aliases: ["s"],
     async execute(msg, ...guide) {
-        if (!msg.inCachedGuildChannel()) return;
-        if (!SUPPORT_ALLOWED_CHANNELS.includes(msg.channel.id)) return;
+        if (!SUPPORT_ALLOWED_CHANNELS.includes(msg.channel?.id!)) return;
 
         const content = instructions[guide.join(" ").toLowerCase()];
         if (content)
