@@ -1,5 +1,5 @@
 import { defineCommand } from "../Command";
-import { ID_REGEX, reply, silently } from "../util";
+import { ID_REGEX, reply, silently, sleep } from "../util";
 
 defineCommand({
     name: "ban",
@@ -43,4 +43,9 @@ defineCommand({
 
         return reply(msg, { content: results.join("\n") || "Done! <:BAN:1112433028917121114>" });
     }
+});
+
+defineCommand({
+    name: "bam",
+    execute: msg => sleep(500).then(() => reply(msg, "Done! <:BAN:1112433028917121114>"))
 });
