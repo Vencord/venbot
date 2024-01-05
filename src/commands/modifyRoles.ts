@@ -23,7 +23,7 @@ function parseArgs(guild: Guild, args: string[]) {
     const role = Aliases[roleName as keyof typeof Aliases] ?? guild.roles.find(r => r.name.toLowerCase().includes(roleName))?.id;
     const users = args.slice(userStart).map(u => u.match(ID_REGEX)?.[1]);
 
-    if (!users.includes(undefined) || !role) return { role: "", users: [] };
+    if (users.includes(undefined) || !role) return { role: "", users: [] };
 
     return { role, users: users as string[] };
 }
