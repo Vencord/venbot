@@ -1,10 +1,10 @@
 import { readdir, readFile } from "fs/promises";
-import { EmbedOptions, Member, Message, MessageTypes } from "oceanic.js";
+import { AutoModerationActionTypes, EmbedOptions, Member, Message, MessageTypes } from "oceanic.js";
 import { join } from "path";
 
-import { Vaius } from "./Client";
-import { DATA_DIR, MINUTES, MOD_LOG_CHANNEL_ID } from "./constants";
-import { sendDm, silently, until } from "./util";
+import { Vaius } from "../Client";
+import { DATA_DIR, MINUTES, MOD_LOG_CHANNEL_ID } from "../constants";
+import { sendDm, silently, until } from "../util";
 
 const mentions = /<@!?(\d{17,20})>/g;
 
@@ -140,4 +140,26 @@ export async function moderateInvites(msg: Message) {
     }
 
     return false;
+}
+
+export function initModListeners() {
+    Vaius.on("guildMemberUpdate", moderateNick);
+    Vaius.on("guildMemberAdd", moderateNick);
+
+    Vaius.on("autoModerationActionExecution", async (guild, _channel, user, data) => {
+        if (data.action.type !== AutoModerationActionTypes.SEND_ALERT_MESSAGE) return;
+
+        const includesPing = data.content.includes("@everyone") || data.content.includes("@here");
+        const includesInvite = data.content.includes("discord.gg/") || data.content.includes("discord.com/invite");
+
+        if (includesPing && includesInvite) {
+            await Vaius.rest.guilds.createBan(guild.id, user.id, {
+                reason: "tried to ping everyone with an invite (spam bot)",
+                deleteMessageDays: 1
+            });
+
+            logModerationAction(`Banned <@${user.id}> for trying to ping everyone with an invite.`);
+        }
+    });
+
 }

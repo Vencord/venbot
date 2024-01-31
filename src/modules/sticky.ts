@@ -1,8 +1,8 @@
 import { AnyTextableGuildChannel } from "oceanic.js";
 
-import { Vaius } from "./Client";
-import { SUPPORT_CHANNEL_ID } from "./constants";
-import { debounce } from "./util";
+import { Vaius } from "../Client";
+import { SUPPORT_CHANNEL_ID } from "../constants";
+import { debounce } from "../util";
 
 const IS_ENABLED = Boolean(false);
 const MESSAGE = `

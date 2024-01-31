@@ -1,10 +1,10 @@
 import { createHash } from "crypto";
 import { mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "fs";
 import { ApplicationCommandOptions, ApplicationCommandOptionTypes, ApplicationCommandTypes, InteractionTypes, MessageFlags } from "oceanic.js";
-import { fetch } from "undici";
 
 import { OwnerId, Vaius } from "../../Client";
 import { PROD } from "../../constants";
+import { fetchBuffer } from "../../util/fetch";
 
 const BasePath = "/var/www/badges.vencord.dev";
 const BadgeJson = `${BasePath}/badges.json`;
@@ -110,8 +110,7 @@ Vaius.on("interactionCreate", async i => {
 
     i.defer(MessageFlags.EPHEMERAL);
 
-    const buf = await fetch(url).then(r => r.arrayBuffer());
-    const imgData = new Uint8Array(buf);
+    const imgData = await fetchBuffer(url);
 
     const ext = new URL(url).pathname.split(".").pop()!;
     const hash = createHash("sha1").update(imgData).digest("hex");

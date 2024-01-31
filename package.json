@@ -13,12 +13,12 @@
     "dependencies": {
         "canvas": "^2.11.2",
         "dotenv": "^16.3.1",
+        "execa": "^8.0.1",
         "oceanic.js": "1.8.1",
-        "pako": "^2.1.0",
-        "undici": "^5.22.1"
+        "pako": "^2.1.0"
     },
     "devDependencies": {
-        "@types/node": "^18.16.19",
+        "@types/node": "^20.11.13",
         "@typescript-eslint/parser": "^5.61.0",
         "esbuild": "^0.15.18",
         "eslint": "^8.44.0",

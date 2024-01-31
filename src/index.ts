@@ -1,7 +1,6 @@
 import "./dotenv";
 import "~commands";
-import "./modmail";
-import "./sticky";
+import "~modules";
 
 import {
     ApplicationCommandTypes,
@@ -10,6 +9,7 @@ import {
 
 import { Vaius } from "./Client";
 import { PROD } from "./constants";
+import { initModListeners } from "./modules/moderate";
 
 if (PROD) {
     Vaius.once("ready", () => {
@@ -26,6 +26,8 @@ if (PROD) {
         })
     );
 }
+
+initModListeners();
 
 process.on("unhandledRejection", console.error);
 process.on("uncaughtException", console.error);

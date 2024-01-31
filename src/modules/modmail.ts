@@ -1,9 +1,9 @@
 import { createHash } from "crypto";
 import { ActivityTypes, ApplicationCommandTypes, ButtonStyles, ChannelTypes, CommandInteraction, ComponentInteraction, ComponentTypes, GuildComponentSelectMenuInteraction, InteractionTypes, MessageFlags, TextChannel } from "oceanic.js";
 
-import { Vaius } from "./Client";
-import { defineCommand } from "./Command";
-import { DEV_CHANNEL_ID, MOD_ROLE_ID, PROD, SUPPORT_CHANNEL_ID } from "./constants";
+import { Vaius } from "../Client";
+import { defineCommand } from "../Command";
+import { DEV_CHANNEL_ID, MOD_ROLE_ID, PROD, SUPPORT_CHANNEL_ID } from "../constants";
 
 const enum Ids {
     OPEN_TICKET = "modmail:open_ticket",

@@ -1,5 +1,6 @@
 import { CreateMessageOptions, Message, User } from "oceanic.js";
-import { fetch } from "undici";
+
+import { doFetch } from "./util/fetch";
 
 export const ZWSP = "\u200B";
 export const ID_REGEX = /^(?:<@!?)?(\d{17,20})>?$/;
@@ -73,9 +74,7 @@ export function makeCachedJsonFetch<T>(url: string, msUntilStale = 60_000 * 5) {
 
     return async () => {
         if (Date.now() - cacheTimestamp > msUntilStale) {
-            const res = await fetch(url);
-            if (!res.ok)
-                throw new Error(`Failed to get ${url} - ${res.status}: ${res.statusText}`);
+            const res = await doFetch(url);
 
             cachedValue = await res.json();
             cacheTimestamp = Date.now();

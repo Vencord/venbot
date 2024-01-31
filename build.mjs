@@ -13,35 +13,33 @@ const makeAllPackagesExternalPlugin = {
 };
 
 /**
- * @type {esbuild.Plugin}
+ * @type {(namespace: string) => esbuild.Plugin}
  */
-const globCommandsPlugin = {
-    name: "glob-commands-plugin",
+const includeDirPlugin = namespace => ({
+    name: `include-dir-plugin:${namespace}`,
     setup(build) {
-        const filter = /^~commands$/;
+        const filter = new RegExp(`^~${namespace}$`);
+        const dir = `./src/${namespace}`;
 
         build.onResolve(
             { filter },
-            args => ({
-                path: args.path,
-                namespace: "commands"
-            })
+            args => ({ path: args.path, namespace })
         );
 
-        build.onLoad({ filter, namespace: "commands" }, async () => {
-            const files = await readdir("./src/commands");
+        build.onLoad({ filter, namespace }, async () => {
+            const files = await readdir(dir);
             return {
                 contents: files.map(f => `import "./${f.replace(".ts", "")}"`).join("\n"),
-                resolveDir: "./src/commands"
+                resolveDir: dir
             };
         });
     }
-};
+});
 
 await esbuild.build({
     entryPoints: ["src/index.ts"],
     bundle: true,
-    plugins: [globCommandsPlugin, makeAllPackagesExternalPlugin],
+    plugins: [includeDirPlugin("commands"), includeDirPlugin("modules"), makeAllPackagesExternalPlugin],
     outfile: "dist/index.js",
     minify: false,
     treeShaking: true,

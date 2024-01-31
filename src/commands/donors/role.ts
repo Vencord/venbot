@@ -1,8 +1,8 @@
 import { ApplicationCommandOptionTypes, ApplicationCommandTypes, InteractionTypes, MessageFlags } from "oceanic.js";
-import { fetch } from "undici";
 
 import { Vaius } from "../../Client";
 import { PROD } from "../../constants";
+import { fetchBuffer } from "../../util/fetch";
 
 const Name = PROD ? "role-add" : "devrole-add";
 const description = "fuck you discord";
@@ -22,9 +22,7 @@ Vaius.on("interactionCreate", async i => {
 
     const iconBuf = !iconUrl
         ? undefined
-        : await fetch(iconUrl)
-            .then(r => r.arrayBuffer())
-            .then(b => Buffer.from(b));
+        : await fetchBuffer(iconUrl);
 
     const role = await i.guild.createRole({
         name,
