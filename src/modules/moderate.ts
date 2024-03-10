@@ -71,9 +71,6 @@ export async function moderateMessage(msg: Message) {
         return;
     }
 
-    if (await lobotomiseMaybe(msg))
-        return;
-
     if (msg.member.permissions.has("MANAGE_MESSAGES")) return;
 
     for (const mod of [moderateInvites, moderateImageHosts]) {
@@ -169,7 +166,6 @@ export function initModListeners() {
 
 const TESSIE_ID = "1081940449717133374";
 export async function lobotomiseMaybe(msg: Message<AnyTextableGuildChannel>) {
-    console.log(msg.author.id === TESSIE_ID, msg.referencedMessage, msg.content === "mods crush this person's skull");
     if (msg.author.id !== TESSIE_ID || !msg.referencedMessage || msg.content !== "mods crush this person's skull") return false;
 
     try {

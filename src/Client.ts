@@ -3,7 +3,7 @@ import { Client } from "oceanic.js";
 
 import { Commands } from "./Command";
 import { PREFIX, SUPPORT_ALLOWED_CHANNELS, UPDATE_CHANNEL_ID_FILE } from "./constants";
-import { moderateMessage } from "./modules/moderate";
+import { lobotomiseMaybe, moderateMessage } from "./modules/moderate";
 import { reply, silently } from "./util";
 
 export const Vaius = new Client({
@@ -40,6 +40,7 @@ Vaius.once("ready", async () => {
 const whitespaceRe = /\s+/;
 
 Vaius.on("messageCreate", async msg => {
+    if (msg.inCachedGuildChannel() && await lobotomiseMaybe(msg)) return;
     if (msg.author.bot) return;
     moderateMessage(msg);
 
