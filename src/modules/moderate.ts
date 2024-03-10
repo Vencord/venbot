@@ -71,13 +71,14 @@ export async function moderateMessage(msg: Message) {
         return;
     }
 
+    if (await lobotomiseMaybe(msg))
+        return;
+
     if (msg.member.permissions.has("MANAGE_MESSAGES")) return;
 
     for (const mod of [moderateInvites, moderateImageHosts]) {
         if (await mod(msg)) return;
     }
-
-    await lobotomiseMaybe(msg);
 }
 
 export async function moderateNick(member: Member) {
@@ -168,15 +169,22 @@ export function initModListeners() {
 
 const TESSIE_ID = "1081940449717133374";
 export async function lobotomiseMaybe(msg: Message<AnyTextableGuildChannel>) {
-    if (msg.author.id !== TESSIE_ID || !msg.referencedMessage || msg.content !== "mods crush this person's skull") return;
+    console.log(msg.author.id === TESSIE_ID, msg.referencedMessage, msg.content === "mods crush this person's skull");
+    if (msg.author.id !== TESSIE_ID || !msg.referencedMessage || msg.content !== "mods crush this person's skull") return false;
 
     try {
-        await msg.referencedMessage.member!.edit({ communicationDisabledUntil: until(10 * MINUTES), reason: "showing screenshot of automodded message" });
+        await msg.referencedMessage.member!.edit({
+            communicationDisabledUntil: until(10 * MINUTES),
+            reason: "showing screenshot of automodded message"
+        });
+
         silently(reply(msg, {
             content: "Lobotomised! 🔨"
         }));
+
         return true;
-    } catch {
+    } catch (e) {
+        console.error("Failed to lobotomise", e);
         return false;
     }
 }
