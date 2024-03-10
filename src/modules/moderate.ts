@@ -1,5 +1,5 @@
 import { readdir, readFile } from "fs/promises";
-import { AutoModerationActionTypes, EmbedOptions, Member, Message, MessageTypes } from "oceanic.js";
+import { AnyTextableGuildChannel, AutoModerationActionTypes, EmbedOptions, Member, Message, MessageTypes } from "oceanic.js";
 import { join } from "path";
 
 import { Vaius } from "../Client";
@@ -167,11 +167,11 @@ export function initModListeners() {
 }
 
 const TESSIE_ID = "1081940449717133374";
-export async function lobotomiseMaybe(msg: Message) {
-    if (!msg.inCachedGuildChannel() || msg.author.id !== TESSIE_ID || msg.content !== "mods crush this person's skull") return;
+export async function lobotomiseMaybe(msg: Message<AnyTextableGuildChannel>) {
+    if (msg.author.id !== TESSIE_ID || !msg.referencedMessage || msg.content !== "mods crush this person's skull") return;
 
     try {
-        await msg.member.edit({ communicationDisabledUntil: until(10 * MINUTES), reason: "showing screenshot of automodded message" });
+        await msg.referencedMessage.member!.edit({ communicationDisabledUntil: until(10 * MINUTES), reason: "showing screenshot of automodded message" });
         silently(reply(msg, {
             content: "Lobotomised! 🔨"
         }));
