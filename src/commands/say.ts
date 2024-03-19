@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionTypes, ApplicationCommandTypes, InteractionTypes } from "oceanic.js";
+import { ApplicationCommandOptionTypes, ApplicationCommandTypes, InteractionTypes, MessageFlags } from "oceanic.js";
 
 import { OwnerId, Vaius } from "../Client";
 
@@ -24,5 +24,8 @@ Vaius.on("interactionCreate", async i => {
 
     const content = i.data.options.getString("content", true);
 
-    i.channel.createMessage({ content });
+    await i.defer(MessageFlags.EPHEMERAL);
+
+    await i.channel.createMessage({ content });
+    await i.createFollowup({ content: "done", flags: MessageFlags.EPHEMERAL });
 });
