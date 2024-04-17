@@ -6,7 +6,7 @@ import { debounce } from "../util";
 
 const IS_ENABLED = Boolean(true);
 const MESSAGE = `
-## Read <#1024351821873037462> before asking for help
+## Read <#1222936386626129920> before asking for help
 `.trim();
 
 let lastMsgId: string | null = null;
