@@ -95,8 +95,8 @@ export function pluralise(amount: number, singular: string, plural = singular + 
     return amount === 1 ? `${amount} ${singular}` : `${amount} ${plural}`
 }
 
-export const stripIndent: typeof String.raw = (...args) => {
-    const string = String.raw(...args);
+export const stripIndent = (strings: TemplateStringsArray, ...values: any[]) => {
+    const string = String.raw({ raw: strings }, ...values);
 
     const match = string.match(/^[ \t]*(?=\S)/gm);
     if (!match) return string.trim();
