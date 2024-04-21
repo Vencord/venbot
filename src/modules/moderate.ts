@@ -3,7 +3,7 @@ import { AnyTextableGuildChannel, AutoModerationActionTypes, EmbedOptions, Membe
 import { join } from "path";
 
 import { Vaius } from "../Client";
-import { DATA_DIR, MINUTES, MOD_LOG_CHANNEL_ID } from "../constants";
+import { DATA_DIR, MINUTES_IN_MS, MOD_LOG_CHANNEL_ID } from "../constants";
 import { reply, sendDm, silently, until } from "../util";
 
 const mentions = /<@!?(\d{17,20})>/g;
@@ -136,7 +136,7 @@ export async function moderateInvites(msg: Message) {
 
         if (!allowedGuilds.has(inviteData.guildID)) {
             silently(msg.delete());
-            silently(msg.member!.edit({ communicationDisabledUntil: until(5 * MINUTES), reason: "invite" }));
+            silently(msg.member!.edit({ communicationDisabledUntil: until(5 * MINUTES_IN_MS), reason: "invite" }));
             logModerationAction(
                 `${msg.author.mention} posted an invite to ${inviteData.guild.name} in ${msg.channel!.mention}`,
                 makeEmbedForMessage(msg)
@@ -176,7 +176,7 @@ export async function lobotomiseMaybe(msg: Message<AnyTextableGuildChannel>) {
 
     try {
         await msg.referencedMessage.member!.edit({
-            communicationDisabledUntil: until(10 * MINUTES),
+            communicationDisabledUntil: until(10 * MINUTES_IN_MS),
             reason: "showing screenshot of automodded message"
         });
 

@@ -20,9 +20,10 @@ export const SUPPORT_ALLOWED_CHANNELS = [
 
 export const MOD_ROLE_ID = "1026509424686284924";
 
-export const SECONDS = 1000;
-export const MINUTES = 60 * SECONDS;
-export const HOURS = 60 * MINUTES;
+export const SECONDS_IN_MS = 1000;
+export const MINUTES_IN_MS = 60 * SECONDS_IN_MS;
+export const HOURS_IN_MS = 60 * MINUTES_IN_MS;
+export const DAYS_IN_MS = 24 * HOURS_IN_MS;
 
 export const Emoji = {
     X: "❌",

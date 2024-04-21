@@ -1,5 +1,29 @@
 import { defineCommand } from "../Command";
-import { ID_REGEX, reply, silently } from "../util";
+import { ID_REGEX, pluralise, reply, silently, stripIndent } from "../util";
+import { AnyTextableGuildChannel, Message } from "oceanic.js";
+import { DAYS_IN_MS } from "../constants";
+
+function parseCrap(msg: Message<AnyTextableGuildChannel>, args: string[]) {
+    let possibleDays = Number(args[0]) || 0;
+    if (possibleDays > 0 && possibleDays < 8)
+        args.shift();
+    else
+        possibleDays = 0;
+
+    const ids = [] as string[];
+    let reason = "Absolutely beaned";
+    for (let i = 0; i < args.length; i++) {
+        const id = args[i].match(ID_REGEX)?.[1];
+        if (id) {
+            ids.push(id);
+        } else {
+            reason = args.slice(i).join(" ");
+            break;
+        }
+    }
+
+    return [possibleDays, ids, `${msg.author.tag}: ${reason}`] as const;
+}
 
 defineCommand({
     name: "ban",
@@ -7,26 +31,9 @@ defineCommand({
     guildOnly: true,
     permissions: ["BAN_MEMBERS"],
     async execute(msg, ...args) {
-        let possibleDays = Number(args[0]) || 0;
-        if (possibleDays > 0 && possibleDays < 8)
-            args.shift();
-        else
-            possibleDays = 0;
+        const [daysToDelete, ids, reason] = parseCrap(msg, args);
 
-        const ids = [] as string[];
-        let reason = "Absolutely beaned";
-        for (let i = 0; i < args.length; i++) {
-            const id = args[i].match(ID_REGEX)?.[1];
-            if (id) {
-                ids.push(id);
-            } else {
-                reason = args.slice(i).join(" ");
-                break;
-            }
-        }
         if (!ids.length) return reply(msg, { content: "Gimme some users silly" });
-
-        reason = `${msg.author.tag}: ${reason}`;
 
         const results = [] as string[];
         for (const id of ids) {
@@ -37,10 +44,34 @@ defineCommand({
                     }))
             );
 
-            await msg.guild.createBan(id, { reason, deleteMessageDays: possibleDays as 0 })
+            await msg.guild.createBan(id, { reason, deleteMessageDays: daysToDelete as 0 })
                 .catch(e => results.push(`Failed to ban ${id}: \`${String(e)}\``));
         }
 
         return reply(msg, { content: results.join("\n") || "Done! <:BAN:1112433028917121114>" });
     }
 });
+
+defineCommand({
+    name: "bulkban",
+    guildOnly: true,
+    ownerOnly: true,
+    permissions: ["BAN_MEMBERS"],
+    async execute(msg, ...args) {
+        const [daysToDelete, userIDs, reason] = parseCrap(msg, args);
+        if (!userIDs.length) return reply(msg, { content: "Gimme some users silly" });
+        if (userIDs.length > 200) return reply(msg, { content: "That's tooooo many users bestie...." });
+
+        const res = await msg.guild.bulkBan({ userIDs, reason, deleteMessageSeconds: daysToDelete * DAYS_IN_MS / 1000 })
+            .catch(e => null);
+
+        if (!res || !res.bannedUsers.length) return reply(msg, { content: "No bans succeeded." });
+        if (!res.failedUsers.length) return reply(msg, { content: `Success! Banned ${pluralise(res.bannedUsers.length, "user")}.` })
+        return reply(msg, {
+            content: stripIndent`
+            Successfully banned ${pluralise(res.bannedUsers.length, "user")}.
+            Failed to ban ${pluralise(res.failedUsers.length, "user")} (${res.failedUsers.join(", ")}).
+            `
+        })
+    }
+})
