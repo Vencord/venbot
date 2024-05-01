@@ -1,7 +1,8 @@
-import { defineCommand } from "../Command";
-import { ID_REGEX, pluralise, reply, silently, stripIndent } from "../util";
 import { AnyTextableGuildChannel, Message } from "oceanic.js";
+
+import { defineCommand } from "../Command";
 import { DAYS_IN_MS } from "../constants";
+import { ID_REGEX, pluralise, reply, silently, stripIndent } from "../util";
 
 function parseCrap(msg: Message<AnyTextableGuildChannel>, args: string[]) {
     let possibleDays = Number(args[0]) || 0;
@@ -66,12 +67,12 @@ defineCommand({
             .catch(e => null);
 
         if (!res || !res.bannedUsers.length) return reply(msg, { content: "No bans succeeded." });
-        if (!res.failedUsers.length) return reply(msg, { content: `Success! Banned ${pluralise(res.bannedUsers.length, "user")}.` })
+        if (!res.failedUsers.length) return reply(msg, { content: `Success! Banned ${pluralise(res.bannedUsers.length, "user")}.` });
         return reply(msg, {
             content: stripIndent`
             Successfully banned ${pluralise(res.bannedUsers.length, "user")}.
             Failed to ban ${pluralise(res.failedUsers.length, "user")} (${res.failedUsers.join(", ")}).
             `
-        })
+        });
     }
-})
+});

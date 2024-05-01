@@ -6,7 +6,10 @@
     "scripts": {
         "start": "pnpm build && node . VENBOT",
         "build": "node build.mjs",
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "lint": "eslint . --ext .js,.ts",
+        "lint:fix": "pnpm lint --fix"
+
     },
     "keywords": [],
     "author": "Vendicated <vendicated+npm@riseup.net>",
@@ -21,7 +24,7 @@
         "@types/node": "^20.12.7",
         "@typescript-eslint/parser": "^7.7.0",
         "esbuild": "^0.20.2",
-        "eslint": "^9.1.0",
+        "eslint": "^8.46.0",
         "eslint-plugin-simple-import-sort": "^12.1.0",
         "eslint-plugin-unused-imports": "^3.1.0",
         "tslib": "^2.6.2",

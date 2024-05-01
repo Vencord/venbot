@@ -92,7 +92,7 @@ export function debounce<T extends Function>(func: T, delay = 300): T {
 }
 
 export function pluralise(amount: number, singular: string, plural = singular + "s") {
-    return amount === 1 ? `${amount} ${singular}` : `${amount} ${plural}`
+    return amount === 1 ? `${amount} ${singular}` : `${amount} ${plural}`;
 }
 
 export const stripIndent = (strings: TemplateStringsArray, ...values: any[]) => {
@@ -102,5 +102,5 @@ export const stripIndent = (strings: TemplateStringsArray, ...values: any[]) => 
     if (!match) return string.trim();
 
     const minIndent = match.reduce((r, a) => Math.min(r, a.length), Infinity);
-    return string.replace(new RegExp(`^[ \\t]{${minIndent}}`, 'gm'), '').trim();
-}
+    return string.replace(new RegExp(`^[ \\t]{${minIndent}}`, "gm"), "").trim();
+};
