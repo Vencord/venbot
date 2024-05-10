@@ -40,7 +40,7 @@ Vaius.on("interactionCreate", async i => {
         const user = data.options.getUserOption("user");
         const existingBadges = BadgeData[user?.value!];
 
-        return i.result(existingBadges?.map((b, i) => ({ name: b.tooltip, value: String(i) }) ?? []));
+        return i.result(existingBadges?.map((b, i) => ({ name: b.tooltip, value: String(i) })) ?? []);
     }
 
     if (type !== InteractionTypes.APPLICATION_COMMAND) return;
