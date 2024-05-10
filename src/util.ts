@@ -14,7 +14,7 @@ export function reply(msg: Message, opts: CreateMessageOptions | string): Promis
             content: opts
         };
 
-    return msg.channel!.createMessage({
+    return msg.client.rest.channels.createMessage(msg.channelID, {
         ...opts,
         messageReference: {
             messageID: msg.id,
