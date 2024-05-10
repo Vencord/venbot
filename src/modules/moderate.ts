@@ -88,7 +88,7 @@ export async function moderateNick(member: Member) {
 
     if (name !== normalizedName)
         silently(member.edit({
-            nick: normalizedName || "lame username (change it)"
+            nick: normalizedName || member.username.replace(HoistCharactersRegex, "")
         }));
 }
 
