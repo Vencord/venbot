@@ -53,15 +53,20 @@ Vaius.on("messageCreate", async msg => {
     const cmd = Commands[cmdName];
     if (!cmd) return;
 
-    if (cmd.guildOnly && !msg.inCachedGuildChannel()) return;
-    if (cmd.permissions && msg.inCachedGuildChannel()) {
-        if (cmd.permissions.some(p => !msg.channel.permissionsOf(msg.member).has(p))) {
-            return;
-        }
-    }
-
     if (cmd.ownerOnly && msg.author.id !== OwnerId)
         return;
+
+    if (cmd.guildOnly && msg.inDirectMessageChannel())
+        return reply(msg, { content: "This command can only be used in servers" });
+
+    if (cmd.permissions) {
+        if (!msg.inCachedGuildChannel()) return;
+
+        const memberPerms = msg.channel.permissionsOf(msg.member);
+        for (const perm of cmd.permissions)
+            if (!memberPerms.has(perm))
+                return reply(msg, { content: "You don't have the required permissions to run this command!" });
+    }
 
     const noRateLimit = SUPPORT_ALLOWED_CHANNELS.includes(msg.channel?.id!) || msg.member?.permissions.has("MANAGE_MESSAGES");
 
