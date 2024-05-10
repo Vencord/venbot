@@ -3,8 +3,10 @@ import { AnyTextableGuildChannel, Message, PermissionName } from "oceanic.js";
 export interface Command<GuildOnly extends boolean = false> {
     name: string;
     aliases?: string[];
+    description: string;
+    usage: string | null;
     guildOnly?: GuildOnly;
-    permissions?: Array<PermissionName | bigint>,
+    permissions?: Array<PermissionName>,
     ownerOnly?: boolean;
     execute(message: GuildOnly extends true ? Message<AnyTextableGuildChannel> : Message, ...args: string[]): Promise<any>;
     rawContent?: boolean;

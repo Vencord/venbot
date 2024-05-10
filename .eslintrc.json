@@ -7,7 +7,6 @@
     "quotes": ["error", "double", { "avoidEscape": true }],
     "jsx-quotes": ["error", "prefer-double"],
     "no-mixed-spaces-and-tabs": "error",
-    "indent": ["error", 4, { "SwitchCase": 1 }],
     "arrow-parens": ["error", "as-needed"],
     "eol-last": ["error", "always"],
     "func-call-spacing": ["error", "never"],

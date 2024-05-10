@@ -11,6 +11,8 @@ const list = [] as string[][];
 defineCommand({
     name: "support",
     aliases: ["s"],
+    description: "Query a support tag",
+    usage: "[topic]",
     async execute(msg, ...guide) {
         if (!SUPPORT_ALLOWED_CHANNELS.includes(msg.channel?.id!)) return;
 

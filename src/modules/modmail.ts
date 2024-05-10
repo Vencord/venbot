@@ -24,6 +24,8 @@ type GuildInteraction = ComponentInteraction<ComponentTypes.BUTTON, TextChannel>
 defineCommand({
     name: "modmail:post",
     ownerOnly: true,
+    description: "Post the modmail message",
+    usage: null,
     execute() {
         return Vaius.rest.channels.createMessage(THREAD_PARENT_ID, {
             embeds: [{

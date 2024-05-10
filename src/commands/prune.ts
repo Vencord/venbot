@@ -6,11 +6,11 @@ import { reply } from "../util";
 defineCommand({
     name: "prune",
     aliases: ["purge", "clear", "delete"],
+    description: "Delete a number of messages",
+    usage: "<amount> [by|from|embeds|files|invites] [extra]",
     guildOnly: true,
+    permissions: ["MANAGE_MESSAGES"],
     async execute(msg, amount, modifier, extra) {
-        if (!msg.member.permissions.has("MANAGE_MESSAGES"))
-            return reply(msg, { content: "nuh-uh!!" });
-
         const limit = Number(amount) + 1;
         if (!limit) return reply(msg, { content: "?" });
 

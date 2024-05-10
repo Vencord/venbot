@@ -45,6 +45,8 @@ async function sendVoiceMessage(msg: Message<AnyTextableChannel | Uncached>) {
 
 defineCommand({
     name: "eval",
+    description: "Evaluate javascript code",
+    usage: "<code>",
     aliases: ["e", "$"],
     rawContent: true,
     async execute(msg, code) {

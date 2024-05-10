@@ -6,10 +6,10 @@
     "scripts": {
         "start": "pnpm build && node . VENBOT",
         "build": "node build.mjs",
-        "test": "echo \"Error: no test specified\" && exit 1",
+        "test": "pnpm lint && pnpm testTypes",
+        "testTypes": "tsc --noEmit",
         "lint": "eslint . --ext .js,.ts",
         "lint:fix": "pnpm lint --fix"
-
     },
     "keywords": [],
     "author": "Vendicated <vendicated+npm@riseup.net>",

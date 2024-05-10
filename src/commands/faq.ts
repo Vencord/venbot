@@ -13,6 +13,8 @@ const fetchFaq = makeCachedJsonFetch<Faq[]>(VENCORD_SITE + "/faq.json");
 defineCommand({
     name: "faq",
     aliases: ["f"],
+    description: "Get an answer from the [FAQ](<https://vencord.dev/faq>)",
+    usage: "[tag | query]",
     async execute(msg, query) {
         if (!msg.inCachedGuildChannel()) return;
         if (!SUPPORT_ALLOWED_CHANNELS.includes(msg.channel.id)) return;

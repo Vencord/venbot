@@ -37,7 +37,9 @@ function canManageRole(roleId: string, member: Member) {
 
 defineCommand({
     name: "role-add",
-    aliases: ["+", "ra", "ar"],
+    aliases: ["+", "ra"],
+    description: "Add a role to one or more users",
+    usage: "<role> <user> [user...]",
     guildOnly: true,
     permissions: ["MANAGE_ROLES"],
     async execute(msg, ...args) {
@@ -60,6 +62,8 @@ defineCommand({
 defineCommand({
     name: "role-remove",
     aliases: ["-", "rr"],
+    description: "Remove a role from one or more users",
+    usage: "<role> <user> [user...]",
     guildOnly: true,
     permissions: ["MANAGE_ROLES"],
     async execute(msg, ...args) {

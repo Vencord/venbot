@@ -34,6 +34,8 @@ const DefaultCaptionsGerman = {
 defineCommand({
     name: "notsupport",
     aliases: ["ns", "nots"],
+    description: "Create a graphic guiding people to the correct channel (usually support)",
+    usage: "[destination channel] [destination caption] | [origin caption]",
     guildOnly: true,
     async execute(msg, channelId, ...captionElements) {
         let channel = msg.client.getChannel(SUPPORT_CHANNEL_ID) as AnyGuildChannelWithoutThreads;

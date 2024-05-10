@@ -7,8 +7,9 @@ import { codeblock, reply, silently } from "../util";
 
 defineCommand({
     name: "update",
+    // aliases: ["up"],
     description: "Update the bot",
-    aliases: ["up"],
+    usage: null,
     ownerOnly: true,
     async execute(msg) {
         try {
