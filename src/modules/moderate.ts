@@ -78,7 +78,7 @@ export async function moderateMessage(msg: Message) {
     }
 }
 
-const HoistCharactersRegex = /^[!"#$%'+,.-]+/;
+const HoistCharactersRegex = /^[!"#$%'+,.*-]+/;
 
 export async function moderateNick(member: Member) {
     if (!member.guild.permissionsOf(Vaius.user.id).has("MANAGE_NICKNAMES")) return;
