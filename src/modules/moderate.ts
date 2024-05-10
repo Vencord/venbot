@@ -78,17 +78,17 @@ export async function moderateMessage(msg: Message) {
     }
 }
 
+const HoistCharactersRegex = /^[!"#$%'+,.-]+/;
+
 export async function moderateNick(member: Member) {
     if (!member.guild.permissionsOf(Vaius.user.id).has("MANAGE_NICKNAMES")) return;
 
     const name = member.displayName;
-    const normalizedName = name.normalize("NFKC");
+    const normalizedName = name.normalize("NFKC").replace(HoistCharactersRegex, "");
 
-    const isLame = normalizedName.startsWith("!");
-
-    if (isLame || name !== normalizedName)
+    if (name !== normalizedName)
         silently(member.edit({
-            nick: isLame ? "lame username (change it)" : normalizedName
+            nick: normalizedName || "lame username (change it)"
         }));
 }
 
