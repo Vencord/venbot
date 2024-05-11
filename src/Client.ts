@@ -1,5 +1,5 @@
 import { readFileSync, rmSync } from "fs";
-import { Client } from "oceanic.js";
+import { AnyTextableChannel, Client, Message } from "oceanic.js";
 
 import { Commands } from "./Command";
 import { PREFIX, SUPPORT_ALLOWED_CHANNELS, UPDATE_CHANNEL_ID_FILE } from "./constants";
@@ -63,9 +63,8 @@ Vaius.on("messageCreate", async msg => {
         if (!msg.inCachedGuildChannel()) return;
 
         const memberPerms = msg.channel.permissionsOf(msg.member);
-        for (const perm of cmd.permissions)
-            if (!memberPerms.has(perm))
-                return reply(msg, { content: "You don't have the required permissions to run this command!" });
+        if (cmd.permissions.some(perm => !memberPerms.has(perm)))
+            return;
     }
 
     const noRateLimit = SUPPORT_ALLOWED_CHANNELS.includes(msg.channel?.id!) || msg.member?.permissions.has("MANAGE_MESSAGES");
@@ -78,11 +77,14 @@ Vaius.on("messageCreate", async msg => {
         setTimeout(() => cmd.rateLimits.delete(msg.author.id), 10_000);
     }
 
+    if (!msg.channel)
+        await msg.client.rest.channels.get(msg.channelID);
+
     try {
         if (cmd.rawContent)
-            await cmd.execute(msg, content.slice(cmdName.length).trim());
+            await cmd.execute(msg as Message<AnyTextableChannel>, content.slice(cmdName.length).trim());
         else
-            await cmd.execute(msg, ...args);
+            await cmd.execute(msg as Message<AnyTextableChannel>, ...args);
     } catch (e) {
         console.error(
             `Failed to run ${cmd.name}`,
