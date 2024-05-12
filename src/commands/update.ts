@@ -24,7 +24,8 @@ defineCommand({
 
             writeFileSync(UPDATE_CHANNEL_ID_FILE, msg.channel!.id);
 
-            execSync("systemctl --user restart venbot");
+            // just quit. systemd will restart the bot
+            process.exit(0);
         } catch (e) {
             console.error(e);
             reply(msg, {

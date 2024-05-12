@@ -28,11 +28,12 @@ const NameMove = Name + "-move";
 
 const description = "fuck you discord";
 
+const DonorRoleId = "1042507929485586532";
+
 Vaius.on("interactionCreate", async i => {
     if (i.user.id !== OwnerId) return;
 
     const { guild, type, data } = i;
-    if (!guild) return;
 
     if (!("name" in data) || !data.name.startsWith(Name + "-")) return;
 
@@ -82,6 +83,9 @@ Vaius.on("interactionCreate", async i => {
         rmSync(`${badgesForUser(user.id)}/${fileName}`, { force: true });
 
         BadgeData[user.id].splice(oldBadgeIndex!, 1);
+        if (BadgeData[user.id].length === 0)
+            delete BadgeData[user.id];
+
         saveBadges();
 
         return i.createMessage({
@@ -134,6 +138,13 @@ Vaius.on("interactionCreate", async i => {
     };
 
     saveBadges();
+
+    if (guild) {
+        const member = await guild.getMember(user.id).catch(() => null);
+        if (member && !member.roles.includes(DonorRoleId))
+            await member.addRole(DonorRoleId); {
+        }
+    }
 
     i.createFollowup({
         content: "Done!",
