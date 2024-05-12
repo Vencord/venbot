@@ -19,6 +19,7 @@ export const SUPPORT_ALLOWED_CHANNELS = [
 ];
 
 export const MOD_ROLE_ID = "1026509424686284924";
+export const DONOR_ROLE_ID = "1042507929485586532";
 
 export const SECONDS_IN_MS = 1000;
 export const MINUTES_IN_MS = 60 * SECONDS_IN_MS;

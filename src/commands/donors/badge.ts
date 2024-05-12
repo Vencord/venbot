@@ -3,7 +3,7 @@ import { mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "fs";
 import { ApplicationCommandOptions, ApplicationCommandOptionTypes, ApplicationCommandTypes, InteractionTypes, MessageFlags } from "oceanic.js";
 
 import { OwnerId, Vaius } from "../../Client";
-import { PROD } from "../../constants";
+import { DONOR_ROLE_ID, PROD } from "../../constants";
 import { fetchBuffer } from "../../util/fetch";
 
 const BasePath = "/var/www/badges.vencord.dev";
@@ -27,8 +27,6 @@ const NameRemove = Name + "-remove";
 const NameMove = Name + "-move";
 
 const description = "fuck you discord";
-
-const DonorRoleId = "1042507929485586532";
 
 Vaius.on("interactionCreate", async i => {
     if (i.user.id !== OwnerId) return;
@@ -141,8 +139,8 @@ Vaius.on("interactionCreate", async i => {
 
     if (guild) {
         const member = await guild.getMember(user.id).catch(() => null);
-        if (member && !member.roles.includes(DonorRoleId))
-            await member.addRole(DonorRoleId); {
+        if (member && !member.roles.includes(DONOR_ROLE_ID))
+            await member.addRole(DONOR_ROLE_ID); {
         }
     }
 

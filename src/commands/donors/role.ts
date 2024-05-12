@@ -1,7 +1,7 @@
 import { ApplicationCommandOptionTypes, ApplicationCommandTypes, InteractionTypes, MessageFlags } from "oceanic.js";
 
 import { Vaius } from "../../Client";
-import { PROD } from "../../constants";
+import { DONOR_ROLE_ID, PROD } from "../../constants";
 import { fetchBuffer } from "../../util/fetch";
 
 const Name = PROD ? "role-add" : "devrole-add";
@@ -39,7 +39,8 @@ Vaius.on("interactionCreate", async i => {
         position: i.guild.roles.get("1042507929485586532")!.position + 1
     }]);
 
-    await i.guild.addMemberRole(user.id, role.id, "Donor Role");
+    await i.guild.addMemberRole(user.id, role.id, "Custom Donor Role");
+    await i.guild.addMemberRole(user.id, DONOR_ROLE_ID, "Donor Role");
 
     await i.createFollowup({
         content: "Done!",
