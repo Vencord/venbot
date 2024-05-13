@@ -7,7 +7,7 @@ const HuskAbuserIds = new Set([
 
 Vaius.on("messageReactionAdd", async (msg, reactor, reaction) => {
     if (!msg.guildID) return;
-    if (reaction.name.toLowerCase().includes("husk")) return;
+    if (!reaction.name.toLowerCase().includes("husk")) return;
 
     if (HuskAbuserIds.has(reactor.id)) {
         await Vaius.rest.channels.deleteReaction(msg.channelID, msg.id, `husk:${reaction.id}`, reactor.id);
