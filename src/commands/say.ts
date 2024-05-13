@@ -8,12 +8,20 @@ Vaius.once("ready", () => {
         name: "say",
         description: "say",
         defaultMemberPermissions: "0",
-        options: [{
-            name: "content",
-            description: "content",
-            type: ApplicationCommandOptionTypes.STRING,
-            required: true
-        }]
+        options: [
+            {
+                name: "content",
+                description: "content",
+                type: ApplicationCommandOptionTypes.STRING,
+                required: true
+            },
+            {
+                name: "reply-to",
+                description: "reply",
+                type: ApplicationCommandOptionTypes.STRING,
+                required: false
+            }
+        ]
     });
 });
 
@@ -23,9 +31,21 @@ Vaius.on("interactionCreate", async i => {
     if (!i.inCachedGuildChannel()) return;
 
     const content = i.data.options.getString("content", true);
+    const reply = i.data.options.getString("reply-to");
 
     await i.defer(MessageFlags.EPHEMERAL);
 
-    await i.channel.createMessage({ content });
+    await i.channel.createMessage({
+        content,
+        messageReference: reply ? {
+            messageID: reply
+        } : undefined,
+        allowedMentions: {
+            everyone: false,
+            roles: false,
+            repliedUser: true,
+            users: true
+        }
+    });
     await i.createFollowup({ content: "done", flags: MessageFlags.EPHEMERAL });
 });
