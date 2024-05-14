@@ -21,8 +21,8 @@ importers:
         specifier: ^3.1.0
         version: 3.1.0
       oceanic.js:
-        specifier: 1.10.2
-        version: 1.10.2
+        specifier: 1.10.4
+        version: 1.10.4
       pako:
         specifier: ^2.1.0
         version: 2.1.0
@@ -725,8 +725,8 @@ packages:
     resolution: {integrity: sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg==}
     engines: {node: '>=0.10.0'}
 
-  oceanic.js@1.10.2:
-    resolution: {integrity: sha512-preIEfqbLJae3S1pS0r6x79jagO3Cd3+puaHwIFrtHFXUY+F5AsV/hlpgmbjeGKp/WSxpiLTfVhlz35z5oI6cQ==}
+  oceanic.js@1.10.4:
+    resolution: {integrity: sha512-pgTc4xYUBgXvyxHit7NuwON7yYpKaO2F/4xego08TNGPCwzU1hE+NQGTKw6A8+AYOoF6R3V6oJSuGAq2pXdsKA==}
     engines: {node: '>=18.13.0'}
 
   once@1.4.0:
@@ -1639,7 +1639,7 @@ snapshots:
 
   object-assign@4.1.1: {}
 
-  oceanic.js@1.10.2:
+  oceanic.js@1.10.4:
     dependencies:
       tslib: 2.6.2
       ws: 8.17.0

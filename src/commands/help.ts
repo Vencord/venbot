@@ -1,7 +1,7 @@
 import { Commands, defineCommand, FullCommand } from "../Command";
 import { PREFIX } from "../constants";
 import { reply, ZWSP } from "../util";
-import { pluralise, snakeToTitle, stripIndent, toTitle } from "../util/text";
+import { snakeToTitle, stripIndent, toTitle } from "../util/text";
 
 defineCommand({
     name: "help",
