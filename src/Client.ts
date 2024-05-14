@@ -26,6 +26,7 @@ Vaius.once("ready", async () => {
     console.log("hi");
     console.log(`Connected as ${Vaius.user.tag} (${Vaius.user.id})`);
     console.log(`I am in ${Vaius.guilds.size} guilds`);
+    console.log(`https://discord.com/oauth2/authorize?client_id=${Vaius.user.id}&permissions=8&scope=bot+applications.commands`);
 
     try {
         const updateChannelId = readFileSync(UPDATE_CHANNEL_ID_FILE, "utf-8").trim();
