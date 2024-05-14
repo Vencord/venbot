@@ -7,6 +7,8 @@ import { debounce, silently } from "../util";
 const IS_ENABLED = Boolean(true);
 const MESSAGE = `
 ## Read <#1222936386626129920> before asking for help
+## Read <#1222936386626129920> before asking for help
+if you don't, you might be banned from support.
 `.trim();
 
 let lastMsgId: string | null = null;
