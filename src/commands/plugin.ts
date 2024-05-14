@@ -3,7 +3,7 @@ import leven from "leven";
 import { defineCommand } from "../Command";
 import { VENCORD_SITE } from "../constants";
 import { makeCachedJsonFetch, reply } from "../util";
-import { stripIndent } from "../util/text";
+import { isTruthy } from "../util/guards";
 
 interface Plugin {
     name: string;
@@ -22,6 +22,17 @@ interface Plugin {
 const fetchPlugins = makeCachedJsonFetch<Plugin[]>(
     VENCORD_SITE + "/plugins.json"
 );
+
+const Emojis = {
+    Required: "<:required:1240029454701563925>",
+    EnabledByDefault: "<:enabledByDefault:1240029457218015332>",
+    HasCommands: "<:hasCommands:1240029456157114460>",
+    Desktop: "<:desktop:1240029460762464276>",
+    DiscordDesktop: "<:discordDesktop:1240029458266591283>",
+    Vesktop: "<:vesktop1240029451690184728>",
+    Web: "<:web:1240029453665570887>",
+    Dev: "<:dev:1240029459449512029>",
+};
 
 defineCommand({
     name: "plugin",
@@ -45,18 +56,15 @@ defineCommand({
         })();
 
         if (match) {
-            const abilities = stripIndent`
-                ${match.required ? "`*️⃣` required" : ""}
-                ${match.enabledByDefault ? "`✅` enabled by default" : ""}
-                ${match.hasCommands ? "`💬` has chat commands" : ""}
-                ${match.target === "desktop" ? "`🖥️` desktop only" : ""}
-                ${match.target === "discordDesktop"
-                    ? "`🍦` discord desktop only"
-                    : ""
-                }
-                ${match.target === "web" ? "`🌐` web only" : ""}
-                ${match.target === "dev" ? "`🧩` development build only" : ""}
-            `.replace(/^\s*\n/gm, ""); // remove blanks
+            const traits = [
+                match.required && `${Emojis.Required} required`,
+                match.enabledByDefault && `${Emojis.EnabledByDefault} enabled by default`,
+                match.hasCommands && `${Emojis.HasCommands} has chat commands`,
+                match.target === "desktop" && `${Emojis.Desktop} desktop only`,
+                match.target === "discordDesktop" && `${Emojis.DiscordDesktop} discord desktop only`,
+                match.target === "web" && `${Emojis.Web} web only`,
+                match.target === "dev" && `${Emojis.Dev} development build only`
+            ].filter(isTruthy).join("\n");
 
             return reply(msg, {
                 embeds: [
@@ -74,11 +82,11 @@ defineCommand({
                                     .map(a => a.name)
                                     .join(", "),
                             },
-                            {
-                                name: "Abilities",
-                                value: abilities || "`❌` no special abilities",
+                            traits && {
+                                name: "Traits",
+                                value: traits,
                             },
-                        ],
+                        ].filter(isTruthy),
                     },
                 ],
             });
