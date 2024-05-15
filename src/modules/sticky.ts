@@ -8,7 +8,7 @@ const IS_ENABLED = Boolean(true);
 const MESSAGE = `
 ## Read <#1222936386626129920> before asking for help
 ## Read <#1222936386626129920> before asking for help
-if you don't, you might be banned from support.
+You will be **BANNED** with no chance of appeal if you ignore this.
 `.trim();
 
 let lastMsgId: string | null = null;
