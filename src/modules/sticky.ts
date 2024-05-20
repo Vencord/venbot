@@ -18,7 +18,7 @@ const repostMessage = debounce(async (channel: AnyTextableGuildChannel) => {
 
     const msg = await channel.createMessage({ content: MESSAGE });
     lastMsgId = msg.id;
-}, 5000);
+}, 10_000);
 
 Vaius.on("messageCreate", async msg => {
     if (!IS_ENABLED || msg.channelID !== SUPPORT_CHANNEL_ID || msg.author.bot || !msg.inCachedGuildChannel()) return;
