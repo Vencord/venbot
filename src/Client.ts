@@ -39,10 +39,11 @@ Vaius.once("ready", async () => {
 });
 
 const whitespaceRe = /\s+/;
+const GEN_AI_ID = "974297735559806986";
 
 Vaius.on("messageCreate", async msg => {
     if (msg.inCachedGuildChannel() && await lobotomiseMaybe(msg)) return;
-    if (msg.author.bot) return;
+    if (msg.author.bot && msg.author.id !== GEN_AI_ID) return;
     moderateMessage(msg);
 
     if (!msg.content?.toLowerCase().startsWith(PREFIX)) return;
