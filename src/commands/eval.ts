@@ -50,8 +50,13 @@ defineCommand({
     aliases: ["e", "$"],
     rawContent: true,
     async execute(msg, code) {
-        if (msg.author.id !== OwnerId)
-            return silently(sendVoiceMessage(msg));
+        if (msg.author.id !== OwnerId) {
+            if (!/^ve\b/.test(msg.content)) {
+                silently(sendVoiceMessage(msg));
+            }
+
+            return;
+        }
 
         const console: any = {
             _lines: [] as string[],

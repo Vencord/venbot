@@ -20,7 +20,7 @@ async function requireMap() {
 
 defineCommand({
     name: "chars",
-    aliases: ["c"],
+    aliases: ["ch", "charinfo", "char-info"],
     description: "Inspect the unicode characters in a string",
     usage: "<text>",
     rawContent: true,
