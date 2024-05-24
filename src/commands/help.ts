@@ -1,7 +1,7 @@
 import { Commands, defineCommand, FullCommand } from "../Command";
 import { PREFIX } from "../constants";
 import { reply, ZWSP } from "../util";
-import { snakeToTitle, stripIndent, toTitle } from "../util/text";
+import { snakeToTitle, stripIndent, toInlineCode, toTitle } from "../util/text";
 
 defineCommand({
     name: "help",
@@ -16,7 +16,7 @@ defineCommand({
 
         const content = cmd
             ? commandHelp(cmd)
-            : `Command \`${commandName}\` not found.`;
+            : `Command ${toInlineCode(commandName)} not found.`;
 
         return reply(msg, { content });
     },

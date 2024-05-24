@@ -1,3 +1,5 @@
+import { ZWSP } from "../util";
+
 export function pluralise(amount: number, singular: string, plural = singular + "s") {
     return amount === 1 ? `${amount} ${singular}` : `${amount} ${plural}`;
 }
@@ -24,4 +26,8 @@ export function snakeToTitle(s: string) {
         .split("_")
         .map(w => w[0].toUpperCase() + w.slice(1).toLowerCase())
         .join(" ");
+}
+
+export function toInlineCode(s: string) {
+    return "``" + ZWSP + s.replaceAll("`", ZWSP + "`" + ZWSP) + ZWSP + "``";
 }
