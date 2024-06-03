@@ -12,8 +12,10 @@ defineCommand({
     async execute(msg, commandName) {
         let content: string;
 
+        const TÜRKVARMI = msg.content.includes("yardım") || msg.content.includes("yardim");
+
         if (!commandName) {
-            content = commandList();
+            content = await commandList(TÜRKVARMI);
         } else {
             let cmd = Commands[commandName];
             if (!cmd && commandName?.startsWith(PREFIX))
@@ -23,28 +25,37 @@ defineCommand({
                 ? commandHelp(cmd)
                 : `Command ${toInlineCode(commandName)} not found.`;
 
+            if (TÜRKVARMI)
+                content = (await translate(content, "en", "tr")).text.replaceAll("''''", "```").replaceAll("'", "`");
         }
-
-        const TÜRKVARMI = msg.content.includes("yardım") || msg.content.includes("yardim");
-        if (TÜRKVARMI)
-            content = (await translate(content, "en", "tr")).text.replaceAll("''''", "```");
 
         return reply(msg, { content });
     },
 });
 
-function commandList() {
-    const commands = Object.entries(Commands)
-        .filter(([name, cmd]) => !cmd.ownerOnly && cmd.name === name); // remove aliased commands
+async function commandList(türk = false) {
+    let commands = Object.entries(Commands)
+        .filter(([name, cmd]) => !cmd.ownerOnly && cmd.name === name)
+        .map(([name, cmd]) => [name, cmd.description]); // remove aliased commands
+
+    let footer = `Use \`${PREFIX}help <command>\` for more information on a specific command!`;
+
+    if (türk) {
+        commands = await Promise.all(commands.map(([name, description]) =>
+            translate(`${name};;;${description}`, "en", "tr")
+                .then(t => t.text.split(";;;"))
+        ));
+        footer = (await translate(footer, "en", "tr")).text.replace("help", "yardım");
+    }
 
     const longestNameLength = commands.reduce((max, [name]) => Math.max(max, name.length), 0) + 1;
 
-    const commandDescriptions = commands.map(([_, cmd], i) => {
-        const paddedName = cmd.name.padEnd(longestNameLength, " ");
-        return `\`${i === 0 ? ZWSP : ""} ${paddedName}\`   ${cmd.description}`;
+    const commandDescriptions = commands.map(([name, description], i) => {
+        const paddedName = name.padEnd(longestNameLength, " ");
+        return `\`${i === 0 ? ZWSP : ""} ${paddedName}\`   ${description}`;
     }).join("\n");
 
-    return commandDescriptions + `\n\nUse \`${PREFIX}help <command>\` for more information on a specific command!`;
+    return commandDescriptions + "\n\n" + footer;
 }
 
 function commandHelp(cmd: FullCommand) {
