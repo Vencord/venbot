@@ -12,7 +12,9 @@ defineCommand({
         if (!commandName)
             return reply(msg, { content: commandList() });
 
-        const cmd = Commands[commandName];
+        let cmd = Commands[commandName];
+        if (!cmd && commandName?.startsWith(PREFIX))
+            cmd = Commands[commandName.slice(PREFIX.length)];
 
         const content = cmd
             ? commandHelp(cmd)
