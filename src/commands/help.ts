@@ -2,23 +2,32 @@ import { Commands, defineCommand, FullCommand } from "../Command";
 import { PREFIX } from "../constants";
 import { reply, ZWSP } from "../util";
 import { snakeToTitle, stripIndent, toInlineCode, toTitle } from "../util/text";
+import { translate } from "../util/translate";
 
 defineCommand({
     name: "help",
-    aliases: ["theylp", "shelp", "shiglp", "h", "?"],
+    aliases: ["theylp", "shelp", "shiglp", "yardim", "yardım", "h", "?"],
     description: "List all commands or get help for a specific command",
     usage: "[command]",
-    execute(msg, commandName) {
-        if (!commandName)
-            return reply(msg, { content: commandList() });
+    async execute(msg, commandName) {
+        let content: string;
 
-        let cmd = Commands[commandName];
-        if (!cmd && commandName?.startsWith(PREFIX))
-            cmd = Commands[commandName.slice(PREFIX.length)];
+        if (!commandName) {
+            content = commandList();
+        } else {
+            let cmd = Commands[commandName];
+            if (!cmd && commandName?.startsWith(PREFIX))
+                cmd = Commands[commandName.slice(PREFIX.length)];
 
-        const content = cmd
-            ? commandHelp(cmd)
-            : `Command ${toInlineCode(commandName)} not found.`;
+            content = cmd
+                ? commandHelp(cmd)
+                : `Command ${toInlineCode(commandName)} not found.`;
+
+        }
+
+        const TÜRKVARMI = msg.content.includes("yardım") || msg.content.includes("yardim");
+        if (TÜRKVARMI)
+            content = (await translate(content, "en", "tr")).text;
 
         return reply(msg, { content });
     },
