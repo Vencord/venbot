@@ -11,6 +11,9 @@ const Aliases = {
     cute: "1026504932959977532",
     c: "1026504932959977532",
 
+    regular: "1026504932959977532",
+    r: "1026504932959977532",
+
     needy: "1088566810976194693"
 };
 
@@ -20,7 +23,10 @@ function parseArgs(guild: Guild, args: string[]) {
         return { role: "", users: [] };
 
     const roleName = args.slice(0, userStart).join(" ").toLowerCase();
-    const role = Aliases[roleName as keyof typeof Aliases] ?? guild.roles.find(r => r.name.toLowerCase().includes(roleName))?.id;
+    const role = Aliases[roleName as keyof typeof Aliases]
+        ?? guild.roles.find(r => r.name.toLowerCase() === roleName)?.id
+        ?? guild.roles.find(r => r.name.toLowerCase().includes(roleName))?.id;
+
     const users = args.slice(userStart).map(u => u.match(ID_REGEX)?.[1]);
 
     if (users.includes(undefined) || !role) return { role: "", users: [] };
