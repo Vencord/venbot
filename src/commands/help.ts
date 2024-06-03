@@ -5,7 +5,7 @@ import { snakeToTitle, stripIndent, toInlineCode, toTitle } from "../util/text";
 
 defineCommand({
     name: "help",
-    aliases: ["theylp", "shelp", "h", "?"],
+    aliases: ["theylp", "shelp", "shiglp", "h", "?"],
     description: "List all commands or get help for a specific command",
     usage: "[command]",
     execute(msg, commandName) {
