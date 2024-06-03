@@ -27,7 +27,7 @@ defineCommand({
 
         const TÜRKVARMI = msg.content.includes("yardım") || msg.content.includes("yardim");
         if (TÜRKVARMI)
-            content = (await translate(content, "en", "tr")).text;
+            content = (await translate(content, "en", "tr")).text.replaceAll("''''", "```");
 
         return reply(msg, { content });
     },
