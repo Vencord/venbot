@@ -1,3 +1,4 @@
+import { spawn } from "child_process";
 import { readdir, readFile } from "fs/promises";
 import { AnyTextableGuildChannel, AutoModerationActionTypes, EmbedOptions, Member, Message, MessageTypes } from "oceanic.js";
 import { join } from "path";
@@ -129,6 +130,31 @@ const allowedGuilds = new Set([
     "820745488231301210", // ntts
 ]);
 
+async function getInviteImage(code: string) {
+    const res = await fetch(`https://invidget.switchblade.xyz/${code}`);
+    if (!res.ok) return null;
+
+    const svgText = await res.text()
+        .then(text => text.replace("image/jpg", "image/jpeg")); // https://github.com/SwitchbladeBot/invidget/pull/82
+
+    return new Promise<Buffer>((resolve, reject) => {
+        const chunks: Buffer[] = [];
+
+        const proc = spawn("rsvg-convert", ["-z", "2"]);
+
+        proc.stdout.on("data", chunk => chunks.push(chunk));
+        proc.on("close", code =>
+            code === 0
+                ? resolve(Buffer.concat(chunks))
+                : reject(new Error(`rsvg-convert exited with code ${code}`))
+        );
+        proc.on("error", reject);
+
+        proc.stdin.write(svgText);
+        proc.stdin.end();
+    });
+}
+
 export async function moderateInvites(msg: Message) {
     for (const [, code] of msg.content.matchAll(inviteRe)) {
         const inviteData = await Vaius.rest.channels.getInvite(code, {}).catch(() => null);
@@ -137,10 +163,14 @@ export async function moderateInvites(msg: Message) {
         if (!allowedGuilds.has(inviteData.guildID)) {
             silently(msg.delete());
             silently(msg.member!.edit({ communicationDisabledUntil: until(5 * MINUTES_IN_MS), reason: "invite" }));
-            logModerationAction(
-                `${msg.author.mention} posted an invite to ${inviteData.guild.name} in ${msg.channel!.mention}`,
-                makeEmbedForMessage(msg)
-            );
+
+            const inviteImage = await getInviteImage(code);
+            Vaius.rest.channels.createMessage(MOD_LOG_CHANNEL_ID, {
+                content: `${msg.author.mention} posted an invite to ${inviteData.guild.name} in ${msg.channel!.mention}`,
+                embeds: [makeEmbedForMessage(msg)],
+                files: inviteImage ? [{ name: "invite.svg", contents: inviteImage }] : void 0
+            });
+
             return true;
         }
     }
