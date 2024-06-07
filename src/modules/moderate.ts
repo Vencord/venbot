@@ -167,7 +167,10 @@ export async function moderateInvites(msg: Message) {
             const inviteImage = await getInviteImage(code);
             Vaius.rest.channels.createMessage(MOD_LOG_CHANNEL_ID, {
                 content: `${msg.author.mention} posted an invite to ${inviteData.guild.name} in ${msg.channel!.mention}`,
-                embeds: [makeEmbedForMessage(msg)],
+                embeds: [{
+                    ...makeEmbedForMessage(msg),
+                    image: inviteImage ? { url: "attachment://invite.png" } : void 0
+                }],
                 files: inviteImage ? [{ name: "invite.png", contents: inviteImage }] : void 0
             });
 
