@@ -2,8 +2,8 @@ import { readdir, readFile } from "fs/promises";
 import { join } from "path";
 
 import { defineCommand } from "../Command";
-import { DATA_DIR, SUPPORT_ALLOWED_CHANNELS } from "../constants";
-import { reply } from "../util";
+import { DATA_DIR, Emoji, SUPPORT_ALLOWED_CHANNELS } from "../constants";
+import { reply, silently } from "../util";
 
 const instructions = {} as Record<string, string>;
 const list = [] as string[][];
@@ -16,11 +16,22 @@ defineCommand({
     async execute(msg, ...guide) {
         if (!SUPPORT_ALLOWED_CHANNELS.includes(msg.channel?.id!)) return;
 
-        const content = instructions[guide.join(" ").toLowerCase()];
-        if (content)
-            return reply(msg, { content });
-        else
-            return reply(msg, { content: list.map(n => "- " + n.join(", ")).join("\n") });
+        if (guide.length === 0 || (guide.length === 1 && ["help", "list"].includes(guide[0])))
+            return reply(msg, list.map(n => "- " + n.join(", ")).join("\n"));
+
+        let content = instructions[guide.join(" ").toLowerCase()];
+        if (!content) return silently(msg.createReaction(Emoji.QuestionMark));
+
+        if (msg.referencedMessage) {
+            silently(msg.delete());
+            content += `\n\n(Auto-response invoked by ${msg.author.mention})`;
+        }
+
+        return msg.channel.createMessage({
+            content,
+            messageReference: { messageID: msg.referencedMessage?.id ?? msg.id },
+            allowedMentions: { repliedUser: !!msg.referencedMessage }
+        });
     },
 });
 

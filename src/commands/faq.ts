@@ -1,6 +1,6 @@
 import { defineCommand } from "../Command";
 import { SUPPORT_ALLOWED_CHANNELS, VENCORD_SITE } from "../constants";
-import { makeCachedJsonFetch } from "../util";
+import { makeCachedJsonFetch, silently } from "../util";
 
 interface Faq {
     question: string;
@@ -35,7 +35,12 @@ defineCommand({
         })();
 
         if (match) {
+            const isReply = !!msg.referencedMessage;
+            if (isReply) silently(msg.delete());
+
             return msg.channel.createMessage({
+                messageReference: { messageID: msg.referencedMessage?.id ?? msg.id },
+                allowedMentions: { repliedUser: isReply },
                 embeds: [{
                     title: match.question,
                     description:
@@ -45,7 +50,8 @@ defineCommand({
                             .replace(/```.+?```/gs, m => m.replaceAll("\n", "%NEWLINE%"))
                             .replace(/(?<!\n)\n(?![\n\-*])/g, "")
                             .replaceAll("%NEWLINE%", "\n"),
-                    color: 0xdd7878
+                    color: 0xdd7878,
+                    footer: { text: `Auto-response invoked by ${msg.author.tag}` },
                 }],
             });
         }
