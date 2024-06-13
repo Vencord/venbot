@@ -29,8 +29,8 @@ function parseCrap(msg: Message<AnyTextableGuildChannel>, args: string[]) {
 
 defineCommand({
     name: "ban",
-    description: "Ban one ore more users with an optional reason and delete message days",
-    usage: "ban [daysToDelete] <user> [user...] [reason]",
+    description: "Ban one or more users with an optional reason and delete message days",
+    usage: "[daysToDelete] <user> [user...] [reason]",
     aliases: ["yeet", "🍌"],
     guildOnly: true,
     permissions: ["BAN_MEMBERS"],
