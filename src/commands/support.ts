@@ -2,7 +2,7 @@ import { readdir, readFile } from "fs/promises";
 import { join } from "path";
 
 import { defineCommand } from "../Command";
-import { DATA_DIR, Emoji, SUPPORT_ALLOWED_CHANNELS } from "../constants";
+import { ASSET_DIR, Emoji, SUPPORT_ALLOWED_CHANNELS } from "../constants";
 import { reply, silently } from "../util";
 
 const instructions = {} as Record<string, string>;
@@ -36,7 +36,7 @@ defineCommand({
 });
 
 (async () => {
-    const supportDir = join(DATA_DIR, "support");
+    const supportDir = join(ASSET_DIR, "support");
     const files = await readdir(supportDir);
 
     for (const file of files) {

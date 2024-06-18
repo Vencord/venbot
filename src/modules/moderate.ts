@@ -4,7 +4,7 @@ import { AnyTextableGuildChannel, AutoModerationActionTypes, EmbedOptions, Membe
 import { join } from "path";
 
 import { Vaius } from "../Client";
-import { DATA_DIR, MINUTES_IN_MS, MOD_LOG_CHANNEL_ID } from "../constants";
+import { ASSET_DIR, MINUTES_IN_MS, MOD_LOG_CHANNEL_ID } from "../constants";
 import { reply, sendDm, silently, until } from "../util";
 
 const mentions = /<@!?(\d{17,20})>/g;
@@ -12,7 +12,7 @@ const mentions = /<@!?(\d{17,20})>/g;
 // matches nothing
 let imageHostRegex = /^(?!a)a/;
 
-const annoyingDomainsDir = join(DATA_DIR, "annoying-domains");
+const annoyingDomainsDir = join(ASSET_DIR, "annoying-domains");
 readdir(annoyingDomainsDir).then(files =>
     Promise.all(files.filter(f => f !== "README.md").map(async s => {
         const content = await readFile(join(annoyingDomainsDir, s), "utf8");

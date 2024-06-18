@@ -1,8 +1,9 @@
 import { createCanvas, Image, loadImage, registerFont } from "canvas";
 import { AnyGuildChannelWithoutThreads } from "oceanic.js";
+import { join } from "path";
 
 import { defineCommand } from "../Command";
-import { SUPPORT_CHANNEL_ID } from "../constants";
+import { ASSET_DIR, SUPPORT_CHANNEL_ID } from "../constants";
 
 const WIDTH = 400;
 const HEIGHT = 260;
@@ -145,14 +146,15 @@ function draw(channels: Channels) {
 
 async function drawNotSupportImage(channels: Channels) {
     if (!img) {
-        img = await loadImage("./data/assets/not-support-template.png");
+        const base = join(ASSET_DIR, "image-gen/not-support");
+        img = await loadImage(join(base, "not-support-template.png"));
 
-        registerFont("./data/assets/twemoji.ttf", {
+        registerFont(join(base, "twemoji.ttf"), {
             family: "Twemoji Mozilla"
         });
 
         for (const weight of ["500", "600"]) {
-            registerFont(`./data/assets/gg-sans-${weight}.ttf`, {
+            registerFont(join(base, `gg-sans-${weight}.ttf`), {
                 family: "gg sans",
                 weight
             });
