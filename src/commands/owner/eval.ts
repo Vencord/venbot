@@ -1,8 +1,10 @@
 import { readFileSync } from "fs";
 import { AnyTextableChannel, Message, Uncached } from "oceanic.js";
+import { join } from "path";
 
 import { OwnerId } from "~/Client";
 import { defineCommand } from "~/Command";
+import { ASSET_DIR } from "~/constants";
 import { codeblock, reply, silently } from "~/util";
 import { inspect } from "~/util/inspect";
 
@@ -11,7 +13,7 @@ async function sendVoiceMessage(msg: Message<AnyTextableChannel | Uncached>) {
     const waveform = "ASg6nDMzCVhSCRPRzr7AfPu3vrOfzMnMyfLEtqSH6L60sa/VpK5/3cvLu3L4tLmXhNCr0ITW2LS7ge3Q1ci8+ruun8u0s8SP+K+uloHIy8iW3szDuZHzwb62kf+0w6TGu8zMy/a+tpeR6LS8qcnGpqdt9cnLq4nwtLmEqcSnzHL1wMGvd/3I1rvd4Laujt2rt8SO9qyxgg==";
     const durationSecs = "15.14725";
 
-    const bytes = readFileSync("./assets/eval-deez-nuts.mp3");
+    const bytes = readFileSync(join(ASSET_DIR, "eval-deez-nuts.mp3"));
 
     const body = {
         content: "",
