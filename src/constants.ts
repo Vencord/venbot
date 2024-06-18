@@ -1,8 +1,13 @@
+import { mkdirSync } from "fs";
 import { join } from "path";
 
 export const VENCORD_SITE = "https://vencord.dev";
 
 export const ASSET_DIR = join(__dirname, "..", "assets");
+export const DATA_DIR = join(__dirname, "..", "data");
+mkdirSync(DATA_DIR, { recursive: true });
+
+
 export const PROD = process.env.NODE_ENV === "production";
 export const PREFIX = PROD ? "v" : "$";
 

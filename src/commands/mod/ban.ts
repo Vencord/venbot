@@ -1,9 +1,9 @@
 import { AnyTextableGuildChannel, Message } from "oceanic.js";
 
-import { defineCommand } from "../Command";
-import { DAYS_IN_MS } from "../constants";
-import { ID_REGEX, reply, silently } from "../util";
-import { pluralise, stripIndent } from "../util/text";
+import { defineCommand } from "~/Command";
+import { DAYS_IN_MS } from "~/constants";
+import { ID_REGEX, reply, silently } from "~/util";
+import { pluralise, stripIndent } from "~/util/text";
 
 function parseCrap(msg: Message<AnyTextableGuildChannel>, args: string[]) {
     let possibleDays = Number(args[0]) || 0;

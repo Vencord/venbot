@@ -14,14 +14,17 @@
     "keywords": [],
     "author": "Vendicated <vendicated+npm@riseup.net>",
     "dependencies": {
+        "better-sqlite3": "^11.0.0",
         "canvas": "^2.11.2",
         "dotenv": "^16.4.5",
         "execa": "^8.0.1",
+        "kysely": "^0.27.3",
         "leven": "^3.1.0",
         "oceanic.js": "1.10.5-dev.9f95b4a",
         "pako": "^2.1.0"
     },
     "devDependencies": {
+        "@types/better-sqlite3": "^7.6.10",
         "@types/node": "^20.12.7",
         "@typescript-eslint/parser": "^7.7.0",
         "esbuild": "^0.20.2",

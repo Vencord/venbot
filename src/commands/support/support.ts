@@ -1,9 +1,9 @@
 import { readdir, readFile } from "fs/promises";
 import { join } from "path";
 
-import { defineCommand } from "../Command";
-import { ASSET_DIR, Emoji, SUPPORT_ALLOWED_CHANNELS } from "../constants";
-import { reply, silently } from "../util";
+import { defineCommand } from "~/Command";
+import { ASSET_DIR, Emoji, SUPPORT_ALLOWED_CHANNELS } from "~/constants";
+import { reply, silently } from "~/util";
 
 const instructions = {} as Record<string, string>;
 const list = [] as string[][];

@@ -1,8 +1,8 @@
-import { readFileSync, rmSync } from "fs";
 import { AnyTextableChannel, Client, Message } from "oceanic.js";
 
 import { Commands } from "./Command";
-import { PREFIX, SUPPORT_ALLOWED_CHANNELS, UPDATE_CHANNEL_ID_FILE } from "./constants";
+import { PREFIX, SUPPORT_ALLOWED_CHANNELS } from "./constants";
+import { BotState } from "./db/botState";
 import { lobotomiseMaybe, moderateMessage } from "./modules/moderate";
 import { reply, silently } from "./util";
 
@@ -28,14 +28,12 @@ Vaius.once("ready", async () => {
     console.log(`I am in ${Vaius.guilds.size} guilds`);
     console.log(`https://discord.com/oauth2/authorize?client_id=${Vaius.user.id}&permissions=8&scope=bot+applications.commands`);
 
-    try {
-        const updateChannelId = readFileSync(UPDATE_CHANNEL_ID_FILE, "utf-8").trim();
-        await Vaius.rest.channels.createMessage(updateChannelId, {
+    if (BotState.helloChannelId) {
+        await Vaius.rest.channels.createMessage(BotState.helloChannelId, {
             content: "I'm back !!! :DDD"
         });
-
-        rmSync(UPDATE_CHANNEL_ID_FILE);
-    } catch { }
+        delete BotState.helloChannelId;
+    }
 });
 
 const whitespaceRe = /\s+/;

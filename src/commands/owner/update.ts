@@ -1,9 +1,9 @@
 import { execSync } from "child_process";
-import { writeFileSync } from "fs";
 
-import { defineCommand } from "../Command";
-import { UPDATE_CHANNEL_ID_FILE } from "../constants";
-import { codeblock, reply, silently } from "../util";
+import { defineCommand } from "~/Command";
+import { codeblock, reply, silently } from "~/util";
+
+import { restart } from "./restart";
 
 defineCommand({
     name: "update",
@@ -22,10 +22,7 @@ defineCommand({
                 content: "Updated!! Now restarting..."
             }));
 
-            writeFileSync(UPDATE_CHANNEL_ID_FILE, msg.channel!.id);
-
-            // just quit. systemd will restart the bot
-            process.exit(0);
+            await restart(msg.channelID);
         } catch (e) {
             console.error(e);
             reply(msg, {

@@ -1,6 +1,6 @@
-import { defineCommand } from "../Command";
-import { SUPPORT_ALLOWED_CHANNELS, VENCORD_SITE } from "../constants";
-import { makeCachedJsonFetch, silently } from "../util";
+import { defineCommand } from "~/Command";
+import { SUPPORT_ALLOWED_CHANNELS, VENCORD_SITE } from "~/constants";
+import { makeCachedJsonFetch, silently } from "~/util";
 
 interface Faq {
     question: string;

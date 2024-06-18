@@ -1,6 +1,6 @@
 import { ApplicationCommandOptionTypes, ApplicationCommandTypes, InteractionTypes, MessageFlags } from "oceanic.js";
 
-import { OwnerId, Vaius } from "../Client";
+import { OwnerId, Vaius } from "~/Client";
 
 Vaius.once("ready", () => {
     Vaius.application.createGuildCommand("1015060230222131221", {

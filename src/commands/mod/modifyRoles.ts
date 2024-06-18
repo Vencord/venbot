@@ -1,8 +1,8 @@
 import { Guild, Member } from "oceanic.js";
 
-import { defineCommand } from "../Command";
-import { Emoji } from "../constants";
-import { codeblock, ID_REGEX, reply, swallow } from "../util";
+import { defineCommand } from "~/Command";
+import { Emoji } from "~/constants";
+import { codeblock, ID_REGEX, reply, swallow } from "~/util";
 
 const Aliases = {
     donor: "1042507929485586532",
