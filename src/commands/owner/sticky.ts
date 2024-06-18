@@ -9,8 +9,11 @@ defineCommand({
     description: "Set the sticky message",
     ownerOnly: true,
     usage: "<off | on | set | delay> [value]",
-    execute(msg, operation?, value?, ...extra) {
+    rawContent: true,
+    execute(msg, content) {
         let response: string | undefined;
+
+        const [operation, value, ...extra] = content.split(" ");
 
         switch (operation?.toLowerCase()) {
             case "on":
