@@ -1,27 +1,36 @@
 import { AnyTextableGuildChannel } from "oceanic.js";
 
+import { BotState } from "~/db/botState";
+
 import { Vaius } from "../Client";
 import { SUPPORT_CHANNEL_ID } from "../constants";
 import { debounce, silently } from "../util";
 
-const IS_ENABLED = Boolean(true);
-const MESSAGE = `
-## Read <#1222936386626129920> before asking for help
-## Read <#1222936386626129920> before asking for help
-You will be **BANNED** with no chance of appeal if you ignore this.
-`.trim();
-
 let lastMsgId: string | null = null;
 
-const repostMessage = debounce(async (channel: AnyTextableGuildChannel) => {
-    if (lastMsgId) await silently(channel.deleteMessage(lastMsgId));
+const getSupportChannel = () => Vaius.getChannel(SUPPORT_CHANNEL_ID) as AnyTextableGuildChannel;
 
-    const msg = await channel.createMessage({ content: MESSAGE });
+export async function createStickyMessage() {
+    await deleteStickyMessage();
+
+    const msg = await getSupportChannel().createMessage({ content: BotState.sticky.message });
     lastMsgId = msg.id;
-}, 10_000);
+}
+
+export async function deleteStickyMessage() {
+    if (lastMsgId)
+        await silently(getSupportChannel().deleteMessage(lastMsgId));
+}
+
+let repostMessage: Function;
+
+export function initStickyDebouncer() {
+    repostMessage = debounce(createStickyMessage, BotState.sticky.delayMs);
+}
+initStickyDebouncer();
 
 Vaius.on("messageCreate", async msg => {
-    if (!IS_ENABLED || msg.channelID !== SUPPORT_CHANNEL_ID || msg.author.bot || !msg.inCachedGuildChannel()) return;
+    if (!BotState.sticky.enabled || msg.channelID !== SUPPORT_CHANNEL_ID || msg.author.bot) return;
 
-    repostMessage(msg.channel);
+    repostMessage();
 });
