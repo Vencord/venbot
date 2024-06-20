@@ -1,3 +1,5 @@
+import { EmbedOptions, User } from "oceanic.js";
+
 import { defineCommand } from "~/Command";
 import { SUPPORT_ALLOWED_CHANNELS, VENCORD_SITE } from "~/constants";
 import { makeCachedJsonFetch, silently } from "~/util";
@@ -8,7 +10,22 @@ interface Faq {
     tags: string[];
 }
 
-const fetchFaq = makeCachedJsonFetch<Faq[]>(VENCORD_SITE + "/faq.json");
+export const fetchFaq = makeCachedJsonFetch<Faq[]>(VENCORD_SITE + "/faq.json");
+
+export function buildFaqEmbed(faq: Faq, invoker: User): EmbedOptions {
+    return {
+        title: faq.question,
+        description:
+            faq.answer
+                // temporarily replace newlines inside codeblocks with a placeholder, so the second replace
+                // doesn't remove them
+                .replace(/```.+?```/gs, m => m.replaceAll("\n", "%NEWLINE%"))
+                .replace(/(?<!\n)\n(?![\n\-*])/g, "")
+                .replaceAll("%NEWLINE%", "\n"),
+        color: 0xdd7878,
+        footer: { text: `Auto-response invoked by ${invoker.tag}` },
+    };
+}
 
 defineCommand({
     name: "faq",
@@ -41,18 +58,7 @@ defineCommand({
             return msg.channel.createMessage({
                 messageReference: { messageID: msg.referencedMessage?.id ?? msg.id },
                 allowedMentions: { repliedUser: isReply },
-                embeds: [{
-                    title: match.question,
-                    description:
-                        match.answer
-                            // temporarily replace newlines inside codeblocks with a placeholder, so the second replace
-                            // doesn't remove them
-                            .replace(/```.+?```/gs, m => m.replaceAll("\n", "%NEWLINE%"))
-                            .replace(/(?<!\n)\n(?![\n\-*])/g, "")
-                            .replaceAll("%NEWLINE%", "\n"),
-                    color: 0xdd7878,
-                    footer: { text: `Auto-response invoked by ${msg.author.tag}` },
-                }],
+                embeds: [buildFaqEmbed(match, msg.author)],
             });
         }
 

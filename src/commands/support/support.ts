@@ -5,8 +5,8 @@ import { defineCommand } from "~/Command";
 import { ASSET_DIR, Emoji, SUPPORT_ALLOWED_CHANNELS } from "~/constants";
 import { reply, silently } from "~/util";
 
-const instructions = {} as Record<string, string>;
-const list = [] as string[][];
+export const SupportInstructions = {} as Record<string, string>;
+export const SupportTagList = [] as string[][];
 
 defineCommand({
     name: "support",
@@ -17,9 +17,9 @@ defineCommand({
         if (!SUPPORT_ALLOWED_CHANNELS.includes(msg.channel?.id!)) return;
 
         if (guide.length === 0 || (guide.length === 1 && ["help", "list"].includes(guide[0])))
-            return reply(msg, list.map(n => "- " + n.join(", ")).join("\n"));
+            return reply(msg, SupportTagList.map(n => "- " + n.join(", ")).join("\n"));
 
-        let content = instructions[guide.join(" ").toLowerCase()];
+        let content = SupportInstructions[guide.join(" ").toLowerCase()];
         if (!content) return silently(msg.createReaction(Emoji.QuestionMark));
 
         if (msg.referencedMessage) {
@@ -53,12 +53,12 @@ defineCommand({
             );
 
             attrs.aliases?.split(",").forEach(a => {
-                instructions[a.trim().toLowerCase()] = content;
+                SupportInstructions[a.trim().toLowerCase()] = content;
                 names.push(a.trim().toLowerCase());
             });
         }
 
-        instructions[name] = content;
-        list.push(names);
+        SupportInstructions[name] = content;
+        SupportTagList.push(names);
     }
 })();
