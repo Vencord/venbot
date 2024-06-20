@@ -61,6 +61,8 @@ Vaius.on("interactionCreate", async interaction => {
         interaction.channel instanceof TextChannel
     ) {
         const [command, targetId] = interaction.data.customID.split(" selection ");
+        if (!command || !targetId) return;
+
         const choice = interaction.data.values.getStrings()[0];
 
         const defer = interaction.defer(MessageFlags.EPHEMERAL);
