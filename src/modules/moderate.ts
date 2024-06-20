@@ -188,8 +188,19 @@ export function initModListeners() {
     Vaius.on("autoModerationActionExecution", async (guild, _channel, user, data) => {
         if (data.action.type !== AutoModerationActionTypes.SEND_ALERT_MESSAGE) return;
 
-        const includesPing = data.content.includes("@everyone") || data.content.includes("@here");
-        const includesInvite = data.content.includes("discord.gg/") || data.content.includes("discord.com/invite");
+        const includesPing = ["@everyone", "@here"].some(s => data.content.includes(s));
+        const includesInvite = ["discord.gg/", "discord.com/invite"].some(s => data.content.includes(s));
+        const isSteamScam = data.content.includes("[steamcommunity.com") &&
+            ["https://u.to", "https://sc.link", "$"].some(s => data.content.includes(s));
+
+        if (isSteamScam) {
+            await Vaius.rest.guilds.createBan(guild.id, user.id, {
+                reason: "steam scam",
+                deleteMessageDays: 1
+            });
+            logModerationAction(`Banned <@${user.id}> for posting a steam scam.`);
+            return;
+        }
 
         if (includesPing && includesInvite) {
             await Vaius.rest.guilds.createBan(guild.id, user.id, {
@@ -198,6 +209,7 @@ export function initModListeners() {
             });
 
             logModerationAction(`Banned <@${user.id}> for trying to ping everyone with an invite.`);
+            return;
         }
     });
 
