@@ -77,7 +77,7 @@ Vaius.on("interactionCreate", async interaction => {
                 case Commands.Support:
                     await interaction.channel.createMessage({
                         ...replyOptions,
-                        content: SupportInstructions[choice]
+                        content: SupportInstructions[choice] + `\n\n(Auto-response invoked by ${interaction.user.mention})`
                     });
                     await defer;
                     break;
