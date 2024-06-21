@@ -11,8 +11,8 @@ const GUILD_ID = PROD
     : "1240028478498144257";
 
 const enum Commands {
-    Support = "send support tag",
-    Faq = "send faq tag"
+    Support = "Send Support Tag",
+    Faq = "Send FAQ Tag"
 }
 
 Vaius.once("ready", () => {
