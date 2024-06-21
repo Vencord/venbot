@@ -4,12 +4,13 @@
     "description": "",
     "main": "dist/index.js",
     "scripts": {
-        "start": "pnpm build && node . VENBOT",
+        "start": "pnpm build & pnpm initSqlite && node . VENBOT",
         "build": "node build.mjs",
         "test": "pnpm lint && pnpm testTypes",
         "testTypes": "tsc --noEmit",
         "lint": "eslint . --ext .js,.ts",
         "lint:fix": "pnpm lint --fix",
+        "initSqlite": "mkdir -p data && sqlite3 data/db.sqlite3 < schemas.sql",
         "sqlTypes": "kysely-codegen"
     },
     "keywords": [],
