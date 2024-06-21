@@ -46,7 +46,6 @@ const includeDirPlugin = namespace => ({
 
         build.onLoad({ filter, namespace }, async () => {
             const files = await readDirRecursive(dir);
-            console.log(files);
             return {
                 contents: files.map(f => `import "./${f.replace(".ts", "")}"`).join("\n"),
                 resolveDir: dir

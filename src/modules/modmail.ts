@@ -1,9 +1,12 @@
-import { createHash } from "crypto";
-import { ActivityTypes, ApplicationCommandTypes, ButtonStyles, ChannelTypes, CommandInteraction, ComponentInteraction, ComponentTypes, GuildComponentSelectMenuInteraction, InteractionTypes, MessageFlags, TextChannel } from "oceanic.js";
+import { ActivityTypes, AnyTextableGuildChannel, ApplicationCommandTypes, ButtonStyles, ChannelTypes, CommandInteraction, ComponentInteraction, ComponentTypes, GuildComponentInteraction, GuildComponentSelectMenuInteraction, InteractionTypes, MessageFlags, TextChannel } from "oceanic.js";
+
+import { db } from "~/db";
+import { sendDm } from "~/util";
+import { stripIndent } from "~/util/text";
 
 import { Vaius } from "../Client";
 import { defineCommand } from "../Command";
-import { DEV_CHANNEL_ID, MOD_ROLE_ID, PROD, SUPPORT_CHANNEL_ID } from "../constants";
+import { DEV_CHANNEL_ID, Emoji, MOD_ROLE_ID, PROD, SUPPORT_CHANNEL_ID } from "../constants";
 
 const enum Ids {
     OPEN_TICKET = "modmail:open_ticket",
@@ -19,7 +22,7 @@ const MODMAIL_BAN_ROLE_ID = "1161815552919076867";
 const THREAD_PARENT_ID = PROD ? "1161412933050437682" : DEV_CHANNEL_ID;
 const LOG_CHANNEL_ID = PROD ? "1161449871182659655" : DEV_CHANNEL_ID;
 
-type GuildInteraction = ComponentInteraction<ComponentTypes.BUTTON, TextChannel> | CommandInteraction<TextChannel>;
+type GuildInteraction = ComponentInteraction<ComponentTypes.BUTTON, AnyTextableGuildChannel> | CommandInteraction<AnyTextableGuildChannel>;
 
 defineCommand({
     name: "modmail:post",
@@ -61,43 +64,64 @@ function getThreadParent() {
     return c as TextChannel;
 }
 
-const getTicketId = (userId: string) => createHash("sha1").update(`${process.env.MODMAIL_HASH_SALT || ""}:${userId}`).digest("hex");
-async function createModmail(interaction: GuildInteraction) {
-    const threadParent = getThreadParent();
 
-    const ticketId = getTicketId(interaction.user.id);
+async function createModmail(interaction: GuildComponentInteraction) {
+    await interaction.defer(MessageFlags.EPHEMERAL);
 
-    const existingChannel = threadParent.threads.find(t => t.name === ticketId);
-    if (existingChannel) {
-        return interaction.createMessage({
-            content: `You already have a modmail ticket open: ${existingChannel.mention}`,
+    const { channelId, id } = await db.insertInto("modMail")
+        .values({
+            channelId: "0",
+            userId: interaction.user.id
+        })
+        .onConflict(oc => oc
+            .column("userId")
+            .doUpdateSet({ id: eb => eb.ref("excluded.id") })
+        )
+        .returning(["channelId", "id"])
+        .executeTakeFirstOrThrow();
+
+    if (channelId !== "0") {
+        return interaction.createFollowup({
+            content: `You already have a modmail ticket open: <#${channelId}>`,
             flags: MessageFlags.EPHEMERAL
         });
     }
 
-    await interaction.defer(MessageFlags.EPHEMERAL);
-
-    const thread = await threadParent.startThreadWithoutMessage({
+    const thread = await getThreadParent().startThreadWithoutMessage({
         type: ChannelTypes.PRIVATE_THREAD,
-        name: ticketId,
+        name: `${id}`,
         invitable: false
     });
-    // FIXME: workaround for oceanic bug where newly created channels wont be cached. remove once fixed
-    threadParent.threads.set(thread.id, thread);
+
+    await db.updateTable("modMail")
+        .set("channelId", thread.id)
+        .where("id", "=", id)
+        .execute();
 
     const msg = await thread.createMessage({
-        content: `👋 ${interaction.user.mention}\n\nPlease describe your issue in as much detail as possible. A moderator will be with you shortly.`,
+        content: `👋 ${interaction.user.mention}\n\nPlease describe your issue with as much detail as possible. A moderator will be with you shortly.`,
         components: [{
             type: ComponentTypes.ACTION_ROW,
-            components: [{
-                type: ComponentTypes.BUTTON,
-                label: "Close ticket",
-                style: ButtonStyles.DANGER,
-                customID: `modmail:close:${thread.id}`,
-                emoji: {
-                    name: "📩"
+            components: [
+                {
+                    type: ComponentTypes.BUTTON,
+                    label: "Close ticket",
+                    style: ButtonStyles.DANGER,
+                    customID: `modmail:close:${thread.id}`,
+                    emoji: {
+                        name: Emoji.TrashCan
+                    }
+                },
+                {
+                    type: ComponentTypes.BUTTON,
+                    label: "User ignored modmail rules",
+                    style: ButtonStyles.DANGER,
+                    customID: `modmail:close-ban:${thread.id}`,
+                    emoji: {
+                        name: Emoji.Hammer
+                    }
                 }
-            }]
+            ]
         }],
         allowedMentions: {
             users: [interaction.user.id]
@@ -113,11 +137,13 @@ async function createModmail(interaction: GuildInteraction) {
     });
 
     await interaction.createFollowup({
-        content: `📩 👉 ${thread.mention}.`,
+        content: `📩 👉 ${thread.mention}`,
         flags: MessageFlags.EPHEMERAL
     });
 
-    await log(`${interaction.user.mention} opened ticket ${thread.name} - ${thread.mention}`);
+    await interaction.deleteFollowup(interaction.message.id);
+
+    await log(`${interaction.user.mention} opened ticket ${thread.mention}`);
 }
 
 async function createModmailConfirm(interaction: GuildInteraction) {
@@ -142,7 +168,7 @@ async function createModmailConfirm(interaction: GuildInteraction) {
                         value: Ids.REASON_MONKEY + 1
                     },
                     {
-                        label: "I want to ask a question about Vencord",
+                        label: "I need Vencord support",
                         value: Ids.REASON_MONKEY + 2
                     },
                     {
@@ -157,6 +183,10 @@ async function createModmailConfirm(interaction: GuildInteraction) {
                         label: "I just want to test modmail",
                         value: Ids.REASON_MONKEY + 3
                     },
+                    {
+                        label: "My Vencord is broken!",
+                        value: Ids.REASON_MONKEY + 4
+                    }
                 ]
             }]
         }]
@@ -179,16 +209,59 @@ async function onModmailConfirm(interaction: GuildComponentSelectMenuInteraction
         });
     }
 
-    createModmail(interaction as any as GuildInteraction);
+    createModmail(interaction);
 }
 
-async function closeModmail(interaction: GuildInteraction) {
-    if (!interaction.member.permissions.has("MANAGE_CHANNELS") && interaction.channel.name !== getTicketId(interaction.user.id))
+async function closeModmail(interaction: GuildInteraction, isBan: boolean) {
+    if (interaction.channel.type !== ChannelTypes.PRIVATE_THREAD || interaction.channel.threadMetadata.archived)
         return;
 
-    await interaction.channel.delete();
+    if (isBan && !interaction.member.permissions.has("MODERATE_MEMBERS")) return;
 
-    await log(`${interaction.user.mention} closed ticket ${interaction.channel.name}`);
+    const res = await db.selectFrom("modMail")
+        .where("channelId", "=", interaction.channel.id)
+        .select(["userId", "id"])
+        .executeTakeFirst();
+    if (!res) return;
+
+    if (!interaction.member.permissions.has("MANAGE_CHANNELS") && res.userId !== interaction.user.id)
+        return;
+
+    await interaction.defer(MessageFlags.EPHEMERAL);
+
+    await interaction.channel.edit({ archived: true });
+    await db.deleteFrom("modMail")
+        .where("id", "=", res.id)
+        .execute();
+
+    await log(`Ticket ${interaction.channel.mention} has been closed by ${interaction.user.mention}!`);
+
+    await interaction.createFollowup({
+        content: "Ticket closed.",
+        flags: MessageFlags.EPHEMERAL
+    });
+
+    const member = await interaction.guild.getMember(res.userId);
+    if (!member) return;
+
+    if (isBan) {
+        member.addRole(MODMAIL_BAN_ROLE_ID);
+        sendDm(member.user, {
+            content: stripIndent`
+                Your modmail ticket has been closed and you have been banned from creating tickets.
+
+                This is most likely because you didn't follow the modmail rules. See <#${THREAD_PARENT_ID}> for more information.
+            `
+        });
+    } else {
+        sendDm(member.user, {
+            content: stripIndent`
+                Your modmail ticket has been closed as resolved.
+
+                It will remain accessible at ${interaction.channel.mention} for future reference.
+            `
+        });
+    }
 }
 
 Vaius.on("interactionCreate", async interaction => {
@@ -203,8 +276,8 @@ Vaius.on("interactionCreate", async interaction => {
         createModmailConfirm(interaction as GuildInteraction);
     else if (interaction.data.customID === Ids.OPEN_CONFIRM)
         onModmailConfirm(interaction as GuildComponentSelectMenuInteraction);
-    else if (interaction.data.customID.startsWith("modmail:close:"))
-        closeModmail(interaction as GuildInteraction);
+    else if (interaction.data.customID.startsWith("modmail:close:") || interaction.data.customID.startsWith("modmail:close-ban:"))
+        closeModmail(interaction as GuildInteraction, interaction.data.customID.startsWith("modmail:close-ban:"));
 });
 
 

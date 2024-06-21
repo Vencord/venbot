@@ -1,16 +1,13 @@
 import Sqlite from "better-sqlite3";
 import { Kysely, SqliteDialect } from "kysely";
-import { join } from "path";
+// generate via `pnpm sqlTypes`
+import type { DB } from "kysely-codegen";
 
-import { DATA_DIR } from "~/constants";
-
-import type { Database } from "./types";
-
-const sqlite = new Sqlite(join(DATA_DIR, "db.sqlite3"));
+const sqlite = new Sqlite(process.env.DATABASE_URL);
 sqlite.pragma("journal_mode = WAL");
 
 const dialect = new SqliteDialect({
     database: sqlite
 });
 
-export const db = new Kysely<Database>({ dialect });
+export const db = new Kysely<DB>({ dialect });

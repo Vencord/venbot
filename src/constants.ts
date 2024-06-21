@@ -36,4 +36,6 @@ export const Emoji = {
     CheckMark: "✅",
     QuestionMark: "❓",
     Anger: "💢",
+    TrashCan: "🗑️",
+    Hammer: "🔨"
 } as const;
