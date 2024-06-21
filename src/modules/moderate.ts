@@ -85,7 +85,11 @@ export async function moderateNick(member: Member) {
     if (member.bot || !member.guild.permissionsOf(Vaius.user.id).has("MANAGE_NICKNAMES")) return;
 
     const name = member.displayName;
-    const normalizedName = name.normalize("NFKC").replace(HoistCharactersRegex, "");
+    const normalizedName = name
+        .normalize("NFKC")
+        .replace(HoistCharactersRegex, "")
+        .replaceAll("🇷🇺", "🇺🇦")
+        .replaceAll("🇮🇱", "🇹🇼");
 
     if (name !== normalizedName)
         silently(member.edit({
