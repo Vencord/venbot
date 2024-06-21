@@ -68,35 +68,42 @@ function getThreadParent() {
 async function createModmail(interaction: GuildComponentInteraction) {
     await interaction.defer(MessageFlags.EPHEMERAL);
 
-    const { channelId, id } = await db.insertInto("modMail")
-        .values({
-            channelId: "0",
-            userId: interaction.user.id
-        })
-        .onConflict(oc => oc
-            .column("userId")
-            .doUpdateSet({ id: eb => eb.ref("excluded.id") })
-        )
-        .returning(["channelId", "id"])
-        .executeTakeFirstOrThrow();
+    const thread = await db.transaction().execute(async t => {
+        const { channelId, id } = await t.insertInto("modMail")
+            .values({
+                channelId: "0",
+                userId: interaction.user.id
+            })
+            .onConflict(oc => oc
+                .column("userId")
+                .doUpdateSet({ id: eb => eb.ref("excluded.id") })
+            )
+            .returning(["channelId", "id"])
+            .executeTakeFirstOrThrow();
 
-    if (channelId !== "0") {
-        return interaction.createFollowup({
-            content: `You already have a modmail ticket open: <#${channelId}>`,
-            flags: MessageFlags.EPHEMERAL
+        if (channelId !== "0") {
+            interaction.createFollowup({
+                content: `You already have a modmail ticket open: <#${channelId}>`,
+                flags: MessageFlags.EPHEMERAL
+            });
+            return null;
+        }
+
+        const thread = await getThreadParent().startThreadWithoutMessage({
+            type: ChannelTypes.PRIVATE_THREAD,
+            name: `${id}`,
+            invitable: false
         });
-    }
 
-    const thread = await getThreadParent().startThreadWithoutMessage({
-        type: ChannelTypes.PRIVATE_THREAD,
-        name: `${id}`,
-        invitable: false
+        await t.updateTable("modMail")
+            .set("channelId", thread.id)
+            .where("id", "=", id)
+            .execute();
+
+        return thread;
     });
 
-    await db.updateTable("modMail")
-        .set("channelId", thread.id)
-        .where("id", "=", id)
-        .execute();
+    if (!thread) return;
 
     const msg = await thread.createMessage({
         content: `👋 ${interaction.user.mention}\n\nPlease describe your issue with as much detail as possible. A moderator will be with you shortly.`,
