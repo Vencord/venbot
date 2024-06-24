@@ -236,7 +236,7 @@ async function closeModmail(interaction: GuildInteraction, isBan: boolean) {
 
     await interaction.defer(MessageFlags.EPHEMERAL);
 
-    await interaction.channel.edit({ archived: true });
+    await interaction.channel.edit({ archived: true, locked: true });
     await db.deleteFrom("modMail")
         .where("id", "=", res.id)
         .execute();
