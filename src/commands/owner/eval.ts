@@ -5,6 +5,7 @@ import { join } from "path";
 import { OwnerId } from "~/Client";
 import { defineCommand } from "~/Command";
 import { ASSET_DIR } from "~/constants";
+import { DISCORD_TOKEN } from "~/env";
 import { codeblock, reply, silently } from "~/util";
 import { inspect } from "~/util/inspect";
 
@@ -38,7 +39,7 @@ async function sendVoiceMessage(msg: Message<AnyTextableChannel | Uncached>) {
     await fetch(`https://discord.com/api/v10/channels/${msg.channelID}/messages`, {
         method: "POST",
         headers: {
-            Authorization: `Bot ${process.env.DISCORD_TOKEN}`,
+            Authorization: `Bot ${DISCORD_TOKEN}`,
             "X-Super-Properties": XSuperProperties
         },
         body: formData

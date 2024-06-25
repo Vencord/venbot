@@ -3,11 +3,12 @@ import { AnyTextableChannel, Client, Message } from "oceanic.js";
 import { Commands } from "./Command";
 import { PREFIX, SUPPORT_ALLOWED_CHANNELS } from "./constants";
 import { BotState } from "./db/botState";
+import { DISCORD_TOKEN } from "./env";
 import { lobotomiseMaybe, moderateMessage } from "./modules/moderate";
 import { reply, silently } from "./util";
 
 export const Vaius = new Client({
-    auth: "Bot " + process.env.DISCORD_TOKEN,
+    auth: "Bot " + DISCORD_TOKEN,
     gateway: { intents: ["ALL"] },
     allowedMentions: {
         everyone: false,

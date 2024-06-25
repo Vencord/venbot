@@ -1,4 +1,4 @@
-import "./dotenv";
+import "./env";
 import "~commands";
 import "~modules";
 

@@ -32,6 +32,9 @@ importers:
       pako:
         specifier: ^2.1.0
         version: 2.1.0
+      valibot:
+        specifier: ^0.34.0
+        version: 0.34.0
     devDependencies:
       '@types/better-sqlite3':
         specifier: ^7.6.10
@@ -1164,6 +1167,9 @@ packages:
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
 
+  valibot@0.34.0:
+    resolution: {integrity: sha512-TELvxO0hEB1/6XjTS5Jfi4dS0oyawA5flxs4/sK/tSUXnlLMiKTMYE6Atuu0a7kvtP3eqPv3yZ80msfM+qMDHA==}
+
   webidl-conversions@3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
 
@@ -2244,6 +2250,8 @@ snapshots:
       punycode: 2.3.0
 
   util-deprecate@1.0.2: {}
+
+  valibot@0.34.0: {}
 
   webidl-conversions@3.0.1: {}
 

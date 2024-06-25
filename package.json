@@ -4,7 +4,7 @@
     "description": "",
     "main": "dist/index.js",
     "scripts": {
-        "start": "pnpm build & pnpm initSqlite && node . VENBOT",
+        "start": "pnpm initSqlite & pnpm build && node . VENBOT",
         "build": "node build.mjs",
         "test": "pnpm lint && pnpm testTypes",
         "testTypes": "tsc --noEmit",
@@ -23,7 +23,8 @@
         "kysely": "^0.27.3",
         "leven": "^3.1.0",
         "oceanic.js": "1.10.5-dev.9f95b4a",
-        "pako": "^2.1.0"
+        "pako": "^2.1.0",
+        "valibot": "^0.34.0"
     },
     "devDependencies": {
         "@types/better-sqlite3": "^7.6.10",
