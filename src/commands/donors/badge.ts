@@ -1,6 +1,6 @@
 import { createHash } from "crypto";
 import { mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "fs";
-import { ApplicationCommandOptions, ApplicationCommandOptionTypes, ApplicationCommandTypes, CreateChatInputApplicationCommandOptions, InteractionContextTypes, InteractionTypes, MessageFlags } from "oceanic.js";
+import { ApplicationCommandOptions, ApplicationCommandOptionTypes, ApplicationCommandTypes, ApplicationIntegrationTypes, CreateChatInputApplicationCommandOptions, InteractionContextTypes, InteractionTypes, MessageFlags } from "oceanic.js";
 
 import { OwnerId, Vaius } from "../../Client";
 import { DONOR_ROLE_ID, PROD } from "../../constants";
@@ -158,7 +158,8 @@ function registerCommand(data: CreateChatInputApplicationCommandOptions) {
 
     Vaius.application.createGlobalCommand({
         ...data,
-        contexts: [InteractionContextTypes.BOT_DM, InteractionContextTypes.GUILD, InteractionContextTypes.PRIVATE_CHANNEL]
+        contexts: [InteractionContextTypes.BOT_DM, InteractionContextTypes.GUILD, InteractionContextTypes.PRIVATE_CHANNEL],
+        integrationTypes: [ApplicationIntegrationTypes.USER_INSTALL]
     });
 }
 
