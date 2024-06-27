@@ -54,8 +54,6 @@ Vaius.on("interactionCreate", async i => {
     const content = i.data.options.getString("content", true);
     const reply = i.data.options.getString("reply-to");
 
-    await i.defer(MessageFlags.EPHEMERAL);
-
     const data: CreateMessageOptions = {
         content,
         messageReference: reply ? {
@@ -71,8 +69,8 @@ Vaius.on("interactionCreate", async i => {
 
     try {
         await Vaius.rest.channels.createMessage(i.channelID, data);
-        await i.createFollowup({ content: "done", flags: MessageFlags.EPHEMERAL });
+        await i.reply({ content: "done", flags: MessageFlags.EPHEMERAL });
     } catch {
-        await i.createFollowup(data);
+        await i.createMessage(data);
     }
 });
