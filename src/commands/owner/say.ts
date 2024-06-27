@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionTypes, ApplicationCommandTypes, ApplicationIntegrationTypes, InteractionTypes, MessageFlags } from "oceanic.js";
+import { ApplicationCommandOptionTypes, ApplicationCommandTypes, ApplicationIntegrationTypes, CreateMessageOptions, InteractionTypes, MessageFlags } from "oceanic.js";
 
 import { OwnerId, Vaius } from "~/Client";
 
@@ -56,7 +56,7 @@ Vaius.on("interactionCreate", async i => {
 
     await i.defer(MessageFlags.EPHEMERAL);
 
-    await Vaius.rest.channels.createMessage(i.channelID, {
+    const data: CreateMessageOptions = {
         content,
         messageReference: reply ? {
             messageID: reply
@@ -67,7 +67,12 @@ Vaius.on("interactionCreate", async i => {
             repliedUser: true,
             users: true
         }
-    });
+    };
 
-    await i.createFollowup({ content: "done", flags: MessageFlags.EPHEMERAL });
+    try {
+        await Vaius.rest.channels.createMessage(i.channelID, data);
+        await i.createFollowup({ content: "done", flags: MessageFlags.EPHEMERAL });
+    } catch {
+        await i.createFollowup(data);
+    }
 });
