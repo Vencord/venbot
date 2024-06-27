@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionTypes, ApplicationCommandTypes, ApplicationIntegrationTypes, CreateMessageOptions, InteractionTypes, MessageFlags } from "oceanic.js";
+import { ApplicationCommandOptionTypes, ApplicationCommandTypes, ApplicationIntegrationTypes, CreateMessageOptions, InteractionContextTypes, InteractionTypes, MessageFlags } from "oceanic.js";
 
 import { OwnerId, Vaius } from "~/Client";
 
@@ -27,6 +27,7 @@ Vaius.once("ready", () => {
     Vaius.application.createGlobalCommand({
         integrationTypes: [ApplicationIntegrationTypes.USER_INSTALL],
         type: ApplicationCommandTypes.CHAT_INPUT,
+        contexts: [InteractionContextTypes.BOT_DM, InteractionContextTypes.GUILD, InteractionContextTypes.PRIVATE_CHANNEL],
         name: "say",
         description: "say",
         options: [

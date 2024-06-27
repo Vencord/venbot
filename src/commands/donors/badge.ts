@@ -1,6 +1,6 @@
 import { createHash } from "crypto";
 import { mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "fs";
-import { ApplicationCommandOptions, ApplicationCommandOptionTypes, ApplicationCommandTypes, InteractionTypes, MessageFlags } from "oceanic.js";
+import { ApplicationCommandOptions, ApplicationCommandOptionTypes, ApplicationCommandTypes, CreateChatInputApplicationCommandOptions, InteractionContextTypes, InteractionTypes, MessageFlags } from "oceanic.js";
 
 import { OwnerId, Vaius } from "../../Client";
 import { DONOR_ROLE_ID, PROD } from "../../constants";
@@ -150,6 +150,18 @@ Vaius.on("interactionCreate", async i => {
     });
 });
 
+function registerCommand(data: CreateChatInputApplicationCommandOptions) {
+    Vaius.application.createGuildCommand("1015060230222131221", {
+        ...data,
+        defaultMemberPermissions: "0",
+    });
+
+    Vaius.application.createGlobalCommand({
+        ...data,
+        contexts: [InteractionContextTypes.BOT_DM, InteractionContextTypes.GUILD, InteractionContextTypes.PRIVATE_CHANNEL]
+    });
+}
+
 Vaius.once("ready", () => {
     const RequiredUser: ApplicationCommandOptions = {
         name: "user",
@@ -174,11 +186,10 @@ Vaius.once("ready", () => {
         description
     };
 
-    Vaius.application.createGuildCommand("1015060230222131221", {
+    registerCommand({
         type: ApplicationCommandTypes.CHAT_INPUT,
         name: NameAdd,
         description,
-        defaultMemberPermissions: "0", // admins only,
         options: [
             RequiredUser,
             Tooltip(true),
@@ -187,11 +198,10 @@ Vaius.once("ready", () => {
         ]
     });
 
-    Vaius.application.createGuildCommand("1015060230222131221", {
+    registerCommand({
         type: ApplicationCommandTypes.CHAT_INPUT,
         name: NameEdit,
         description,
-        defaultMemberPermissions: "0", // admins only,
         options: [
             RequiredUser,
             {
@@ -207,11 +217,10 @@ Vaius.once("ready", () => {
         ]
     });
 
-    Vaius.application.createGuildCommand("1015060230222131221", {
+    registerCommand({
         type: ApplicationCommandTypes.CHAT_INPUT,
         name: NameRemove,
         description,
-        defaultMemberPermissions: "0",
         options: [
             RequiredUser,
             {
@@ -224,11 +233,10 @@ Vaius.once("ready", () => {
         ]
     });
 
-    Vaius.application.createGuildCommand("1015060230222131221", {
+    registerCommand({
         type: ApplicationCommandTypes.CHAT_INPUT,
         name: NameMove,
         description,
-        defaultMemberPermissions: "0", // admins only,
         options: [
             {
                 name: "old-user",
