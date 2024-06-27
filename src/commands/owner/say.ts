@@ -29,7 +29,6 @@ Vaius.once("ready", () => {
         type: ApplicationCommandTypes.CHAT_INPUT,
         name: "say",
         description: "say",
-        defaultMemberPermissions: "0",
         options: [
             {
                 name: "content",
