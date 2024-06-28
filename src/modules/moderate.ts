@@ -194,15 +194,19 @@ export function initModListeners() {
 
         const includesPing = ["@everyone", "@here"].some(s => data.content.includes(s));
         const includesInvite = ["discord.gg/", "discord.com/invite"].some(s => data.content.includes(s));
+
         const isSteamScam = data.content.includes("[steamcommunity.com") &&
             ["https://u.to", "https://sc.link", "$"].some(s => data.content.includes(s));
+        const isMediaFireScam = data.content.includes("bro") && data.content.includes("mediafire") && data.content.includes("found");
 
-        if (isSteamScam) {
+        const isScam = isSteamScam || isMediaFireScam;
+
+        if (isScam) {
             await Vaius.rest.guilds.createBan(guild.id, user.id, {
-                reason: "steam scam",
+                reason: "scams (hacked account)",
                 deleteMessageDays: 1
             });
-            logModerationAction(`Banned <@${user.id}> for posting a steam scam.`);
+            logModerationAction(`Banned <@${user.id}> for posting a scam message.`);
             return;
         }
 
