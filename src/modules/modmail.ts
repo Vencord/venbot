@@ -1,6 +1,7 @@
 import { ActivityTypes, AnyTextableGuildChannel, ApplicationCommandTypes, ButtonStyles, ChannelTypes, CommandInteraction, ComponentInteraction, ComponentTypes, GuildComponentInteraction, GuildComponentSelectMenuInteraction, InteractionTypes, MessageFlags, TextChannel } from "oceanic.js";
 
 import { db } from "~/db";
+import { GUILD_ID } from "~/env";
 import { sendDm } from "~/util";
 import { stripIndent } from "~/util/text";
 
@@ -69,7 +70,7 @@ async function createModmail(interaction: GuildComponentInteraction) {
     await interaction.defer(MessageFlags.EPHEMERAL);
 
     const thread = await db.transaction().execute(async t => {
-        const { channelId, id } = await t.insertInto("modMail")
+        const { channelId, id } = await t.insertInto("tickets")
             .values({
                 channelId: "0",
                 userId: interaction.user.id
@@ -95,7 +96,7 @@ async function createModmail(interaction: GuildComponentInteraction) {
             invitable: false
         });
 
-        await t.updateTable("modMail")
+        await t.updateTable("tickets")
             .set("channelId", thread.id)
             .where("id", "=", id)
             .execute();
@@ -225,7 +226,7 @@ async function closeModmail(interaction: GuildInteraction, isBan: boolean) {
 
     if (isBan && !interaction.member.permissions.has("MODERATE_MEMBERS")) return;
 
-    const res = await db.selectFrom("modMail")
+    const res = await db.selectFrom("tickets")
         .where("channelId", "=", interaction.channel.id)
         .select(["userId", "id"])
         .executeTakeFirst();
@@ -237,7 +238,7 @@ async function closeModmail(interaction: GuildInteraction, isBan: boolean) {
     await interaction.defer(MessageFlags.EPHEMERAL);
 
     await interaction.channel.edit({ archived: true, locked: true });
-    await db.deleteFrom("modMail")
+    await db.deleteFrom("tickets")
         .where("id", "=", res.id)
         .execute();
 
@@ -297,7 +298,7 @@ Vaius.once("ready", () => {
         }]);
     }
 
-    Vaius.application.createGuildCommand("1015060230222131221", {
+    Vaius.application.createGuildCommand(GUILD_ID, {
         type: ApplicationCommandTypes.CHAT_INPUT,
         name: COMMAND_NAME,
         description: "Open a modmail ticket",

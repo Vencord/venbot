@@ -1,7 +1,7 @@
 import { AnyTextableGuildChannel, Message } from "oceanic.js";
 
 import { defineCommand } from "~/Command";
-import { DAYS_IN_MS } from "~/constants";
+import { Millis } from "~/constants";
 import { ID_REGEX, reply, silently } from "~/util";
 import { pluralise, stripIndent } from "~/util/text";
 
@@ -68,7 +68,7 @@ defineCommand({
         if (!userIDs.length) return reply(msg, { content: "Gimme some users silly" });
         if (userIDs.length > 200) return reply(msg, { content: "That's tooooo many users bestie...." });
 
-        const res = await msg.guild.bulkBan({ userIDs, reason, deleteMessageSeconds: daysToDelete * DAYS_IN_MS / 1000 })
+        const res = await msg.guild.bulkBan({ userIDs, reason, deleteMessageSeconds: daysToDelete * Millis.DAY / 1000 })
             .catch(e => null);
 
         if (!res || !res.bannedUsers.length) return reply(msg, { content: "No bans succeeded." });

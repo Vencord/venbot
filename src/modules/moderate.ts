@@ -3,11 +3,11 @@ import { readdir, readFile } from "fs/promises";
 import { AnyTextableGuildChannel, AutoModerationActionTypes, EmbedOptions, Member, Message, MessageTypes } from "oceanic.js";
 import { join } from "path";
 
-import { Vaius } from "../Client";
-import { ASSET_DIR, MINUTES_IN_MS, MOD_LOG_CHANNEL_ID } from "../constants";
-import { reply, sendDm, silently, until } from "../util";
+import { GUILD_ID } from "~/env";
 
-const mentions = /<@!?(\d{17,20})>/g;
+import { Vaius } from "../Client";
+import { ASSET_DIR, Millis, MOD_LOG_CHANNEL_ID } from "../constants";
+import { reply, sendDm, silently, until } from "../util";
 
 // matches nothing
 let imageHostRegex = /^(?!a)a/;
@@ -110,6 +110,7 @@ export async function moderateImageHosts(msg: Message) {
 
 const inviteRe = /discord(?:(?:app)?\.com\/invite|\.gg)\/([a-z0-9-]+)/ig;
 const allowedGuilds = new Set([
+    GUILD_ID,
     "1015060230222131221", // vencord
     "811255666990907402", // aliucord
     "1015931589865246730", // vendetta
@@ -166,7 +167,7 @@ export async function moderateInvites(msg: Message) {
 
         if (!allowedGuilds.has(inviteData.guildID)) {
             silently(msg.delete());
-            silently(msg.member!.edit({ communicationDisabledUntil: until(5 * MINUTES_IN_MS), reason: "invite" }));
+            silently(msg.member!.edit({ communicationDisabledUntil: until(5 * Millis.MINUTE), reason: "invite" }));
 
             const inviteImage = await getInviteImage(code);
             Vaius.rest.channels.createMessage(MOD_LOG_CHANNEL_ID, {
@@ -229,7 +230,7 @@ export async function lobotomiseMaybe(msg: Message<AnyTextableGuildChannel>) {
 
     try {
         await msg.referencedMessage.member!.edit({
-            communicationDisabledUntil: until(10 * MINUTES_IN_MS),
+            communicationDisabledUntil: until(10 * Millis.MINUTE),
             reason: "showing screenshot of automodded message"
         });
 

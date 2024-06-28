@@ -2,6 +2,8 @@ import { createHash } from "crypto";
 import { mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "fs";
 import { ApplicationCommandOptions, ApplicationCommandOptionTypes, ApplicationCommandTypes, ApplicationIntegrationTypes, CreateChatInputApplicationCommandOptions, InteractionContextTypes, InteractionTypes, MessageFlags } from "oceanic.js";
 
+import { GUILD_ID } from "~/env";
+
 import { OwnerId, Vaius } from "../../Client";
 import { DONOR_ROLE_ID, PROD } from "../../constants";
 import { fetchBuffer } from "../../util/fetch";
@@ -151,7 +153,7 @@ Vaius.on("interactionCreate", async i => {
 });
 
 function registerCommand(data: CreateChatInputApplicationCommandOptions) {
-    Vaius.application.createGuildCommand("1015060230222131221", {
+    Vaius.application.createGuildCommand(GUILD_ID, {
         ...data,
         defaultMemberPermissions: "0",
     });

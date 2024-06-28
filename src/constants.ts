@@ -28,10 +28,21 @@ export const SUPPORT_ALLOWED_CHANNELS = [
 export const MOD_ROLE_ID = "1026509424686284924";
 export const DONOR_ROLE_ID = "1042507929485586532";
 
-export const SECONDS_IN_MS = 1000;
-export const MINUTES_IN_MS = 60 * SECONDS_IN_MS;
-export const HOURS_IN_MS = 60 * MINUTES_IN_MS;
-export const DAYS_IN_MS = 24 * HOURS_IN_MS;
+export const enum Seconds {
+    SECOND = 1,
+    MINUTE = 60,
+    HOUR = 60 * 60,
+    DAY = 24 * 60 * 60,
+    WEEK = 7 * 24 * 60 * 60
+}
+
+export const enum Millis {
+    SECOND = 1000,
+    MINUTE = 60 * 1000,
+    HOUR = 60 * 60 * 1000,
+    DAY = 24 * 60 * 60 * 1000,
+    WEEK = 7 * 24 * 60 * 60 * 1000
+}
 
 export const Emoji = {
     X: "❌",

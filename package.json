@@ -4,14 +4,15 @@
     "description": "",
     "main": "dist/index.js",
     "scripts": {
-        "start": "pnpm initSqlite & pnpm build && node . VENBOT",
+        "start": "pnpm sql:up & pnpm build && node . VENBOT",
         "build": "node build.mjs",
         "test": "pnpm lint && pnpm testTypes",
         "testTypes": "tsc --noEmit",
         "lint": "eslint . --ext .js,.ts",
         "lint:fix": "pnpm lint --fix",
-        "initSqlite": "mkdir -p data && sqlite3 data/db.sqlite3 < schemas.sql",
-        "sqlTypes": "kysely-codegen"
+        "sql:up": "mkdir -p data && sqlite3 data/db.sqlite3 < sql/create.sql",
+        "sql:down": "mkdir -p data && sqlite3 data/db.sqlite3 < sql/drop.sql",
+        "sql:types": "kysely-codegen"
     },
     "keywords": [],
     "author": "Vendicated <vendicated+npm@riseup.net>",

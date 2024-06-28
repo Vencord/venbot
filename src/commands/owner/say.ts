@@ -1,9 +1,10 @@
 import { ApplicationCommandOptionTypes, ApplicationCommandTypes, ApplicationIntegrationTypes, CreateMessageOptions, InteractionContextTypes, InteractionTypes, MessageFlags } from "oceanic.js";
 
 import { OwnerId, Vaius } from "~/Client";
+import { GUILD_ID } from "~/env";
 
 Vaius.once("ready", () => {
-    Vaius.application.createGuildCommand("1015060230222131221", {
+    Vaius.application.createGuildCommand(GUILD_ID, {
         type: ApplicationCommandTypes.CHAT_INPUT,
         name: "say",
         description: "say",

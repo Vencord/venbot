@@ -1,14 +1,10 @@
 import { ApplicationCommandTypes, ComponentTypes, MessageFlags, TextChannel } from "oceanic.js";
 
 import { Vaius } from "~/Client";
-import { PROD } from "~/constants";
+import { GUILD_ID } from "~/env";
 
 import { buildFaqEmbed, fetchFaq } from "./faq";
 import { SupportInstructions, SupportTagList } from "./support";
-
-const GUILD_ID = PROD
-    ? "1015060230222131221"
-    : "1240028478498144257";
 
 const enum Commands {
     Support = "Send Support Tag",

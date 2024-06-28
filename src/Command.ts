@@ -8,7 +8,7 @@ export interface Command<GuildOnly extends boolean = false> {
     guildOnly?: GuildOnly;
     permissions?: Array<PermissionName>,
     ownerOnly?: boolean;
-    execute(message: GuildOnly extends true ? Message<AnyTextableGuildChannel> : Message<AnyTextableChannel>, ...args: string[]): Promise<any>;
+    execute(message: GuildOnly extends true ? Message<AnyTextableGuildChannel> : Message<AnyTextableChannel>, ...args: string[]): Promise<any> | void;
     rawContent?: boolean;
 }
 

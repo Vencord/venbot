@@ -8,7 +8,8 @@ if (error)
 const configSchema = object({
     DISCORD_TOKEN: string(),
     DATABASE_URL: string(),
-    NODE_ENV: optional(picklist(["development", "production"]))
+    NODE_ENV: optional(picklist(["development", "production"])),
+    GUILD_ID: string()
 });
 
 try {
@@ -32,5 +33,6 @@ try {
 export const {
     DATABASE_URL,
     DISCORD_TOKEN,
-    NODE_ENV
+    NODE_ENV,
+    GUILD_ID
 } = parsed;

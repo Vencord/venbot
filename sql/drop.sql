@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS tickets;
+DROP TABLE IF EXISTS expressions;
+DROP TABLE IF EXISTS expressionUses;
