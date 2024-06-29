@@ -1,5 +1,5 @@
 import { Expressions, ExpressionUses } from "kysely-codegen";
-import { AnyTextableGuildChannel, GuildEmoji, Member, PossiblyUncachedMessage, StickerFormatTypes, StickerItem, Uncached, User } from "oceanic.js";
+import { AnyTextableGuildChannel, GuildEmoji, Member, PartialEmoji, PossiblyUncachedMessage, StickerFormatTypes, StickerItem, Uncached, User } from "oceanic.js";
 
 import { Vaius } from "~/Client";
 import { Millis } from "~/constants";
@@ -143,9 +143,14 @@ Vaius.on("messageCreate", msg => {
     insertRows(rows);
 });
 
-function shouldHandleReactionEvent(msg: PossiblyUncachedMessage, user?: Uncached | User | Member) {
+function shouldHandleReactionEvent(msg: PossiblyUncachedMessage, emoji?: PartialEmoji, user?: Uncached | User | Member) {
     const guildId = msg.guildID || (Vaius.getChannel(msg.channelID) as AnyTextableGuildChannel)?.guildID;
     if (guildId !== GUILD_ID) return false;
+
+    if (emoji?.id) {
+        if (!Vaius.guilds.get(GUILD_ID)?.emojis.has(emoji.id))
+            return false;
+    }
 
     if (!user) return true;
 
@@ -153,7 +158,7 @@ function shouldHandleReactionEvent(msg: PossiblyUncachedMessage, user?: Uncached
 }
 
 Vaius.on("messageReactionAdd", async (msg, user, emoji) => {
-    if (!shouldHandleReactionEvent(msg, user)) return;
+    if (!shouldHandleReactionEvent(msg, emoji, user)) return;
 
     const row = emoji.id
         ? buildCustomEmojiRow(msg.id, user.id, ExpressionUsageType.REACTION, emoji as GuildEmoji)
@@ -163,7 +168,7 @@ Vaius.on("messageReactionAdd", async (msg, user, emoji) => {
 });
 
 Vaius.on("messageReactionRemove", async (msg, user, emoji) => {
-    if (!shouldHandleReactionEvent(msg, user)) return;
+    if (!shouldHandleReactionEvent(msg, emoji, user)) return;
 
     db
         .deleteFrom("expressionUses")
@@ -189,7 +194,7 @@ Vaius.on("messageReactionRemoveAll", msg => {
 });
 
 Vaius.on("messageReactionRemoveEmoji", (msg, emoji) => {
-    if (!shouldHandleReactionEvent(msg)) return;
+    if (!shouldHandleReactionEvent(msg, emoji)) return;
 
     db
         .deleteFrom("expressionUses")
