@@ -102,6 +102,9 @@ defineCommand({
             .orderBy("count", "desc")
             .execute();
 
+        if (!stats.length)
+            return reply(msg, `No ${type}s have been tracked yet! D:`);
+
         const render = type === ExpressionType.EMOJI ? renderEmojis : renderStickers;
 
         const paginator = new Paginator(

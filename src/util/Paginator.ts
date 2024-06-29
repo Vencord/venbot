@@ -24,6 +24,9 @@ export class Paginator<T> {
         readonly renderPage: (data: T[], page: number) => string | Omit<EmbedOptions, "footer">,
         readonly footerExtra?: string
     ) {
+        if (!data.length)
+            throw new Error("Paginator data cannot be empty.");
+
         this.totalPages = Math.ceil(data.length / pageSize);
     }
 
