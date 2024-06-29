@@ -22,6 +22,7 @@ export class Paginator<T> {
         readonly data: T[],
         readonly pageSize: number,
         readonly renderPage: (data: T[], page: number) => string | Omit<EmbedOptions, "footer">,
+        readonly footerExtra?: string
     ) {
         this.totalPages = Math.ceil(data.length / pageSize);
     }
@@ -89,7 +90,8 @@ export class Paginator<T> {
                         type: ComponentTypes.BUTTON,
                         customID: `paginator:go-to:${this.id}`,
                         style: ButtonStyles.PRIMARY,
-                        emoji: { name: Emoji.InputNumbers }
+                        emoji: { name: Emoji.InputNumbers },
+                        disabled: this.totalPages === 1,
                     },
                     {
                         type: ComponentTypes.BUTTON,
@@ -117,10 +119,15 @@ export class Paginator<T> {
 
         const data = this.renderPage(pageData, page);
 
+        let footerText = `Page ${page + 1}/${this.totalPages}`;
+        if (this.footerExtra) {
+            footerText += `  •  ${this.footerExtra}`;
+        }
+
         const baseEmbed: EmbedOptions = {
             title: this.title,
             footer: {
-                text: `Page ${page + 1}/${this.totalPages}`,
+                text: footerText,
             }
         };
 
