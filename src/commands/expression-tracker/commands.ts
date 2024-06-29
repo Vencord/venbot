@@ -1,6 +1,8 @@
+
 import { defineCommand } from "~/Command";
 import { db, ExpressionType } from "~/db";
 import { reply } from "~/util";
+import { Paginator } from "~/util/Paginator";
 import { toInlineCode } from "~/util/text";
 
 const ExpressionTypes = [ExpressionType.EMOJI, ExpressionType.STICKER];
@@ -26,10 +28,16 @@ defineCommand({
             .groupBy("expressions.id")
             .execute();
 
-        const content = stats
-            .map(({ name, count }) => `${name}: ${count}`)
-            .join("\n");
+        console.log(stats.map(s => s.name));
+        const paginator = new Paginator(
+            `${type} stats`,
+            stats,
+            2,
+            data => {
+                return data.map(d => d.name).join("\n");
+            }
+        );
 
-        return reply(msg, { content: content || "No stats yet D:" });
+        await paginator.create(msg);
     },
 });

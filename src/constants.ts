@@ -50,5 +50,11 @@ export const Emoji = {
     QuestionMark: "❓",
     Anger: "💢",
     TrashCan: "🗑️",
-    Hammer: "🔨"
+    Hammer: "🔨",
+
+    DoubleLeft: "⏪",
+    Left: "◀️",
+    InputNumbers: "🔢",
+    Right: "▶️",
+    DoubleRight: "⏩",
 } as const;
