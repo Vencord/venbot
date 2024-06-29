@@ -1,7 +1,8 @@
 
+
 import { Vaius } from "~/Client";
 import { defineCommand } from "~/Command";
-import { db, ExpressionType } from "~/db";
+import { db, ExpressionFormatType, ExpressionType } from "~/db";
 import { GUILD_ID } from "~/env";
 import { reply, ZWSP } from "~/util";
 import { Paginator } from "~/util/Paginator";
@@ -18,6 +19,16 @@ interface Expression {
 
 const THREE_SPACES_FUCK_YOU_DISCORD_WHY_WOULD_YOU_MERGE_MULTIPLE_SPACES = ` ${ZWSP} ${ZWSP} `;
 
+function formatCountAndName(data: string[][]) {
+    const longestCountString = data.reduce((length, [count]) => Math.max(length, count.length), 0);
+
+    return data
+        .map(([count, name]) =>
+            `\`${count.padStart(longestCountString, " ")}\`${THREE_SPACES_FUCK_YOU_DISCORD_WHY_WOULD_YOU_MERGE_MULTIPLE_SPACES}${name}`
+        )
+        .join("\n");
+}
+
 function renderEmojis(emojis: Expression[]) {
     const guildEmojis = Vaius.guilds.get(GUILD_ID)!.emojis;
 
@@ -30,33 +41,51 @@ function renderEmojis(emojis: Expression[]) {
             const namePart = isUnicode
                 ? e.name
                 : isDead
-                    ? `[${toInlineCode(`:${e.name}:`)}](https://cdn.discordapp.com/emojis/${e.id}.${e.formatType})`
+                    ? `[${toInlineCode(`:${e.name}:`)}](https://cdn.discordapp.com/emojis/${e.id}.${e.formatType}?size=256)`
                     : `<${isAnimated ? "a" : ""}:${e.name}:${e.id}>`;
 
             return [e.count.toString(), namePart];
         });
 
-    const longestCountString = data.reduce((length, [count]) => Math.max(length, count.length), 0);
-
-    return data
-        .map(([count, name]) =>
-            `\`${count.padStart(longestCountString, " ")}\`${THREE_SPACES_FUCK_YOU_DISCORD_WHY_WOULD_YOU_MERGE_MULTIPLE_SPACES}${name}`
-        )
-        .join("\n");
+    return formatCountAndName(data);
 }
+
+const StickerExtensions = {
+    [ExpressionFormatType.PNG]: "png",
+    [ExpressionFormatType.APNG]: "png",
+    [ExpressionFormatType.GIF]: "gif",
+    [ExpressionFormatType.LOTTIE]: "json",
+};
 
 function renderStickers(stickers: Expression[]) {
-    const guildStickers = Vaius.guilds.get(GUILD_ID)!.stickers;
+    const data = stickers
+        .map(s => {
+            const ext = StickerExtensions[s.formatType];
+            const name = `[${toInlineCode(s.name)}](https://media.discordapp.net/stickers/${s.id}.${ext}?size=512)`;
+            return [s.count.toString(), name];
+        });
 
-    return "";
+    return formatCountAndName(data);
 }
+
+const Aliases: Record<string, ExpressionType> = {
+    e: ExpressionType.EMOJI,
+    emojis: ExpressionType.EMOJI,
+    emote: ExpressionType.EMOJI,
+    emotes: ExpressionType.EMOJI,
+    s: ExpressionType.STICKER,
+    stickers: ExpressionType.STICKER
+};
 
 defineCommand({
     name: "stats",
+    aliases: ["st"],
     description: "Get stats about most used emojis or stickers",
     usage: `<${ExpressionTypes.join(" | ")}>`,
-    async execute(msg, type: ExpressionType) {
-        if (!ExpressionTypes.includes(type))
+    async execute(msg, type: string) {
+        type = Aliases[type] ?? type;
+
+        if (!ExpressionTypes.includes(type as any))
             return reply(msg, `Invalid type. Must be one of: ${ExpressionTypes.map(toInlineCode).join(", ")}`);
 
         const stats = await db
