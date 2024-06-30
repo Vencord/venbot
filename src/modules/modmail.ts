@@ -12,10 +12,21 @@ import { DEV_CHANNEL_ID, Emoji, MOD_ROLE_ID, PROD, SUPPORT_CHANNEL_ID } from "..
 const enum Ids {
     OPEN_TICKET = "modmail:open_ticket",
     OPEN_CONFIRM = "modmail:open_confirm",
+
     REASON_MONKEY = "modmail:iamamonkey",
     REASON_MOD = "modmail:mod",
-    REASON_DONOR = "modmail:donor"
+    REASON_DONOR = "modmail:donor",
+    REASON_PLUGIN = "modmail:plugin",
+    REASON_CSS = "modmail:css",
+    REASON_JS = "modmail:js"
 }
+
+const ChannelNameAndPrompt: Record<string, [string, string]> = {
+    [Ids.REASON_MOD]: ["ticket", "Please describe your issue with as much detail as possible."],
+    [Ids.REASON_PLUGIN]: ["plugin-submission", "Please post the full message + image(s) that you would like to post in the plugin channel."],
+    [Ids.REASON_CSS]: ["css-submission", "Please post the full message + image(s) that you would like to post in the css snippet channel."],
+    [Ids.REASON_JS]: ["js-submission", "Please post the full message + image(s) that you would like to post in the js snippet channel."],
+};
 
 const COMMAND_NAME = PROD ? "modmail" : "devmodmail";
 
@@ -66,8 +77,11 @@ function getThreadParent() {
 }
 
 
-async function createModmail(interaction: GuildComponentInteraction) {
+async function createModmail(interaction: GuildComponentInteraction, reason: string) {
     await interaction.defer(MessageFlags.EPHEMERAL);
+
+    const [channelName, prompt] = ChannelNameAndPrompt[reason];
+    if (!channelName) return interaction.createFollowup({ content: "Something went wrong", flags: MessageFlags.EPHEMERAL });
 
     const thread = await db.transaction().execute(async t => {
         const { channelId, id } = await t.insertInto("tickets")
@@ -92,7 +106,7 @@ async function createModmail(interaction: GuildComponentInteraction) {
 
         const thread = await getThreadParent().startThreadWithoutMessage({
             type: ChannelTypes.PRIVATE_THREAD,
-            name: `${id}`,
+            name: `${channelName}-${id}`,
             invitable: false
         });
 
@@ -107,7 +121,7 @@ async function createModmail(interaction: GuildComponentInteraction) {
     if (!thread) return;
 
     const msg = await thread.createMessage({
-        content: `👋 ${interaction.user.mention}\n\nPlease describe your issue with as much detail as possible. A moderator will be with you shortly.`,
+        content: `👋 ${interaction.user.mention}\n\n${prompt}. A moderator will be with you shortly!`,
         components: [{
             type: ComponentTypes.ACTION_ROW,
             components: [
@@ -151,7 +165,7 @@ async function createModmail(interaction: GuildComponentInteraction) {
 
     await interaction.deleteFollowup(interaction.message.id);
 
-    await log(`${interaction.user.mention} opened ticket ${thread.mention}`);
+    await log(`${interaction.user.mention} opened ${channelName.replace("-", " ")} ${thread.mention}`);
 }
 
 async function createModmailConfirm(interaction: GuildInteraction) {
@@ -172,28 +186,49 @@ async function createModmailConfirm(interaction: GuildInteraction) {
                 customID: "modmail:open_confirm",
                 options: [
                     {
+                        label: "I want to submit my plugin",
+                        value: Ids.REASON_PLUGIN,
+                        emoji: { name: "🧩" }
+                    },
+                    {
+                        label: "I want to submit my css snippet",
+                        value: Ids.REASON_CSS,
+                        emoji: { name: "🎨" }
+                    },
+                    {
+                        label: "I want to submit my js snippet",
+                        value: Ids.REASON_JS,
+                        emoji: { name: "🛠️" }
+                    },
+                    {
                         label: "I need help with Vencord",
-                        value: Ids.REASON_MONKEY + 1
-                    },
-                    {
-                        label: "I need Vencord support",
-                        value: Ids.REASON_MONKEY + 2
-                    },
-                    {
-                        label: "I donated and want to redeem my rewards",
-                        value: Ids.REASON_DONOR
+                        value: Ids.REASON_MONKEY + 1,
+                        emoji: { name: "🛟" }
                     },
                     {
                         label: "I need to talk to a moderator",
-                        value: Ids.REASON_MOD
+                        value: Ids.REASON_MOD,
+                        emoji: { name: "👥" }
+                    },
+                    {
+                        label: "I donated and want to redeem my rewards",
+                        value: Ids.REASON_DONOR,
+                        emoji: { name: "🤝" }
+                    },
+                    {
+                        label: "I need Vencord support",
+                        value: Ids.REASON_MONKEY + 2,
+                        emoji: { name: "🛟" }
                     },
                     {
                         label: "I just want to test modmail",
-                        value: Ids.REASON_MONKEY + 3
+                        value: Ids.REASON_MONKEY + 3,
+                        emoji: { name: "🛟" }
                     },
                     {
                         label: "My Vencord is broken!",
-                        value: Ids.REASON_MONKEY + 4
+                        value: Ids.REASON_MONKEY + 4,
+                        emoji: { name: "🛟" }
                     }
                 ]
             }]
@@ -217,7 +252,7 @@ async function onModmailConfirm(interaction: GuildComponentSelectMenuInteraction
         });
     }
 
-    createModmail(interaction);
+    createModmail(interaction, reason);
 }
 
 async function closeModmail(interaction: GuildInteraction, isBan: boolean) {
