@@ -1,5 +1,6 @@
 ---
 aliases: darwin, m
+emoji: 🍎
 ---
 
 Download https://github.com/Vencord/Installer/releases/latest/download/VencordInstaller.MacOS.zip

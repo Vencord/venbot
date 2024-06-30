@@ -1,5 +1,6 @@
 ---
 aliases: e, devtools
+emoji: 🕵️
 ---
 
 To better help you, we need your error logs!

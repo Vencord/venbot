@@ -1,5 +1,6 @@
 ---
 aliases: l
+emoji: 🐧
 ---
 
 Run the following command in your terminal and follow along with the instructions/prompts

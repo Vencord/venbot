@@ -1,5 +1,6 @@
 ---
 aliases: more info, mi
+emoji: ❓
 ---
 
 "doesn't work" and similar are not very helpful. To help you, we need more info!

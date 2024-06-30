@@ -1,5 +1,6 @@
 ---
 aliases: w, win
+emoji: 🪟
 ---
 
 > ⚠️ Do not run the installer as Administrator

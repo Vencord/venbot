@@ -1,4 +1,4 @@
-import { ApplicationCommandTypes, ComponentTypes, MessageFlags, TextChannel } from "oceanic.js";
+import { ApplicationCommandTypes, ComponentTypes, MessageFlags, SelectOption, TextChannel } from "oceanic.js";
 
 import { Vaius } from "~/Client";
 import { GUILD_ID } from "~/env";
@@ -27,13 +27,20 @@ Vaius.on("interactionCreate", async interaction => {
     if (interaction.isCommandInteraction() && interaction.isMessageCommand()) {
         const { name } = interaction.data;
         if (name === Commands.Support || name === Commands.Faq) {
-            let options: string[];
+            let options: SelectOption[];
             let method: "createMessage" | "createFollowup" = "createMessage";
             if (name === Commands.Support) {
-                options = SupportTagList.map(tags => tags[0]);
+                options = SupportTagList.map(tags => ({
+                    value: tags[0],
+                    label: tags[0],
+                    emoji: { name: SupportInstructions[tags[0]].emoji }
+                }));
             } else {
                 const [_, faqs] = await Promise.all([interaction.defer(MessageFlags.EPHEMERAL), fetchFaq()]);
-                options = faqs.map(f => f.question);
+                options = faqs.map(f => ({
+                    value: f.question,
+                    label: f.question
+                }));
                 method = "createFollowup";
             }
 
@@ -44,7 +51,7 @@ Vaius.on("interactionCreate", async interaction => {
                     components: [{
                         type: ComponentTypes.STRING_SELECT,
                         customID: `${name} selection ${interaction.data.targetID}`,
-                        options: options.map(o => ({ label: o, value: o }))
+                        options
                     }]
                 }]
             });
@@ -75,7 +82,7 @@ Vaius.on("interactionCreate", async interaction => {
                 case Commands.Support:
                     await interaction.channel.createMessage({
                         ...replyOptions,
-                        content: SupportInstructions[choice] + `\n\n(Auto-response invoked by ${interaction.user.mention})`
+                        content: SupportInstructions[choice].content + `\n\n(Auto-response invoked by ${interaction.user.mention})`
                     });
                     await defer;
                     break;

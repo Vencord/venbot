@@ -1,5 +1,6 @@
 ---
 aliases: keybinds, mf
+emoji: 🛠️
 ---
 
 If global keybinds and possibly some more features aren't working for you, it's likely you installed the Vencord Desktop app.

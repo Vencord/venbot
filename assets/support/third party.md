@@ -1,5 +1,6 @@
 ---
 aliases: third, 3rd, dev
+emoji: 🧩
 ---
 
 If you are trying to install plugins from the third party plugins channel, see the pinned message there.

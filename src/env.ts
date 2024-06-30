@@ -1,5 +1,7 @@
 import dotenv from "dotenv";
-import { object, optional, parse, picklist, string, ValiError } from "valibot";
+import { object, optional, picklist, string } from "valibot";
+
+import { mustParse } from "./util/validation";
 
 const { error } = dotenv.config({ override: true });
 if (error)
@@ -12,23 +14,7 @@ const configSchema = object({
     GUILD_ID: string()
 });
 
-try {
-    var parsed = parse(configSchema, process.env);
-} catch (e) {
-    if (!(e instanceof ValiError)) throw e;
-
-    let message = "Invalid environment variable(s): ";
-    const issues = e.issues
-        .map(({ path, expected, received }) => `\t${path[0].key}: expected ${expected}, got ${received}`)
-        .join("\n");
-
-    message += issues
-        ? `\n${issues}`
-        : e.message;
-
-    console.error(message);
-    process.exit(1);
-}
+const parsed = mustParse("Invalid environment variables", configSchema, process.env);
 
 export const {
     DATABASE_URL,
