@@ -13,16 +13,25 @@ import { reply, sendDm, silently, until } from "../util";
 let imageHostRegex = /^(?!a)a/;
 
 const annoyingDomainsDir = join(ASSET_DIR, "annoying-domains");
-readdir(annoyingDomainsDir).then(files =>
-    Promise.all(files.filter(f => f !== "README.md").map(async s => {
-        const content = await readFile(join(annoyingDomainsDir, s), "utf8");
-        return content.trim().split("\n");
-    }))
-).then(domains => {
-    const list = domains.flat().filter(Boolean).map(d => d.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&"));
-    imageHostRegex = new RegExp(`https?://(\\w+\\.)?(${list.join("|")})`, "i");
-    console.log(`Loaded ${list.length} image hosts`);
-});
+readdir(annoyingDomainsDir)
+    .then(files =>
+        Promise.all(
+            files
+                .filter(f => f !== "README.md")
+                .map(async s => {
+                    const content = await readFile(join(annoyingDomainsDir, s), "utf8");
+                    return content.trim().split("\n");
+                }))
+    ).then(domains => {
+        const list = domains
+            .flat()
+            .filter(Boolean)
+            .map(d => d.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&"));
+
+        imageHostRegex = new RegExp(`https?://(\\w+\\.)?(${list.join("|")})`, "i");
+
+        console.log(`Loaded ${list.length} image hosts`);
+    });
 
 /**
  * Return type:
@@ -61,6 +70,38 @@ function makeEmbedForMessage(message: Message): EmbedOptions {
     };
 }
 
+const channelsMessagedUserMap = new Map<string, Set<string>>();
+
+async function moderateMultiChannelSpam(msg: Message<AnyTextableGuildChannel>) {
+    let channelsMessaged = channelsMessagedUserMap.get(msg.author.id);
+    if (!channelsMessaged) {
+        channelsMessaged = new Set();
+        channelsMessagedUserMap.set(msg.author.id, channelsMessaged);
+    }
+
+    channelsMessaged.add(msg.channelID);
+    setTimeout(() => {
+        const channelsMessaged = channelsMessagedUserMap.get(msg.author.id);
+        if (channelsMessaged) {
+            channelsMessaged.delete(msg.channelID);
+            if (!channelsMessaged.size)
+                channelsMessagedUserMap.delete(msg.author.id);
+        }
+    }, 5 * Millis.SECOND);
+
+    if (channelsMessaged.size < 3) return false;
+
+    await msg.member.edit({
+        communicationDisabledUntil: until(1 * Millis.HOUR),
+        reason: "Messaged >=3 different channels within 5 seconds"
+    });
+
+    logModerationAction(`Muted <@${msg.author.id}> for messaging >=3 different channels within 5 seconds`, makeEmbedForMessage(msg));
+
+    await silently(msg.delete());
+
+    return true;
+}
 
 export async function moderateMessage(msg: Message) {
     if (!msg.inCachedGuildChannel()) return;
@@ -74,7 +115,7 @@ export async function moderateMessage(msg: Message) {
 
     if (msg.member.permissions.has("MANAGE_MESSAGES")) return;
 
-    for (const mod of [moderateInvites, moderateImageHosts]) {
+    for (const mod of [moderateMultiChannelSpam, moderateInvites, moderateImageHosts]) {
         if (await mod(msg)) return;
     }
 }
