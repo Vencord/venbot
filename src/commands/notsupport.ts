@@ -2,6 +2,7 @@ import { createCanvas, Image, loadImage, registerFont } from "canvas";
 import { AnyGuildChannelWithoutThreads } from "oceanic.js";
 import { join } from "path";
 
+import { silently } from "~/util";
 import { defineCommand } from "../Command";
 import { ASSET_DIR, SUPPORT_CHANNEL_ID } from "../constants";
 
@@ -65,15 +66,19 @@ defineCommand({
             currentCaption: currentCaption || DefaultCaptions.originCaption
         });
 
+        const isReply = !!msg.referencedMessage;
+        if (isReply) silently(msg.delete());
+
         msg.channel.createMessage({
-            content: `👉 ${channel.mention}`,
+            content: `👉 ${channel.mention} (Auto-response invoked by ${msg.author.tag})`,
             files: [
                 {
                     name: "notsupport.png",
                     contents: image
                 }
             ],
-            messageReference: msg.messageReference
+            messageReference: { messageID: msg.referencedMessage?.id ?? msg.id },
+            allowedMentions: { repliedUser: isReply }
         });
     }
 });
