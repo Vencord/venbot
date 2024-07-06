@@ -1,5 +1,18 @@
+import { makeLazy } from "~/util/lazy";
+
 import { defineCommand } from "../Command";
 import { reply } from "../util";
+
+const ApiUrl = {
+    Local: "http://localhost:47822",
+    Remote: "https://minky.materii.dev"
+};
+
+const hasLocalMinkerApi = makeLazy(() =>
+    fetch(ApiUrl.Local, { method: "HEAD" })
+        .then(() => true)
+        .catch(() => false)
+);
 
 defineCommand({
     name: "minky",
@@ -7,7 +20,11 @@ defineCommand({
     description: "minker",
     usage: null,
     async execute(msg) {
-        const minker = await fetch("https://minky.materii.dev/")
+        const url = await hasLocalMinkerApi()
+            ? ApiUrl.Local
+            : ApiUrl.Remote;
+
+        const minker = await fetch(url)
             .then(r => r.ok ? r.arrayBuffer() : null);
 
         if (!minker)
