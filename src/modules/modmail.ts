@@ -1,7 +1,7 @@
 import { ActivityTypes, AnyTextableGuildChannel, ApplicationCommandTypes, ButtonStyles, ChannelTypes, CommandInteraction, ComponentInteraction, ComponentTypes, GuildComponentInteraction, GuildComponentSelectMenuInteraction, InteractionTypes, MessageFlags, TextChannel } from "oceanic.js";
 
 import { db } from "~/db";
-import { GUILD_ID, MOD_LOG_CHANNEL_ID, MOD_MAIL_BAN_ROLE_ID, MOD_MAIL_CHANNEL_ID, MOD_ROLE_ID, SUPPORT_CHANNEL_ID } from "~/env";
+import { GUILD_ID, MOD_MAIL_BAN_ROLE_ID, MOD_MAIL_CHANNEL_ID, MOD_MAIL_LOG_CHANNEL_ID, MOD_ROLE_ID, SUPPORT_CHANNEL_ID } from "~/env";
 import { sendDm } from "~/util";
 import { stripIndent } from "~/util/text";
 
@@ -60,7 +60,7 @@ defineCommand({
 });
 
 async function log(content: string) {
-    return Vaius.rest.channels.createMessage(MOD_LOG_CHANNEL_ID, {
+    return Vaius.rest.channels.createMessage(MOD_MAIL_LOG_CHANNEL_ID, {
         content
     });
 }
