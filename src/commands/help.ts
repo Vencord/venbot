@@ -1,5 +1,5 @@
 import { Commands, defineCommand, FullCommand } from "../Command";
-import { PREFIX } from "../constants";
+import { PREFIX } from "../env";
 import { reply, ZWSP } from "../util";
 import { snakeToTitle, stripIndent, toInlineCode, toTitle } from "../util/text";
 import { translate } from "../util/translate";

@@ -1,13 +1,13 @@
 import { ActivityTypes, AnyTextableGuildChannel, ApplicationCommandTypes, ButtonStyles, ChannelTypes, CommandInteraction, ComponentInteraction, ComponentTypes, GuildComponentInteraction, GuildComponentSelectMenuInteraction, InteractionTypes, MessageFlags, TextChannel } from "oceanic.js";
 
 import { db } from "~/db";
-import { GUILD_ID } from "~/env";
+import { GUILD_ID, MOD_LOG_CHANNEL_ID, MOD_MAIL_BAN_ROLE_ID, MOD_MAIL_CHANNEL_ID, MOD_ROLE_ID, SUPPORT_CHANNEL_ID } from "~/env";
 import { sendDm } from "~/util";
 import { stripIndent } from "~/util/text";
 
 import { Vaius } from "../Client";
 import { defineCommand } from "../Command";
-import { DEV_CHANNEL_ID, Emoji, MOD_ROLE_ID, PROD, SUPPORT_CHANNEL_ID } from "../constants";
+import { Emoji, PROD } from "../constants";
 
 const enum Ids {
     OPEN_TICKET = "modmail:open_ticket",
@@ -30,10 +30,6 @@ const ChannelNameAndPrompt: Record<string, [string, string]> = {
 
 const COMMAND_NAME = PROD ? "modmail" : "devmodmail";
 
-const MODMAIL_BAN_ROLE_ID = "1161815552919076867";
-const THREAD_PARENT_ID = PROD ? "1161412933050437682" : DEV_CHANNEL_ID;
-const LOG_CHANNEL_ID = PROD ? "1161449871182659655" : DEV_CHANNEL_ID;
-
 type GuildInteraction = ComponentInteraction<ComponentTypes.BUTTON, AnyTextableGuildChannel> | CommandInteraction<AnyTextableGuildChannel>;
 
 defineCommand({
@@ -42,7 +38,7 @@ defineCommand({
     description: "Post the modmail message",
     usage: null,
     execute() {
-        return Vaius.rest.channels.createMessage(THREAD_PARENT_ID, {
+        return Vaius.rest.channels.createMessage(MOD_MAIL_CHANNEL_ID, {
             embeds: [{
                 title: "Get in touch",
                 description: "Got a question or problem regarding this server? Get in touch with our moderators by opening a ticket!\n\n# WARNING\nThis form is NOT FOR VENCORD SUPPORT. To get Vencord support, use <#1026515880080842772>.",
@@ -64,13 +60,13 @@ defineCommand({
 });
 
 async function log(content: string) {
-    return Vaius.rest.channels.createMessage(LOG_CHANNEL_ID, {
+    return Vaius.rest.channels.createMessage(MOD_LOG_CHANNEL_ID, {
         content
     });
 }
 
 function getThreadParent() {
-    const c = Vaius.getChannel(THREAD_PARENT_ID);
+    const c = Vaius.getChannel(MOD_MAIL_CHANNEL_ID);
     if (!c) throw new Error("Modmail category not found");
 
     return c as TextChannel;
@@ -169,7 +165,7 @@ async function createModmail(interaction: GuildComponentInteraction, reason: str
 }
 
 async function createModmailConfirm(interaction: GuildInteraction) {
-    if (interaction.member.roles.includes(MODMAIL_BAN_ROLE_ID)) {
+    if (interaction.member.roles.includes(MOD_MAIL_BAN_ROLE_ID)) {
         return interaction.createMessage({
             content: "You are banned from using modmail.",
             flags: MessageFlags.EPHEMERAL
@@ -288,12 +284,12 @@ async function closeModmail(interaction: GuildInteraction, isBan: boolean) {
     if (!member) return;
 
     if (isBan) {
-        member.addRole(MODMAIL_BAN_ROLE_ID);
+        member.addRole(MOD_MAIL_BAN_ROLE_ID);
         sendDm(member.user, {
             content: stripIndent`
                 Your modmail ticket has been closed and you have been banned from creating tickets.
 
-                This is most likely because you didn't follow the modmail rules. See <#${THREAD_PARENT_ID}> for more information.
+                This is most likely because you didn't follow the modmail rules. See <#${MOD_MAIL_CHANNEL_ID}> for more information.
             `
         });
     } else {

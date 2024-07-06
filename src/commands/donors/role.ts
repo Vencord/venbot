@@ -38,7 +38,7 @@ Vaius.on("interactionCreate", async i => {
 
     await i.guild.editRolePositions([{
         id: role.id,
-        position: i.guild.roles.get("1042507929485586532")!.position + 1
+        position: i.guild.roles.get(DONOR_ROLE_ID)!.position + 1
     }]);
 
     await i.guild.addMemberRole(user.id, role.id, "Custom Donor Role");

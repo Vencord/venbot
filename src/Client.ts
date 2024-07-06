@@ -1,9 +1,9 @@
 import { AnyTextableChannel, Client, Message } from "oceanic.js";
 
 import { Commands } from "./Command";
-import { PREFIX, SUPPORT_ALLOWED_CHANNELS } from "./constants";
+import { SUPPORT_ALLOWED_CHANNELS } from "./constants";
 import { BotState } from "./db/botState";
-import { DISCORD_TOKEN } from "./env";
+import { DISCORD_TOKEN, PREFIX } from "./env";
 import { lobotomiseMaybe, moderateMessage } from "./modules/moderate";
 import { reply, silently } from "./util";
 

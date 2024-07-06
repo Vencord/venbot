@@ -3,10 +3,10 @@ import { readdir, readFile } from "fs/promises";
 import { AnyTextableGuildChannel, AutoModerationActionTypes, EmbedOptions, Member, Message, MessageTypes } from "oceanic.js";
 import { join } from "path";
 
-import { GUILD_ID } from "~/env";
+import { GUILD_ID, MOD_LOG_CHANNEL_ID } from "~/env";
 
 import { Vaius } from "../Client";
-import { ASSET_DIR, Millis, MOD_LOG_CHANNEL_ID } from "../constants";
+import { ASSET_DIR, Millis } from "../constants";
 import { reply, sendDm, silently, until } from "../util";
 
 // matches nothing

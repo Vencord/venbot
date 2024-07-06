@@ -1,12 +1,12 @@
 import { Guild, Member } from "oceanic.js";
 
 import { defineCommand } from "~/Command";
-import { Emoji } from "~/constants";
+import { DONOR_ROLE_ID, Emoji } from "~/constants";
 import { codeblock, ID_REGEX, reply, swallow } from "~/util";
 
 const Aliases = {
-    donor: "1042507929485586532",
-    d: "1042507929485586532",
+    donor: DONOR_ROLE_ID,
+    d: DONOR_ROLE_ID,
 
     cute: "1026504932959977532",
     c: "1026504932959977532",

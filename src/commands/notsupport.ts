@@ -2,9 +2,11 @@ import { createCanvas, Image, loadImage, registerFont } from "canvas";
 import { AnyGuildChannelWithoutThreads } from "oceanic.js";
 import { join } from "path";
 
+import { SUPPORT_CHANNEL_ID } from "~/env";
 import { silently } from "~/util";
+
 import { defineCommand } from "../Command";
-import { ASSET_DIR, SUPPORT_CHANNEL_ID } from "../constants";
+import { ASSET_DIR } from "../constants";
 
 const WIDTH = 400;
 const HEIGHT = 260;

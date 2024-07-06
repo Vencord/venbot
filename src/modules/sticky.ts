@@ -3,7 +3,7 @@ import { AnyTextableGuildChannel } from "oceanic.js";
 import { BotState } from "~/db/botState";
 
 import { Vaius } from "../Client";
-import { SUPPORT_CHANNEL_ID } from "../constants";
+import { SUPPORT_CHANNEL_ID } from "../env";
 import { debounce, silently } from "../util";
 
 let lastMsgId: string | null = null;
