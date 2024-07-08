@@ -72,7 +72,7 @@ defineCommand({
 
         const isReply = !!msg.referencedMessage;
         if (isReply) {
-            content += `\n\n(Auto-response invoked by ${msg.author.tag})`;
+            content += `\n\n(Auto-response invoked by ${msg.author.mention})`;
             silently(msg.delete());
         }
 
