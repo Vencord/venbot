@@ -25,7 +25,8 @@ defineCommand({
     usage: "<text>",
     rawContent: true,
     async execute(msg, text) {
-        text = text.replaceAll("\n", "");
+        text = text.replaceAll("\n", "") || msg.referencedMessage?.content!;
+
         if (!text)
             return reply(msg, { content: "https://www.youtube.com/watch?v=hiRacdl02w4" });
 

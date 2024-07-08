@@ -1,4 +1,4 @@
-import { Guild, Member } from "oceanic.js";
+import { AnyTextableGuildChannel, Member, Message } from "oceanic.js";
 
 import { defineCommand } from "~/Command";
 import { DONOR_ROLE_ID, Emoji } from "~/constants";
@@ -17,10 +17,16 @@ const Aliases = {
     needy: "1088566810976194693"
 };
 
-function parseArgs(guild: Guild, args: string[]) {
-    const userStart = args.findIndex(a => ID_REGEX.test(a));
-    if (userStart === -1)
-        return { role: "", users: [] };
+function parseArgs(msg: Message<AnyTextableGuildChannel>, args: string[]) {
+    const { guild, referencedMessage } = msg;
+
+    let userStart = args.findIndex(a => ID_REGEX.test(a));
+    if (userStart === -1) {
+        if (!referencedMessage)
+            return { role: "", users: [] };
+
+        userStart = args.length;
+    }
 
     const roleName = args.slice(0, userStart).join(" ").toLowerCase();
     const role = Aliases[roleName as keyof typeof Aliases]
@@ -28,8 +34,11 @@ function parseArgs(guild: Guild, args: string[]) {
         ?? guild.roles.find(r => r.name.toLowerCase().includes(roleName))?.id;
 
     const users = args.slice(userStart).map(u => u.match(ID_REGEX)?.[1]);
+    if (!users.length)
+        users.push(referencedMessage!.author.id);
 
-    if (users.includes(undefined) || !role) return { role: "", users: [] };
+    if (users.includes(undefined) || !role)
+        return { role: "", users: [] };
 
     return { role, users: users as string[] };
 }
@@ -49,7 +58,7 @@ defineCommand({
     guildOnly: true,
     permissions: ["MANAGE_ROLES"],
     async execute(msg, ...args) {
-        const { role, users } = parseArgs(msg.guild, args);
+        const { role, users } = parseArgs(msg, args);
         if (!role) return msg.createReaction(Emoji.QuestionMark).catch(swallow);
         if (!canManageRole(role, msg.member)) return msg.createReaction(Emoji.Anger).catch(swallow);
 
@@ -73,7 +82,7 @@ defineCommand({
     guildOnly: true,
     permissions: ["MANAGE_ROLES"],
     async execute(msg, ...args) {
-        const { role, users } = parseArgs(msg.guild, args);
+        const { role, users } = parseArgs(msg, args);
         if (!role) return msg.createReaction(Emoji.QuestionMark).catch(swallow);
         if (!canManageRole(role, msg.member)) return msg.createReaction(Emoji.Anger).catch(swallow);
 

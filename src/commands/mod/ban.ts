@@ -37,7 +37,12 @@ defineCommand({
     async execute(msg, ...args) {
         const [daysToDelete, ids, reason] = parseCrap(msg, args);
 
-        if (!ids.length) return reply(msg, { content: "Gimme some users silly" });
+        if (!ids.length) {
+            if (!msg.referencedMessage)
+                return reply(msg, { content: "Gimme some users silly" });
+
+            ids.push(msg.referencedMessage.author.id);
+        }
 
         const results = [] as string[];
         for (const id of ids) {
