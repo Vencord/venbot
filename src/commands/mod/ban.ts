@@ -14,14 +14,20 @@ function parseCrap(msg: Message<AnyTextableGuildChannel>, args: string[]) {
 
     const ids = [] as string[];
     let reason = "Absolutely beaned";
+    let hasCustomReason = false;
     for (let i = 0; i < args.length; i++) {
         const id = args[i].match(ID_REGEX)?.[1];
         if (id) {
             ids.push(id);
         } else {
             reason = args.slice(i).join(" ");
+            hasCustomReason = true;
             break;
         }
+    }
+
+    if (!hasCustomReason && !ids.length && msg.referencedMessage) {
+        reason = "Banned for message: " + msg.referencedMessage.content.slice(0, 400);
     }
 
     return [possibleDays, ids, `${msg.author.tag}: ${reason}`] as const;
