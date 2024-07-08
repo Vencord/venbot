@@ -2,7 +2,7 @@ import { AnyTextableGuildChannel, Message } from "oceanic.js";
 
 import { defineCommand } from "~/Command";
 import { Millis } from "~/constants";
-import { ID_REGEX, reply, silently } from "~/util";
+import { codeblock, ID_REGEX, reply, silently } from "~/util";
 import { pluralise, stripIndent } from "~/util/text";
 
 function parseCrap(msg: Message<AnyTextableGuildChannel>, args: string[]) {
@@ -27,7 +27,7 @@ function parseCrap(msg: Message<AnyTextableGuildChannel>, args: string[]) {
     }
 
     if (!hasCustomReason && !ids.length && msg.referencedMessage) {
-        reason = "Banned for message: " + msg.referencedMessage.content.slice(0, 400);
+        reason = `Banned for message: "${msg.referencedMessage.content.slice(0, 400)}"`;
     }
 
     return [possibleDays, ids, `${msg.author.tag}: ${reason}`] as const;
@@ -55,7 +55,7 @@ defineCommand({
             await silently(
                 msg.client.rest.channels.createDM(id)
                     .then(dm => dm.createMessage({
-                        content: `You have been banned from the Vencord Server by ${msg.author.tag}.\nReason: ${reason}`
+                        content: `You have been banned from the Vencord Server by ${msg.author.tag}.\n## Reason:\n${codeblock(reason)}`
                     }))
             );
 
