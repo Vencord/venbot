@@ -68,11 +68,16 @@ defineCommand({
             currentCaption: currentCaption || DefaultCaptions.originCaption
         });
 
+        let content = `👉 ${channel.mention}`;
+
         const isReply = !!msg.referencedMessage;
-        if (isReply) silently(msg.delete());
+        if (isReply) {
+            content += `\n\n(Auto-response invoked by ${msg.author.tag})`;
+            silently(msg.delete());
+        }
 
         msg.channel.createMessage({
-            content: `👉 ${channel.mention} (Auto-response invoked by ${msg.author.tag})`,
+            content,
             files: [
                 {
                     name: "notsupport.png",
