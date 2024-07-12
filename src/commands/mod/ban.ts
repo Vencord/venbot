@@ -57,6 +57,7 @@ defineCommand({
         }
 
         const members = await msg.guild.fetchMembers({ userIDs: ids });
+        const restIds = ids.filter(id => !members.some(m => m.id === id));
 
         const authorHighestRolePosition = getHighestRolePosition(msg.member);
 
@@ -78,6 +79,12 @@ defineCommand({
             await member.ban({ reason, deleteMessageDays: daysToDelete as 0 })
                 .then(() => bannedUsers.push(`**${member.tag}** (${member.mention})`))
                 .catch(e => fails.push(`Failed to ban **${member.tag}** (${member.mention}): \`${String(e)}\``));
+        }
+
+        for (const id of restIds) {
+            await msg.guild.createBan(id, { reason, deleteMessageDays: daysToDelete as 0 })
+                .then(() => bannedUsers.push(`**<@${id}>**`))
+                .catch(e => fails.push(`Failed to ban **<@${id}>**: \`${String(e)}\``));
         }
 
         let content = fails.join("\n") || "Done! <:BAN:1112433028917121114>";
