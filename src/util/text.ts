@@ -31,3 +31,14 @@ export function snakeToTitle(s: string) {
 export function toInlineCode(s: string) {
     return "``" + ZWSP + s.replaceAll("`", ZWSP + "`" + ZWSP) + ZWSP + "``";
 }
+
+export function countOccurrences(s: string, sub: string) {
+    let i = 0, count = 0;
+
+    while ((i = s.indexOf(sub, i)) !== -1) {
+        i += sub.length;
+        count++;
+    }
+
+    return count;
+}

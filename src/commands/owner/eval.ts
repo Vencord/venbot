@@ -8,6 +8,7 @@ import { ASSET_DIR } from "~/constants";
 import { DISCORD_TOKEN } from "~/env";
 import { codeblock, reply, silently } from "~/util";
 import { inspect } from "~/util/inspect";
+import { countOccurrences } from "~/util/text";
 
 async function sendVoiceMessage(msg: Message<AnyTextableChannel | Uncached>) {
     const XSuperProperties = "eyJvcyI6IkxpbnV4IiwiYnJvd3NlciI6IkNocm9tZSIsImRldmljZSI6IiIsInN5c3RlbV9sb2NhbGUiOiJlbi1HQiIsImJyb3dzZXJfdXNlcl9hZ2VudCI6Ik1vemlsbGEvNS4wIChYMTE7IExpbnV4IHg4Nl82NCkgQXBwbGVXZWJLaXQvNTM3LjM2IChLSFRNTCwgbGlrZSBHZWNrbykgQ2hyb21lLzEyMi4wLjAuMCBTYWZhcmkvNTM3LjM2IiwiYnJvd3Nlcl92ZXJzaW9uIjoiMTIyLjAuMC4wIiwib3NfdmVyc2lvbiI6IiIsInJlZmVycmVyIjoiaHR0cHM6Ly9hY2NvdW50cy5zcG90aWZ5LmNvbS8iLCJyZWZlcnJpbmdfZG9tYWluIjoiYWNjb3VudHMuc3BvdGlmeS5jb20iLCJyZWZlcnJlcl9jdXJyZW50IjoiIiwicmVmZXJyaW5nX2RvbWFpbl9jdXJyZW50IjoiIiwicmVsZWFzZV9jaGFubmVsIjoic3RhYmxlIiwiY2xpZW50X2J1aWxkX251bWJlciI6Mjg5Mzc5LCJjbGllbnRfZXZlbnRfc291cmNlIjpudWxsLCJkZXNpZ25faWQiOjB9";
@@ -85,7 +86,8 @@ defineCommand({
             var result = e;
         }
 
-        const res = inspect(result, { getters: true }).slice(0, 1990);
+        let res = inspect(result, { getters: true });
+        res = res.slice(0, 2000 - 10 - countOccurrences(res, "`"));
 
         let output = codeblock(res, "js");
         const consoleOutput = console._lines.join("\n").slice(0, Math.max(0, 1990 - output.length));
