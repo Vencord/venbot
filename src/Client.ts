@@ -1,9 +1,9 @@
 import { AnyTextableChannel, Client, Message } from "oceanic.js";
 
 import { Commands } from "./Command";
-import { SUPPORT_ALLOWED_CHANNELS } from "./constants";
+import { Emoji, SUPPORT_ALLOWED_CHANNELS } from "./constants";
 import { BotState } from "./db/botState";
-import { DISCORD_TOKEN, PREFIX } from "./env";
+import { DISCORD_TOKEN, MOD_ROLE_ID, PREFIX } from "./env";
 import { lobotomiseMaybe, moderateMessage } from "./modules/moderate";
 import { reply, silently } from "./util";
 
@@ -66,6 +66,13 @@ Vaius.on("messageCreate", async msg => {
         const memberPerms = msg.channel.permissionsOf(msg.member);
         if (cmd.permissions.some(perm => !memberPerms.has(perm)))
             return;
+    }
+
+    if (cmd.modOnly) {
+        if (!msg.inCachedGuildChannel()) return;
+
+        if (!msg.member.roles.includes(MOD_ROLE_ID))
+            return silently(msg.createReaction(Emoji.Anger));
     }
 
     const noRateLimit = SUPPORT_ALLOWED_CHANNELS.includes(msg.channel?.id!) || msg.member?.permissions.has("MANAGE_MESSAGES");

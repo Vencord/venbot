@@ -25,7 +25,7 @@ defineCommand({
         if (guide.length === 0 || (guide.length === 1 && ["help", "list"].includes(guide[0])))
             return reply(msg, SupportTagList.map(n => `${toInlineCode(SupportInstructions[n[0]].emoji)} ` + n.join(", ")).join("\n"));
 
-        let { content } = SupportInstructions[guide.join(" ").toLowerCase()];
+        let { content } = SupportInstructions[guide.join(" ").toLowerCase()] ?? {};
         if (!content) return silently(msg.createReaction(Emoji.QuestionMark));
 
         if (msg.referencedMessage) {

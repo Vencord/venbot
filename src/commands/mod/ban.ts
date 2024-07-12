@@ -39,7 +39,7 @@ defineCommand({
     usage: "[daysToDelete] <user> [user...] [reason]",
     aliases: ["yeet", "🍌"],
     guildOnly: true,
-    permissions: ["BAN_MEMBERS"],
+    modOnly: true,
     async execute(msg, ...args) {
         const [daysToDelete, ids, reason] = parseCrap(msg, args);
 
@@ -73,7 +73,7 @@ defineCommand({
     usage: "[daysToDelete] <user> [user...] [reason]",
     guildOnly: true,
     ownerOnly: true,
-    permissions: ["BAN_MEMBERS"],
+    modOnly: true,
     async execute(msg, ...args) {
         const [daysToDelete, userIDs, reason] = parseCrap(msg, args);
         if (!userIDs.length) return reply(msg, { content: "Gimme some users silly" });

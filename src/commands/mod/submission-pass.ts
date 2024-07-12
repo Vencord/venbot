@@ -13,7 +13,7 @@ defineCommand({
     description: "Allow this user to post one submission",
     usage: "<user>",
     guildOnly: true,
-    permissions: ["MANAGE_ROLES"],
+    modOnly: true,
     async execute(msg, user) {
         const id = resolveUserId(user);
         if (!id)

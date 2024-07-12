@@ -56,7 +56,7 @@ defineCommand({
     description: "Add a role to one or more users",
     usage: "<role> <user> [user...]",
     guildOnly: true,
-    permissions: ["MANAGE_ROLES"],
+    modOnly: true,
     async execute(msg, ...args) {
         const { role, users } = parseArgs(msg, args);
         if (!role) return msg.createReaction(Emoji.QuestionMark).catch(swallow);
@@ -80,7 +80,7 @@ defineCommand({
     description: "Remove a role from one or more users",
     usage: "<role> <user> [user...]",
     guildOnly: true,
-    permissions: ["MANAGE_ROLES"],
+    modOnly: true,
     async execute(msg, ...args) {
         const { role, users } = parseArgs(msg, args);
         if (!role) return msg.createReaction(Emoji.QuestionMark).catch(swallow);

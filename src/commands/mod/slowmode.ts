@@ -6,9 +6,9 @@ defineCommand({
     name: "slowmode",
     aliases: ["slow"],
     description: "Set the slowmode for the channel",
-    permissions: ["MANAGE_CHANNELS"],
     usage: "<seconds>",
     guildOnly: true,
+    permissions: ["MANAGE_CHANNELS"],
     async execute(msg, secondsArg) {
         if (secondsArg === "off") secondsArg = "0";
 
