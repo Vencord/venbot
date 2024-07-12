@@ -1,8 +1,10 @@
-import { AnyTextableGuildChannel, Member, Message } from "oceanic.js";
+import { AnyTextableGuildChannel, Message } from "oceanic.js";
 
 import { defineCommand } from "~/Command";
 import { DONOR_ROLE_ID, Emoji } from "~/constants";
 import { codeblock, ID_REGEX, reply, swallow } from "~/util";
+
+import { hasHigherRoleThan } from "./utils";
 
 const Aliases = {
     donor: DONOR_ROLE_ID,
@@ -43,12 +45,7 @@ function parseArgs(msg: Message<AnyTextableGuildChannel>, args: string[]) {
     return { role, users: users as string[] };
 }
 
-function canManageRole(roleId: string, member: Member) {
-    const g = member.guild;
-    const pos = g.roles.get(roleId)!.position;
 
-    return member.roles.some(r => g.roles.get(r)!.position > pos);
-}
 
 defineCommand({
     name: "role-add",
@@ -60,7 +57,7 @@ defineCommand({
     async execute(msg, ...args) {
         const { role, users } = parseArgs(msg, args);
         if (!role) return msg.createReaction(Emoji.QuestionMark).catch(swallow);
-        if (!canManageRole(role, msg.member)) return msg.createReaction(Emoji.Anger).catch(swallow);
+        if (!hasHigherRoleThan(role, msg.member)) return msg.createReaction(Emoji.Anger).catch(swallow);
 
         const failed = [] as string[];
         for (const u of users) {
@@ -84,7 +81,7 @@ defineCommand({
     async execute(msg, ...args) {
         const { role, users } = parseArgs(msg, args);
         if (!role) return msg.createReaction(Emoji.QuestionMark).catch(swallow);
-        if (!canManageRole(role, msg.member)) return msg.createReaction(Emoji.Anger).catch(swallow);
+        if (!hasHigherRoleThan(role, msg.member)) return msg.createReaction(Emoji.Anger).catch(swallow);
 
         const failed = [] as string[];
         for (const u of users) {

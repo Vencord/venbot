@@ -5,6 +5,8 @@ import { Millis } from "~/constants";
 import { codeblock, ID_REGEX, reply, silently } from "~/util";
 import { pluralise, stripIndent } from "~/util/text";
 
+import { getHighestRolePosition } from "./utils";
+
 function parseCrap(msg: Message<AnyTextableGuildChannel>, args: string[]) {
     let possibleDays = Number(args[0]) || 0;
     if (possibleDays > 0 && possibleDays < 8)
@@ -50,20 +52,40 @@ defineCommand({
             ids.push(msg.referencedMessage.author.id);
         }
 
-        const results = [] as string[];
-        for (const id of ids) {
+        if (ids.length > 100) {
+            return reply(msg, { content: "That's tooooo many users bestie...." });
+        }
+
+        const members = await msg.guild.fetchMembers({ userIDs: ids });
+
+        const authorHighestRolePosition = getHighestRolePosition(msg.member);
+
+        const failedUsers = [] as string[];
+        const bannedUsers = [] as string[];
+        for (const member of members) {
+            if (getHighestRolePosition(member) >= authorHighestRolePosition) {
+                failedUsers.push(`Failed to ban ${member.tag} (${member.id}): You can't ban someone with a higher role.`);
+                continue;
+            }
+
             await silently(
-                msg.client.rest.channels.createDM(id)
+                member.user.createDM()
                     .then(dm => dm.createMessage({
                         content: `You have been banned from the Vencord Server by ${msg.author.tag}.\n## Reason:\n${codeblock(reason)}`
                     }))
             );
 
-            await msg.guild.createBan(id, { reason, deleteMessageDays: daysToDelete as 0 })
-                .catch(e => results.push(`Failed to ban ${id}: \`${String(e)}\``));
+            await member.ban({ reason, deleteMessageDays: daysToDelete as 0 })
+                .then(() => bannedUsers.push(member.tag))
+                .catch(e => failedUsers.push(`Failed to ban ${member.tag} (${member.id}): \`${String(e)}\``));
         }
 
-        return reply(msg, { content: results.join("\n") || "Done! <:BAN:1112433028917121114>" });
+        let content = failedUsers.join("\n") || "Done! <:BAN:1112433028917121114>";
+        if (bannedUsers.length) {
+            content += `\n\nBanned ${bannedUsers.join(", ")}`;
+        }
+
+        return reply(msg, { content });
     }
 });
 
