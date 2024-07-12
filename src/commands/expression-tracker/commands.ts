@@ -5,6 +5,7 @@ import { defineCommand } from "~/Command";
 import { db, ExpressionFormatType, ExpressionType } from "~/db";
 import { GUILD_ID } from "~/env";
 import { reply, ZWSP } from "~/util";
+import { makeConstants } from "~/util/objects";
 import { Paginator } from "~/util/Paginator";
 import { toInlineCode, toTitle } from "~/util/text";
 
@@ -68,14 +69,14 @@ function renderStickers(stickers: Expression[]) {
     return formatCountAndName(data);
 }
 
-const Aliases: Record<string, ExpressionType> = {
+const Aliases: Record<string, ExpressionType> = makeConstants({
     e: ExpressionType.EMOJI,
     emojis: ExpressionType.EMOJI,
     emote: ExpressionType.EMOJI,
     emotes: ExpressionType.EMOJI,
     s: ExpressionType.STICKER,
     stickers: ExpressionType.STICKER
-};
+});
 
 defineCommand({
     name: "stats",
