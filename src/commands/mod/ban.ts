@@ -60,11 +60,11 @@ defineCommand({
 
         const authorHighestRolePosition = getHighestRolePosition(msg.member);
 
-        const failedUsers = [] as string[];
+        const fails = [] as string[];
         const bannedUsers = [] as string[];
         for (const member of members) {
             if (getHighestRolePosition(member) >= authorHighestRolePosition) {
-                failedUsers.push(`Failed to ban ${member.tag} (${member.id}): You can't ban someone with a higher role.`);
+                fails.push(`Failed to ban ${member.tag} (${member.id}): You can't ban that person!`);
                 continue;
             }
 
@@ -77,10 +77,10 @@ defineCommand({
 
             await member.ban({ reason, deleteMessageDays: daysToDelete as 0 })
                 .then(() => bannedUsers.push(member.tag))
-                .catch(e => failedUsers.push(`Failed to ban ${member.tag} (${member.id}): \`${String(e)}\``));
+                .catch(e => fails.push(`Failed to ban ${member.tag} (${member.id}): \`${String(e)}\``));
         }
 
-        let content = failedUsers.join("\n") || "Done! <:BAN:1112433028917121114>";
+        let content = fails.join("\n") || "Done! <:BAN:1112433028917121114>";
         if (bannedUsers.length) {
             content += `\n\nBanned ${bannedUsers.join(", ")}`;
         }
