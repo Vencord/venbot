@@ -8,7 +8,7 @@ import { reply, silently } from "~/util";
 import { toInlineCode } from "~/util/text";
 import { mustParse } from "~/util/validation";
 
-export const SupportInstructions = {} as Record<string, {
+export const SupportInstructions = Object.create(null) as Record<string, {
     content: string;
     emoji: string;
 }>;

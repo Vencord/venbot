@@ -3,10 +3,11 @@ import { AnyTextableGuildChannel, Message } from "oceanic.js";
 import { defineCommand } from "~/Command";
 import { DONOR_ROLE_ID, Emoji } from "~/constants";
 import { codeblock, ID_REGEX, reply, swallow } from "~/util";
+import { makeConstants } from "~/util/objects";
 
 import { hasHigherRoleThan } from "./utils";
 
-const Aliases = {
+const Aliases = makeConstants({
     donor: DONOR_ROLE_ID,
     d: DONOR_ROLE_ID,
 
@@ -17,7 +18,7 @@ const Aliases = {
     r: "1026504932959977532",
 
     needy: "1088566810976194693"
-};
+});
 
 function parseArgs(msg: Message<AnyTextableGuildChannel>, args: string[]) {
     const { guild, referencedMessage } = msg;
