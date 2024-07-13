@@ -23,7 +23,7 @@ defineCommand({
         await Promise.all(ids.map(id =>
             msg.guild.removeBan(id, `${msg.author.tag}: ${reason}`)
                 .then(() => unbannedUsers.push(id))
-                .catch(() => fails.push(`Failed to unban **${id}**: User not banned`))
+                .catch(() => fails.push(`Failed to unban <@${id}>: User not banned`))
         ));
 
 
