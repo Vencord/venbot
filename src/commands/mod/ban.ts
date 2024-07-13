@@ -2,10 +2,10 @@ import { AnyTextableGuildChannel, Message } from "oceanic.js";
 
 import { defineCommand } from "~/Command";
 import { Millis } from "~/constants";
-import { codeblock, ID_REGEX, reply, silently } from "~/util";
+import { codeblock, reply, silently } from "~/util";
 import { pluralise, stripIndent } from "~/util/text";
 
-import { getHighestRolePosition } from "./utils";
+import { getHighestRolePosition, parseUserIdsAndReason } from "./utils";
 
 function parseCrap(msg: Message<AnyTextableGuildChannel>, args: string[]) {
     let possibleDays = Number(args[0]) || 0;
@@ -14,19 +14,8 @@ function parseCrap(msg: Message<AnyTextableGuildChannel>, args: string[]) {
     else
         possibleDays = 0;
 
-    const ids = [] as string[];
-    let reason = "Absolutely beaned";
-    let hasCustomReason = false;
-    for (let i = 0; i < args.length; i++) {
-        const id = args[i].match(ID_REGEX)?.[1];
-        if (id) {
-            ids.push(id);
-        } else {
-            reason = args.slice(i).join(" ");
-            hasCustomReason = true;
-            break;
-        }
-    }
+    // eslint-disable-next-line prefer-const
+    let { ids, reason, hasCustomReason } = parseUserIdsAndReason(args);
 
     if (!hasCustomReason && !ids.length && msg.referencedMessage) {
         reason = `Banned for message: "${msg.referencedMessage.content.slice(0, 400)}"`;
