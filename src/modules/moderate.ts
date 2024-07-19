@@ -240,8 +240,12 @@ export function initModListeners() {
         const isSteamScam = data.content.includes("[steamcommunity.com") &&
             ["https://u.to", "https://sc.link", "$"].some(s => data.content.includes(s));
         const isMediaFireScam = data.content.includes("bro") && data.content.includes("mediafire") && data.content.includes("found");
+        const isRobloxScam = data.content.includes("executor") && (
+            includesInvite ||
+            ["roblox", "free"].some(s => data.content.includes(s))
+        );
 
-        const isScam = isSteamScam || isMediaFireScam;
+        const isScam = isSteamScam || isMediaFireScam || isRobloxScam;
 
         if (isScam) {
             await Vaius.rest.guilds.createBan(guild.id, user.id, {
