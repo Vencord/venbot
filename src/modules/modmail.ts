@@ -255,7 +255,9 @@ async function closeModmail(interaction: GuildInteraction, isBan: boolean) {
     if (interaction.channel.type !== ChannelTypes.PRIVATE_THREAD || interaction.channel.threadMetadata.archived)
         return;
 
-    if (isBan && !interaction.member.permissions.has("MODERATE_MEMBERS")) return;
+    const isModAction = interaction.member.roles.includes(MOD_ROLE_ID);
+
+    if (isBan && !isModAction) return;
 
     const res = await db.selectFrom("tickets")
         .where("channelId", "=", interaction.channel.id)
@@ -263,7 +265,7 @@ async function closeModmail(interaction: GuildInteraction, isBan: boolean) {
         .executeTakeFirst();
     if (!res) return;
 
-    if (!interaction.member.permissions.has("MANAGE_CHANNELS") && res.userId !== interaction.user.id)
+    if (res.userId !== interaction.user.id && !isModAction)
         return;
 
     await interaction.defer(MessageFlags.EPHEMERAL);
