@@ -96,7 +96,8 @@ defineCommand({
                 "expressions.id",
                 "expressions.name",
                 "expressions.formatType",
-                fn.countAll().as("count")
+                fn.countAll().as("count"),
+                fn.sum(fn.countAll()).over().as("totalCount")
             ])
             .where("expressionType", "=", type)
             .groupBy("expressions.id")
@@ -113,7 +114,7 @@ defineCommand({
             stats,
             20,
             render,
-            `${stats.length} ${type}s tracked`
+            `${stats.length} ${type}s tracked  •  ${stats[0].totalCount} uses`
         );
 
         await paginator.create(msg);

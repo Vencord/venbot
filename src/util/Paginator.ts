@@ -149,9 +149,7 @@ export class Paginator<T> {
 
     private async destroy() {
         if (this.message) {
-            const embed = this.message.embeds[0];
-            embed.footer!.text = "This paginator has expired.";
-            await this.message.edit({ embeds: [embed], components: [] });
+            await this.message.edit({ components: [] });
             this.message = null;
         }
 
