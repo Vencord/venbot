@@ -23,10 +23,23 @@ export class Deduper<T> extends Set<T> {
         return super.delete(key);
     }
 
+    /**
+     * Adds the key if it doesn't exist, and returns whether it was already present
+     * @param key The key to add
+     * @returns Whether the key was already present
+     */
     public getOrAdd(key: T) {
         if (this.has(key)) return true;
 
         this.add(key);
         return false;
+    }
+
+    public clear() {
+        for (const timeoutId of this._timers.values())
+            clearTimeout(timeoutId);
+
+        this._timers.clear();
+        return super.clear();
     }
 }

@@ -1,5 +1,8 @@
 import { AnyTextableChannel, AnyTextableGuildChannel, Message, PermissionName } from "oceanic.js";
 
+import { Millis } from "./constants";
+import { Deduper } from "./util/Deduper";
+
 export interface Command<GuildOnly extends boolean = false> {
     name: string;
     aliases?: string[];
@@ -14,7 +17,7 @@ export interface Command<GuildOnly extends boolean = false> {
 }
 
 export interface FullCommand extends Command {
-    rateLimits: Set<string>;
+    rateLimits: Deduper<string>;
 }
 
 export const Commands = {} as Record<string, FullCommand>;
@@ -23,7 +26,7 @@ export function defineCommand<C extends Command<true>>(c: C & { guildOnly: true 
 export function defineCommand<C extends Command<false>>(c: C): void;
 export function defineCommand<C extends Command<boolean>>(c: C): void {
     const cmd = c as any as FullCommand;
-    cmd.rateLimits = new Set();
+    cmd.rateLimits = new Deduper(10 * Millis.SECOND);
 
     Commands[cmd.name] = cmd;
     cmd.aliases?.forEach(alias => Commands[alias] = cmd);

@@ -77,13 +77,8 @@ Vaius.on("messageCreate", async msg => {
 
     const noRateLimit = SUPPORT_ALLOWED_CHANNELS.includes(msg.channel?.id!) || msg.member?.permissions.has("MANAGE_MESSAGES");
 
-    if (!noRateLimit) {
-        if (cmd.rateLimits.has(msg.author.id))
-            return;
-
-        cmd.rateLimits.add(msg.author.id);
-        setTimeout(() => cmd.rateLimits.delete(msg.author.id), 10_000);
-    }
+    if (!noRateLimit && cmd.rateLimits.getOrAdd(msg.author.id))
+        return;
 
     if (!msg.channel)
         await msg.client.rest.channels.get(msg.channelID);
