@@ -1,6 +1,7 @@
-import { ApplicationCommandOptionTypes, ApplicationCommandTypes, InteractionTypes, MessageFlags } from "oceanic.js";
+import { ApplicationCommandOptionTypes, ApplicationCommandTypes, MessageFlags } from "oceanic.js";
 
 import { GUILD_ID } from "~/env";
+import { handleCommandInteraction } from "~/SlashCommands";
 
 import { Vaius } from "../../Client";
 import { DONOR_ROLE_ID, PROD } from "../../constants";
@@ -9,45 +10,45 @@ import { fetchBuffer } from "../../util/fetch";
 const Name = PROD ? "role-add" : "devrole-add";
 const description = "fuck you discord";
 
-Vaius.on("interactionCreate", async i => {
-    if (!i.inCachedGuildChannel()) return;
-    if (i.type !== InteractionTypes.APPLICATION_COMMAND) return;
-    if (i.data.name !== Name) return;
+handleCommandInteraction({
+    name: Name,
+    guildOnly: true,
+    async handle(i) {
+        await i.defer(MessageFlags.EPHEMERAL);
 
-    await i.defer(MessageFlags.EPHEMERAL);
+        const opts = i.data.options;
+        const user = opts.getUser("user", true);
+        const name = opts.getString("name", true);
+        const color = opts.getString("color")?.replace(/#/, "") || "000000";
+        const iconUrl = opts.getAttachment("icon")?.url || opts.getString("icon-url");
 
-    const opts = i.data.options;
-    const user = opts.getUser("user", true);
-    const name = opts.getString("name", true);
-    const color = opts.getString("color")?.replace(/#/, "") || "000000";
-    const iconUrl = opts.getAttachment("icon")?.url || opts.getString("icon-url");
+        const iconBuf = !iconUrl
+            ? undefined
+            : await fetchBuffer(iconUrl);
 
-    const iconBuf = !iconUrl
-        ? undefined
-        : await fetchBuffer(iconUrl);
+        const role = await i.guild.createRole({
+            name,
+            color: parseInt(color, 16),
+            icon: iconBuf,
+            hoist: false,
+            mentionable: false,
+            reason: `Donor Role for ${user.tag}`,
+            permissions: "0"
+        });
 
-    const role = await i.guild.createRole({
-        name,
-        color: parseInt(color, 16),
-        icon: iconBuf,
-        hoist: false,
-        mentionable: false,
-        reason: `Donor Role for ${user.tag}`,
-        permissions: "0"
-    });
+        await i.guild.editRolePositions([{
+            id: role.id,
+            position: i.guild.roles.get(DONOR_ROLE_ID)!.position + 1
+        }]);
 
-    await i.guild.editRolePositions([{
-        id: role.id,
-        position: i.guild.roles.get(DONOR_ROLE_ID)!.position + 1
-    }]);
+        await i.guild.addMemberRole(user.id, role.id, "Custom Donor Role");
+        await i.guild.addMemberRole(user.id, DONOR_ROLE_ID, "Donor Role");
 
-    await i.guild.addMemberRole(user.id, role.id, "Custom Donor Role");
-    await i.guild.addMemberRole(user.id, DONOR_ROLE_ID, "Donor Role");
-
-    await i.createFollowup({
-        content: "Done!",
-        flags: MessageFlags.EPHEMERAL
-    });
+        await i.createFollowup({
+            content: "Done!",
+            flags: MessageFlags.EPHEMERAL
+        });
+    }
 });
 
 Vaius.once("ready", () => {

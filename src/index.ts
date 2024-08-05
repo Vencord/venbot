@@ -3,13 +3,13 @@ import "~commands";
 import "~modules";
 
 import {
-    ApplicationCommandTypes,
-    InteractionTypes
+    ApplicationCommandTypes
 } from "oceanic.js";
 
 import { Vaius } from "./Client";
 import { PROD } from "./constants";
 import { initModListeners } from "./modules/moderate";
+import { handleCommandInteraction } from "./SlashCommands";
 
 if (PROD) {
     Vaius.once("ready", () => {
@@ -20,11 +20,12 @@ if (PROD) {
         });
     });
 
-    Vaius.on("interactionCreate", i =>
-        i.type === InteractionTypes.APPLICATION_COMMAND && i.data.name === "owo" && i.createMessage({
-            content: "owo"
-        })
-    );
+    handleCommandInteraction({
+        name: "owo",
+        handle(i) {
+            i.createMessage({ content: "owo " });
+        }
+    });
 }
 
 initModListeners();

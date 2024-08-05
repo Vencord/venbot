@@ -1,7 +1,7 @@
-import { ButtonStyles, ComponentTypes, CreateMessageOptions, EmbedOptions, Message, MessageFlags, TextInputStyles } from "oceanic.js";
+import { ButtonStyles, ComponentTypes, CreateMessageOptions, EmbedOptions, InteractionTypes, Message, MessageFlags, TextInputStyles } from "oceanic.js";
 
-import { Vaius } from "~/Client";
 import { Emoji, Millis } from "~/constants";
+import { handleInteraction } from "~/SlashCommands";
 import { reply } from "~/util";
 
 let id = 0;
@@ -158,16 +158,66 @@ export class Paginator<T> {
     }
 }
 
-Vaius.on("interactionCreate", async interaction => {
-    if (!interaction.isComponentInteraction() && !interaction.isModalSubmitInteraction()) return;
-    if (!interaction.data.customID.startsWith("paginator:")) return;
+handleInteraction(InteractionTypes.MESSAGE_COMPONENT, {
+    isMatch: i => i.data.customID.startsWith("paginator:"),
+    async handle(interaction) {
+        const [, action, id] = interaction.data.customID.split(":");
+        const paginator = paginators.get(Number(id));
 
-    const [, action, id] = interaction.data.customID.split(":");
-    const paginator = paginators.get(Number(id));
+        if (!paginator) return;
 
-    if (!paginator) return;
+        if (interaction.user.id !== paginator.userId)
+            return interaction.reply({
+                content: `This button is not for you! ${Emoji.Anger}`,
+                flags: MessageFlags.EPHEMERAL
+            });
 
-    if (interaction.isModalSubmitInteraction()) {
+        if (action !== "go-to")
+            await interaction.deferUpdate();
+
+        switch (action) {
+            case "first":
+                await paginator.navigateTo(0);
+                break;
+            case "prev":
+                await paginator.previousPage();
+                break;
+            case "next":
+                await paginator.nextPage();
+                break;
+            case "last":
+                await paginator.navigateTo(paginator.totalPages - 1);
+                break;
+            case "go-to":
+                await interaction.createModal({
+                    title: "Go To Page",
+                    customID: `paginator:go-to-submit:${id}`,
+                    components: [{
+                        type: ComponentTypes.ACTION_ROW,
+                        components: [{
+                            type: ComponentTypes.TEXT_INPUT,
+                            label: "Page Number",
+                            customID: "page",
+                            placeholder: "1",
+                            style: TextInputStyles.SHORT,
+                            required: true,
+                            maxLength: 4
+                        }]
+                    }]
+                });
+                break;
+        }
+    }
+});
+
+handleInteraction(InteractionTypes.MODAL_SUBMIT, {
+    isMatch: i => i.data.customID.startsWith("paginator:go-to-submit:"),
+    async handle(interaction) {
+        const [, _action, id] = interaction.data.customID.split(":");
+        const paginator = paginators.get(Number(id));
+
+        if (!paginator) return;
+
         const page = Number(interaction.data.components.getTextInput("page"));
         if (isNaN(page) || page < 1 || page > paginator.totalPages) {
             return interaction.reply({
@@ -178,50 +228,5 @@ Vaius.on("interactionCreate", async interaction => {
 
         await interaction.deferUpdate();
         await paginator.navigateTo(page - 1);
-        return;
-    }
-
-    if (paginator.message?.id !== interaction.message.id) return;
-
-    if (interaction.user.id !== paginator.userId)
-        return interaction.reply({
-            content: `This button is not for you! ${Emoji.Anger}`,
-            flags: MessageFlags.EPHEMERAL
-        });
-
-    if (action !== "go-to")
-        await interaction.deferUpdate();
-
-    switch (action) {
-        case "first":
-            await paginator.navigateTo(0);
-            break;
-        case "prev":
-            await paginator.previousPage();
-            break;
-        case "next":
-            await paginator.nextPage();
-            break;
-        case "last":
-            await paginator.navigateTo(paginator.totalPages - 1);
-            break;
-        case "go-to":
-            await interaction.createModal({
-                title: "Go To Page",
-                customID: `paginator:go-to-submit:${id}`,
-                components: [{
-                    type: ComponentTypes.ACTION_ROW,
-                    components: [{
-                        type: ComponentTypes.TEXT_INPUT,
-                        label: "Page Number",
-                        customID: "page",
-                        placeholder: "1",
-                        style: TextInputStyles.SHORT,
-                        required: true,
-                        maxLength: 4
-                    }]
-                }]
-            });
-            break;
     }
 });

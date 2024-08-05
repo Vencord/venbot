@@ -1,7 +1,8 @@
-import { ApplicationCommandOptionTypes, ApplicationCommandTypes, ApplicationIntegrationTypes, CreateMessageOptions, InteractionContextTypes, InteractionTypes, MessageFlags } from "oceanic.js";
+import { ApplicationCommandOptionTypes, ApplicationCommandTypes, ApplicationIntegrationTypes, CreateMessageOptions, InteractionContextTypes, MessageFlags } from "oceanic.js";
 
-import { OwnerId, Vaius } from "~/Client";
+import { Vaius } from "~/Client";
 import { GUILD_ID } from "~/env";
+import { handleCommandInteraction } from "~/SlashCommands";
 
 Vaius.once("ready", () => {
     Vaius.application.createGuildCommand(GUILD_ID, {
@@ -48,30 +49,31 @@ Vaius.once("ready", () => {
     });
 });
 
-Vaius.on("interactionCreate", async i => {
-    if (i.user.id !== OwnerId) return;
-    if (i.type !== InteractionTypes.APPLICATION_COMMAND || i.data.name !== "say") return;
+handleCommandInteraction({
+    name: "say",
+    ownerOnly: true,
+    async handle(i) {
+        const content = i.data.options.getString("content", true);
+        const reply = i.data.options.getString("reply-to");
 
-    const content = i.data.options.getString("content", true);
-    const reply = i.data.options.getString("reply-to");
+        const data: CreateMessageOptions = {
+            content,
+            messageReference: reply ? {
+                messageID: reply
+            } : undefined,
+            allowedMentions: {
+                everyone: false,
+                roles: false,
+                repliedUser: true,
+                users: true
+            }
+        };
 
-    const data: CreateMessageOptions = {
-        content,
-        messageReference: reply ? {
-            messageID: reply
-        } : undefined,
-        allowedMentions: {
-            everyone: false,
-            roles: false,
-            repliedUser: true,
-            users: true
+        try {
+            await Vaius.rest.channels.createMessage(i.channelID, data);
+            await i.reply({ content: "done", flags: MessageFlags.EPHEMERAL });
+        } catch {
+            await i.createMessage(data);
         }
-    };
-
-    try {
-        await Vaius.rest.channels.createMessage(i.channelID, data);
-        await i.reply({ content: "done", flags: MessageFlags.EPHEMERAL });
-    } catch {
-        await i.createMessage(data);
     }
 });

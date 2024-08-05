@@ -1,7 +1,8 @@
-import { ApplicationCommandTypes, ComponentTypes, MessageFlags, SelectOption, TextChannel } from "oceanic.js";
+import { AnyTextableChannel, ApplicationCommandTypes, ComponentInteraction, ComponentTypes, InteractionTypes, MessageFlags, SelectMenuTypes } from "oceanic.js";
 
 import { Vaius } from "~/Client";
 import { GUILD_ID } from "~/env";
+import { handleCommandInteraction, handleInteraction } from "~/SlashCommands";
 
 import { buildFaqEmbed, fetchFaq } from "./faq";
 import { SupportInstructions, SupportTagList } from "./support";
@@ -23,47 +24,60 @@ Vaius.once("ready", () => {
     });
 });
 
-Vaius.on("interactionCreate", async interaction => {
-    if (interaction.isCommandInteraction() && interaction.isMessageCommand()) {
-        const { name } = interaction.data;
-        if (name === Commands.Support || name === Commands.Faq) {
-            let options: SelectOption[];
-            let method: "createMessage" | "createFollowup" = "createMessage";
-            if (name === Commands.Support) {
-                options = SupportTagList.map(tags => ({
-                    value: tags[0],
-                    label: tags[0],
-                    emoji: { name: SupportInstructions[tags[0]].emoji }
-                }));
-            } else {
-                const [_, faqs] = await Promise.all([interaction.defer(MessageFlags.EPHEMERAL), fetchFaq()]);
-                options = faqs.map(f => ({
-                    value: f.question,
-                    label: f.question
-                }));
-                method = "createFollowup";
-            }
+handleCommandInteraction(
+    Commands.Support,
+    async interaction => {
+        const options = SupportTagList.map(tags => ({
+            value: tags[0],
+            label: tags[0],
+            emoji: { name: SupportInstructions[tags[0]].emoji }
+        }));
 
-            await interaction[method]({
-                flags: MessageFlags.EPHEMERAL,
+        await interaction.createMessage({
+            flags: MessageFlags.EPHEMERAL,
+            components: [{
+                type: ComponentTypes.ACTION_ROW,
                 components: [{
-                    type: ComponentTypes.ACTION_ROW,
-                    components: [{
-                        type: ComponentTypes.STRING_SELECT,
-                        customID: `${name} selection ${interaction.data.targetID}`,
-                        options
-                    }]
+                    type: ComponentTypes.STRING_SELECT,
+                    customID: `${Commands.Support}:${interaction.data.targetID}`,
+                    options
                 }]
-            });
-        }
+            }]
+        });
     }
+);
 
-    if (
-        interaction.isComponentInteraction() &&
-        interaction.data.componentType === ComponentTypes.STRING_SELECT &&
-        interaction.channel instanceof TextChannel
-    ) {
-        const [command, targetId] = interaction.data.customID.split(" selection ");
+handleCommandInteraction(
+    Commands.Faq,
+    async interaction => {
+        const [_, faqs] = await Promise.all([interaction.defer(MessageFlags.EPHEMERAL), fetchFaq()]);
+        const options = faqs.map(f => ({
+            value: f.question,
+            label: f.question
+        }));
+
+        await interaction.createFollowup({
+            flags: MessageFlags.EPHEMERAL,
+            components: [{
+                type: ComponentTypes.ACTION_ROW,
+                components: [{
+                    type: ComponentTypes.STRING_SELECT,
+                    customID: `${Commands.Faq}:${interaction.data.targetID}`,
+                    options
+                }]
+            }]
+        });
+    }
+);
+
+handleInteraction(InteractionTypes.MESSAGE_COMPONENT, {
+    isMatch: i =>
+        i.data.componentType === ComponentTypes.STRING_SELECT && (
+            i.data.customID.startsWith(Commands.Support + ":") ||
+            i.data.customID.startsWith(Commands.Faq + ":")
+        ),
+    async handle(interaction: ComponentInteraction<SelectMenuTypes, AnyTextableChannel>) {
+        const [command, targetId] = interaction.data.customID.split(":");
         if (!command || !targetId) return;
 
         const choice = interaction.data.values.getStrings()[0];
