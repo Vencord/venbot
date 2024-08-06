@@ -158,7 +158,8 @@ export class Paginator<T> {
     }
 }
 
-handleInteraction(InteractionTypes.MESSAGE_COMPONENT, {
+handleInteraction({
+    type: InteractionTypes.MESSAGE_COMPONENT,
     isMatch: i => i.data.customID.startsWith("paginator:"),
     async handle(interaction) {
         const [, action, id] = interaction.data.customID.split(":");
@@ -210,7 +211,8 @@ handleInteraction(InteractionTypes.MESSAGE_COMPONENT, {
     }
 });
 
-handleInteraction(InteractionTypes.MODAL_SUBMIT, {
+handleInteraction({
+    type: InteractionTypes.MODAL_SUBMIT,
     isMatch: i => i.data.customID.startsWith("paginator:go-to-submit:"),
     async handle(interaction) {
         const [, _action, id] = interaction.data.customID.split(":");
