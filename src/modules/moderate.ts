@@ -129,13 +129,10 @@ export async function moderateNick(member: Member) {
     const normalizedName = name
         .normalize("NFKC")
         .replace(HoistCharactersRegex, "")
-        .replaceAll("🇷🇺", "🇺🇦")
-        .replaceAll("🇮🇱", "🇹🇼");
+        .replaceAll("﷽", "") || member.username.replace(HoistCharactersRegex, "");
 
     if (name !== normalizedName)
-        silently(member.edit({
-            nick: normalizedName || member.username.replace(HoistCharactersRegex, "")
-        }));
+        silently(member.edit({ nick: normalizedName }));
 }
 
 export async function moderateImageHosts(msg: Message) {
