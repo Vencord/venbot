@@ -21,3 +21,8 @@ CREATE TABLE IF NOT EXISTS expressionUses (
 );
 
 CREATE INDEX IF NOT EXISTS expressionTypeIndex on expressionUses (expressionType);
+
+CREATE TABLE IF NOT EXISTS stickyRoles (
+    id      TEXT NOT NULL PRIMARY KEY,
+    roleIds TEXT NOT NULL              -- Comma separated list of role IDs. Sqlite doesn't support arrays.
+);
