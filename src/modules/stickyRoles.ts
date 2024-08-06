@@ -40,8 +40,9 @@ Vaius.on("guildAuditLogEntryCreate", async (maybeUncachedGuild, entry) => {
     const roleIds = member.roles
         .filter(roleId => !shouldIgnoreRole(roleId, guild));
 
-    if (roleIds.length === 0 && entry.changes!.some(c => c.key === "$remove")) {
-        await db.deleteFrom("stickyRoles").where("id", "=", entry.targetID).execute();
+    if (roleIds.length === 0) {
+        if (entry.changes!.some(c => c.key === "$remove"))
+            await db.deleteFrom("stickyRoles").where("id", "=", entry.targetID).execute();
     } else {
         await db
             .insertInto("stickyRoles")
