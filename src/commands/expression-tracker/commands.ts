@@ -126,7 +126,7 @@ defineCommand({
 });
 
 const makeLeaderboard = (usageType: ExpressionUsageType) => async (msg: Message, emoji: string) => {
-    const id = customEmojiRe.exec(emoji)?.[1] ?? emoji;
+    const id = emoji.match(customEmojiRe)?.[1] ?? emoji;
 
     const stats = await db.selectFrom("expressionUses")
         .select(({ fn }) => [
