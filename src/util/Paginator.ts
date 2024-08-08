@@ -1,20 +1,20 @@
+import { nanoid } from "nanoid";
 import { ButtonStyles, ComponentTypes, CreateMessageOptions, EmbedOptions, InteractionTypes, Message, MessageFlags, TextInputStyles } from "oceanic.js";
 
 import { Emoji, Millis } from "~/constants";
 import { handleInteraction } from "~/SlashCommands";
 import { reply } from "~/util";
 
-let id = 0;
-
-const paginators = new Map<number, Paginator<any>>();
+const paginators = new Map<string, Paginator<any>>();
 
 export class Paginator<T> {
-    private readonly id = id++;
-    private timeout: NodeJS.Timeout | undefined = undefined;
+    private _timeout: NodeJS.Timeout | undefined = undefined;
+
+    public readonly id = nanoid();
+    public readonly totalPages: number;
+
     public message: Message | null = null;
     public userId: string = "";
-
-    readonly totalPages: number;
     public currentPage = 0;
 
     constructor(
@@ -48,6 +48,16 @@ export class Paginator<T> {
         paginators.set(this.id, this);
     }
 
+    async destroy() {
+        if (this.message) {
+            await this.message.edit({ components: [] });
+            this.message = null;
+        }
+
+        paginators.delete(this.id);
+        clearTimeout(this._timeout);
+    }
+
     async navigateTo(page: number) {
         await this.message!.edit(this.buildMessageData(page));
         this.startTimeout();
@@ -67,8 +77,7 @@ export class Paginator<T> {
     }
 
     private buildMessageData(page: number) {
-        const isFirstPage = page === 0;
-        const isLastPage = page === this.totalPages - 1;
+        const { id, isFirstPage, isLastPage, totalPages } = this;
 
         return {
             embeds: [this.buildEmbed(page)],
@@ -77,35 +86,35 @@ export class Paginator<T> {
                 components: [
                     {
                         type: ComponentTypes.BUTTON,
-                        customID: `paginator:first:${this.id}`,
+                        customID: `paginator:first:${id}`,
                         style: ButtonStyles.PRIMARY,
                         emoji: { name: Emoji.DoubleLeft },
                         disabled: isFirstPage,
                     },
                     {
                         type: ComponentTypes.BUTTON,
-                        customID: `paginator:prev:${this.id}`,
+                        customID: `paginator:prev:${id}`,
                         style: ButtonStyles.PRIMARY,
                         emoji: { name: Emoji.Left },
                         disabled: isFirstPage,
                     },
                     {
                         type: ComponentTypes.BUTTON,
-                        customID: `paginator:go-to:${this.id}`,
+                        customID: `paginator:go-to:${id}`,
                         style: ButtonStyles.PRIMARY,
                         emoji: { name: Emoji.InputNumbers },
-                        disabled: this.totalPages === 1,
+                        disabled: totalPages === 1,
                     },
                     {
                         type: ComponentTypes.BUTTON,
-                        customID: `paginator:next:${this.id}`,
+                        customID: `paginator:next:${id}`,
                         style: ButtonStyles.PRIMARY,
                         emoji: { name: Emoji.Right },
                         disabled: isLastPage,
                     },
                     {
                         type: ComponentTypes.BUTTON,
-                        customID: `paginator:last:${this.id}`,
+                        customID: `paginator:last:${id}`,
                         style: ButtonStyles.PRIMARY,
                         emoji: { name: Emoji.DoubleRight },
                         disabled: isLastPage,
@@ -140,21 +149,11 @@ export class Paginator<T> {
     }
 
     private startTimeout() {
-        clearTimeout(this.timeout);
-        this.timeout = setTimeout(
+        clearTimeout(this._timeout);
+        this._timeout = setTimeout(
             () => this.destroy(),
             5 * Millis.MINUTE
         );
-    }
-
-    private async destroy() {
-        if (this.message) {
-            await this.message.edit({ components: [] });
-            this.message = null;
-        }
-
-        paginators.delete(this.id);
-        clearTimeout(this.timeout);
     }
 }
 
@@ -163,7 +162,7 @@ handleInteraction({
     isMatch: i => i.data.customID.startsWith("paginator:"),
     async handle(interaction) {
         const [, action, id] = interaction.data.customID.split(":");
-        const paginator = paginators.get(Number(id));
+        const paginator = paginators.get(id);
 
         if (!paginator) return;
 
@@ -215,8 +214,8 @@ handleInteraction({
     type: InteractionTypes.MODAL_SUBMIT,
     isMatch: i => i.data.customID.startsWith("paginator:go-to-submit:"),
     async handle(interaction) {
-        const [, _action, id] = interaction.data.customID.split(":");
-        const paginator = paginators.get(Number(id));
+        const [, , id] = interaction.data.customID.split(":");
+        const paginator = paginators.get(id);
 
         if (!paginator) return;
 
