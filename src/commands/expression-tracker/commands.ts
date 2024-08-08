@@ -11,8 +11,6 @@ import { makeConstants } from "~/util/objects";
 import { Paginator } from "~/util/Paginator";
 import { toInlineCode, toTitle } from "~/util/text";
 
-import { customEmojiRe } from "./tracker";
-
 const ExpressionTypes = [ExpressionType.EMOJI, ExpressionType.STICKER];
 
 interface Expression {
@@ -125,12 +123,13 @@ defineCommand({
     },
 });
 
+const customEmojiRe = /<a?:\w+:(\d+)>/;
+
 const makeLeaderboard = (usageType: ExpressionUsageType, expressionType = ExpressionType.EMOJI) => async (msg: Message, emoji: string) => {
     let name = emoji;
     let id: string | undefined;
     if (expressionType === ExpressionType.EMOJI) {
         id = customEmojiRe.exec(emoji)?.[1] ?? emoji;
-        customEmojiRe.lastIndex = 0;
     } else {
         const sticker = msg.stickerItems?.[0];
         if (sticker) {
@@ -156,7 +155,7 @@ const makeLeaderboard = (usageType: ExpressionUsageType, expressionType = Expres
         .execute();
 
     if (!stats.length)
-        return reply(msg, `Either no one has used ${toInlineCode(emoji)} yet, or it's not a valid ${expressionType}!`);
+        return reply(msg, `Either no one has used ${customEmojiRe.test(name) ? name : toInlineCode(name)} yet, or it's not a valid ${expressionType}!`);
 
     const paginator = new Paginator(
         toTitle(`Top  ${name}  ${usageType === ExpressionUsageType.MESSAGE ? "Users" : "Reactors"}`),
