@@ -1,13 +1,17 @@
 
 
+import { Message } from "oceanic.js";
+
 import { Vaius } from "~/Client";
 import { defineCommand } from "~/Command";
-import { db, ExpressionFormatType, ExpressionType } from "~/db";
+import { db, ExpressionFormatType, ExpressionType, ExpressionUsageType } from "~/db";
 import { GUILD_ID } from "~/env";
 import { reply, ZWSP } from "~/util";
 import { makeConstants } from "~/util/objects";
 import { Paginator } from "~/util/Paginator";
 import { toInlineCode, toTitle } from "~/util/text";
+
+import { customEmojiRe } from "./tracker";
 
 const ExpressionTypes = [ExpressionType.EMOJI, ExpressionType.STICKER];
 
@@ -119,4 +123,51 @@ defineCommand({
 
         await paginator.create(msg);
     },
+});
+
+const makeLeaderboard = (usageType: ExpressionUsageType) => async (msg: Message, emoji: string) => {
+    const id = customEmojiRe.exec(emoji)?.[1] ?? emoji;
+
+    const stats = await db.selectFrom("expressionUses")
+        .select(({ fn }) => [
+            "userId",
+            fn.countAll().as("count"),
+            fn.sum(fn.countAll()).over().as("totalCount")
+        ])
+        .where(eb => eb.and({
+            id,
+            usageType
+        }))
+        .groupBy("userId")
+        .orderBy("count", "desc")
+        .execute();
+
+    if (!stats.length)
+        return reply(msg, `Either no one has used ${toInlineCode(emoji)} yet, or it's not a valid emoji!`);
+
+    const paginator = new Paginator(
+        toTitle(`Top  ${emoji}  ${usageType === ExpressionUsageType.MESSAGE ? "Users" : "Reactors"}`),
+        stats,
+        20,
+        users => formatCountAndName(users.map(({ count, userId }) => [count.toString(), `<@${userId}>`])),
+        `used by ${stats.length} users •  used ${stats[0].totalCount} times`
+    );
+
+    await paginator.create(msg);
+};
+
+defineCommand({
+    name: "emoji-leaderboard",
+    aliases: ["elb", "e-lb", "emojilb", "emoji-lb"],
+    description: "Check who used an emoji the most",
+    usage: "<emoji>",
+    execute: makeLeaderboard(ExpressionUsageType.MESSAGE),
+});
+
+defineCommand({
+    name: "reaction-leaderboard",
+    aliases: ["rlb", "r-lb", "reactionlb", "reaction-lb"],
+    description: "Check who reacted with an emoji the most",
+    usage: "<emoji>",
+    execute: makeLeaderboard(ExpressionUsageType.REACTION),
 });

@@ -9,7 +9,7 @@ import { Deduper } from "~/util/Deduper";
 
 const coolDowns = new Deduper<string>(Millis.MINUTE);
 
-const customEmojiRe = /<a?:\w+:(\d+)>/g;
+export const customEmojiRe = /<a?:\w+:(\d+)>/g;
 const unicodeEmojiRe = /\p{RGI_Emoji}/vg;
 
 const ExpressionFormatTypes = {
