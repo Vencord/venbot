@@ -17,7 +17,7 @@ export function stripIndent(strings: TemplateStringsArray, ...values: any[]) {
 export function toTitle(s: string) {
     return s
         .split(" ")
-        .map(w => w[0].toUpperCase() + w.slice(1).toLowerCase())
+        .map(w => w && (w[0].toUpperCase() + w.slice(1).toLowerCase()))
         .join(" ");
 }
 
