@@ -1,4 +1,7 @@
 
+
+import { Message } from "oceanic.js";
+
 import { Millis } from "~/constants";
 
 import { Vaius } from "../Client";
@@ -16,6 +19,12 @@ Vaius.on("messageReactionAdd", async (msg, reactor, reaction) => {
     if (!msg.guildID) return;
     if (!HuskAbuserIds.has(reactor.id)) return;
     if (!reaction.name.toLowerCase().includes("husk")) return;
+
+    if (msg instanceof Message) {
+        const existingReactions = msg.reactions.find(r => r.emoji.id === reaction.id);
+        if (existingReactions?.count! >= 3) // if 2 other people reacted, it means this husk is probably a no-brainer so don't count
+            return;
+    }
 
     const husksUsed = HusksUsedPerUser.get(reactor.id) ?? 0;
 
