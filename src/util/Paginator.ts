@@ -77,7 +77,9 @@ export class Paginator<T> {
     }
 
     private buildMessageData(page: number) {
-        const { id, isFirstPage, isLastPage, totalPages } = this;
+        const { id, totalPages } = this;
+        const isFirstPage = page === 0;
+        const isLastPage = page === totalPages - 1;
 
         return {
             embeds: [this.buildEmbed(page)],
