@@ -16,7 +16,7 @@ defineCommand({
 
         const ban = await msg.guild.getBan(user.id).catch(() => null);
         if (!ban) {
-            return reply(msg, "That user is not banned");
+            return reply(msg, "bro is not banne");
         }
 
         let reason = ban.reason || "No reason provided";
