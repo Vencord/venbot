@@ -1,4 +1,4 @@
-import { Message } from "oceanic.js";
+import { Message, User } from "oceanic.js";
 
 import { Vaius } from "~/Client";
 import { defineCommand } from "~/Command";
@@ -6,6 +6,7 @@ import { db, ExpressionFormatType, ExpressionType, ExpressionUsageType } from "~
 import { GUILD_ID } from "~/env";
 import { reply } from "~/util";
 import { Paginator } from "~/util/Paginator";
+import { resolveUser } from "~/util/resolvers";
 import { toInlineCode, toTitle } from "~/util/text";
 
 import { formatCountAndName } from "./shared";
@@ -58,7 +59,7 @@ function renderStickers(stickers: Expression[]) {
     return formatCountAndName(data);
 }
 
-async function createTop(msg: Message, userId: string | undefined, expressionType: ExpressionType, usageType = ExpressionUsageType.MESSAGE) {
+async function createTop(msg: Message, user: User | null, expressionType: ExpressionType, usageType = ExpressionUsageType.MESSAGE) {
     let builder = db
         .selectFrom("expressionUses")
         .innerJoin("expressions", "expressions.id", "expressionUses.id")
@@ -76,8 +77,8 @@ async function createTop(msg: Message, userId: string | undefined, expressionTyp
         .groupBy("expressions.id")
         .orderBy("count", "desc");
 
-    if (userId)
-        builder = builder.where("userId", "=", userId);
+    if (user)
+        builder = builder.where("userId", "=", user.id);
 
     const stats = await builder.execute();
 
@@ -87,7 +88,7 @@ async function createTop(msg: Message, userId: string | undefined, expressionTyp
         return reply(msg, `No ${name}s have been tracked yet! D:`);
 
     const render = expressionType === ExpressionType.EMOJI ? renderEmojis : renderStickers;
-    const title = `${userId ? `${toTitle(msg.author.tag)}'s Top` : "Top"} ${toTitle(name)}s`;
+    const title = `${user ? `${toTitle(user.tag)}'s Top` : "Top"} ${toTitle(name)}s`;
 
     const paginator = new Paginator(
         title,
@@ -100,20 +101,25 @@ async function createTop(msg: Message, userId: string | undefined, expressionTyp
     await paginator.create(msg);
 }
 
-const makeTop = (isSelf: boolean) => async (msg: Message, type?: string) => {
+const makeTop = (isUserMode: boolean) => async (msg: Message, type?: string, userInput?: string) => {
     type ||= "emojis";
     type = type.toLowerCase();
 
-    const userId = isSelf ? msg.author.id : undefined;
+    let user = isUserMode ? msg.author : null;
+    if (isUserMode && userInput) {
+        user = await resolveUser(userInput);
+        if (!user)
+            return reply(msg, `Invalid user ${toInlineCode(userInput)}`);
+    }
 
     if ("emojis".startsWith(type) || "emotes".startsWith(type))
-        return createTop(msg, userId, ExpressionType.EMOJI);
+        return createTop(msg, user, ExpressionType.EMOJI);
 
     if ("stickers".startsWith(type))
-        return createTop(msg, userId, ExpressionType.STICKER);
+        return createTop(msg, user, ExpressionType.STICKER);
 
     if ("reactions".startsWith(type))
-        return createTop(msg, userId, ExpressionType.EMOJI, ExpressionUsageType.REACTION);
+        return createTop(msg, user, ExpressionType.EMOJI, ExpressionUsageType.REACTION);
 
     return reply(msg, "Invalid type. Must be one of: `emojis`, `stickers`, `reactions`");
 };
@@ -130,6 +136,6 @@ defineCommand({
     name: "mytop",
     aliases: ["myt", "myst", "mystats"],
     description: "Get stats about your most used emojis or stickers",
-    usage: "<emojis | stickers | reactions>",
+    usage: "<emojis | stickers | reactions> [user]",
     execute: makeTop(true),
 });
