@@ -55,7 +55,7 @@ const makeLeaderboard = (usageType: ExpressionUsageType, expressionType = Expres
 
 defineCommand({
     name: "emoji-leaderboard",
-    aliases: ["elb", "e-lb", "emojilb", "emoji-lb"],
+    aliases: ["elb", "e-lb", "emojilb", "emoji-lb", "whoused", "wu"],
     description: "Check who sent an emoji the most",
     usage: "<emoji>",
     execute: makeLeaderboard(ExpressionUsageType.MESSAGE),
@@ -63,7 +63,7 @@ defineCommand({
 
 defineCommand({
     name: "reaction-leaderboard",
-    aliases: ["rlb", "r-lb", "reactionlb", "reaction-lb"],
+    aliases: ["rlb", "r-lb", "reactionlb", "reaction-lb", "whoreacted", "wr"],
     description: "Check who reacted with an emoji the most",
     usage: "<emoji>",
     execute: makeLeaderboard(ExpressionUsageType.REACTION),
