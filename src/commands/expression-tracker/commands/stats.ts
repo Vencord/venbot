@@ -59,9 +59,6 @@ function renderStickers(stickers: Expression[]) {
 }
 
 async function createTop(msg: Message, userId: string | undefined, expressionType: ExpressionType, usageType = ExpressionUsageType.MESSAGE) {
-    if (!ExpressionTypes.includes(expressionType as any))
-        return reply(msg, `Invalid type. Must be one of: ${ExpressionTypes.map(toInlineCode).join(", ")}`);
-
     let builder = db
         .selectFrom("expressionUses")
         .innerJoin("expressions", "expressions.id", "expressionUses.id")
@@ -90,7 +87,6 @@ async function createTop(msg: Message, userId: string | undefined, expressionTyp
         return reply(msg, `No ${name}s have been tracked yet! D:`);
 
     const render = expressionType === ExpressionType.EMOJI ? renderEmojis : renderStickers;
-
     const title = `${userId ? `${toTitle(msg.author.tag)}'s Top` : "Top"} ${toTitle(name)}s`;
 
     const paginator = new Paginator(
