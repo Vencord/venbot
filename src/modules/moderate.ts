@@ -113,7 +113,7 @@ export async function moderateMessage(msg: Message) {
         return;
     }
 
-    if (msg.member.permissions.has("MANAGE_MESSAGES")) return;
+    if (msg.member?.permissions.has("MANAGE_MESSAGES")) return;
 
     for (const mod of [moderateMultiChannelSpam, moderateInvites, moderateImageHosts]) {
         if (await mod(msg)) return;

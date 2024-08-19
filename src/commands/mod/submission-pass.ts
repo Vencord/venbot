@@ -33,8 +33,8 @@ Vaius.on("threadCreate", async thread => {
     if (thread.parent?.type !== ChannelTypes.GUILD_FORUM || thread.parent?.parent?.id !== COMMUNITY_CATEGORY_CHANNEL_ID)
         return;
 
-    const member = thread.guild.members.get(thread.ownerID) ?? await thread.guild.getMember(thread.ownerID);
-    if (member.roles.includes(COMMUNITY_POST_PASS_ROLE_ID)) {
+    const member = thread.guild.members.get(thread.ownerID) ?? await thread.guild.getMember(thread.ownerID).catch(() => null);
+    if (member?.roles.includes(COMMUNITY_POST_PASS_ROLE_ID)) {
         member.removeRole(COMMUNITY_POST_PASS_ROLE_ID, "Submission pass used");
     }
 });

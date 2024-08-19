@@ -35,7 +35,8 @@ Vaius.on("guildAuditLogEntryCreate", async (maybeUncachedGuild, entry) => {
         ? maybeUncachedGuild
         : Vaius.guilds.get(maybeUncachedGuild.id)!;
 
-    const member = await guild.getMember(entry.targetID);
+    const member = entry.targetID && await guild.getMember(entry.targetID).catch(() => null);
+    if (!member) return;
 
     const roleIds = member.roles
         .filter(roleId => !shouldIgnoreRole(roleId, guild));

@@ -302,7 +302,7 @@ handleInteraction({
             flags: MessageFlags.EPHEMERAL
         });
 
-        const member = await interaction.guild.getMember(res.userId);
+        const member = await interaction.guild.getMember(res.userId).catch(() => null);
         if (!member) return;
 
         if (isBan) {
