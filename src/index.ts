@@ -1,3 +1,4 @@
+import "source-map-support/register";
 import "./env";
 import "~commands";
 import "~modules";

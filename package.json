@@ -27,6 +27,7 @@
         "nanoid": "^3.3.7",
         "oceanic.js": "1.10.5-dev.9f95b4a",
         "pako": "^2.1.0",
+        "source-map-support": "^0.5.21",
         "valibot": "^0.34.0"
     },
     "devDependencies": {
