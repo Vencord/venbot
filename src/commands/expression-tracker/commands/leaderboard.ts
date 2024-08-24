@@ -40,7 +40,11 @@ const makeLeaderboard = (usageType: ExpressionUsageType, expressionType = Expres
         .execute();
 
     if (!stats.length)
-        return reply(msg, `Either no one has used ${customEmojiRe.test(name) ? name : toInlineCode(name)} yet, or it's not a valid ${expressionType}!`);
+        return reply(
+            msg,
+            `Either no one has used ${customEmojiRe.test(name) ? name : toInlineCode(name)} yet, or it's not a valid ${expressionType}! ` +
+            `Keep in mind that I only track ${expressionType}s from this server :3`
+        );
 
     const myCount = stats.find(u => u.userId === msg.author.id)?.count ?? 0;
 
