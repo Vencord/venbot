@@ -2,7 +2,7 @@
 
 import { Message } from "oceanic.js";
 
-import { Millis } from "~/constants";
+import { hourly } from "~/util/hourly";
 
 import { Vaius } from "../Client";
 
@@ -36,9 +36,4 @@ Vaius.on("messageReactionAdd", async (msg, reactor, reaction) => {
     HusksUsedPerUser.set(reactor.id, husksUsed + 1);
 });
 
-const millisToNextFullHour = () => Millis.HOUR - (Date.now() % Millis.HOUR);
-
-setTimeout(function resetHusksUsed() {
-    HusksUsedPerUser.clear();
-    setTimeout(resetHusksUsed, millisToNextFullHour());
-}, millisToNextFullHour());
+hourly(() => HusksUsedPerUser.clear());
