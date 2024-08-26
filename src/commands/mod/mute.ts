@@ -3,6 +3,7 @@ import parseDuration from "parse-duration";
 import { defineCommand } from "~/Command";
 import { Millis } from "~/constants";
 import { codeblock, ID_REGEX, reply, silently, until } from "~/util";
+import { msToHumanReadable } from "~/util/text";
 
 import { getHighestRolePosition, parseUserIdsAndReason } from "./utils";
 
@@ -23,6 +24,7 @@ defineCommand({
         if (duration == null || duration <= 0 || duration > 28 * Millis.DAY) {
             return reply(msg, { content: "Duration must be a valid time span not longer than 28 days" });
         }
+        const durationText = msToHumanReadable(duration);
 
         // eslint-disable-next-line prefer-const
         let { ids, reason, hasCustomReason } = parseUserIdsAndReason(args);
@@ -54,7 +56,7 @@ defineCommand({
             silently(
                 member.user.createDM()
                     .then(dm => dm.createMessage({
-                        content: `You have been muted on the Vencord Server by ${msg.author.tag}.\n## Reason:\n${codeblock(reason)}`
+                        content: `You have been muted on the Vencord Server for ${durationText} by ${msg.author.tag}.\n## Reason:\n${codeblock(reason)}`
                     }))
             );
 
@@ -65,7 +67,7 @@ defineCommand({
 
         let content = fails.join("\n") || "Done!";
         if (mutedUsers.length) {
-            content += `\n\nMuted ${mutedUsers.join(", ")}`;
+            content += `\n\nMuted ${mutedUsers.join(", ")} for ${durationText}`;
         }
 
         return reply(msg, { content });

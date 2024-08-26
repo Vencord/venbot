@@ -42,3 +42,25 @@ export function countOccurrences(s: string, sub: string) {
 
     return count;
 }
+
+export function msToHumanReadable(ms: number, short = false) {
+    const seconds = Math.floor((ms / 1000) % 60);
+    const minutes = Math.floor((ms / (1000 * 60)) % 60);
+    const hours = Math.floor((ms / (1000 * 60 * 60)) % 24);
+    const days = Math.floor(ms / (1000 * 60 * 60 * 24));
+
+    const values = ([
+        [days, "day"],
+        [hours, "hour"],
+        [minutes, "minute"],
+        [seconds, "second"]
+    ] as const).filter(([v]) => v > 0);
+
+    return values
+        .map(
+            short
+                ? ([v, u]) => `${v}${u[0]}`
+                : ([v, u]) => pluralise(v, u)
+        )
+        .join(", ");
+}
