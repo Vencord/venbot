@@ -2,7 +2,7 @@ import parseDuration from "parse-duration";
 
 import { defineCommand } from "~/Command";
 import { Millis } from "~/constants";
-import { ID_REGEX, reply, until } from "~/util";
+import { codeblock, ID_REGEX, reply, silently, until } from "~/util";
 
 import { getHighestRolePosition, parseUserIdsAndReason } from "./utils";
 
@@ -50,6 +50,13 @@ defineCommand({
                 fails.push(`Failed to mute **${member.tag}** (${member.mention}): You can't mute that person!`);
                 return;
             }
+
+            silently(
+                member.user.createDM()
+                    .then(dm => dm.createMessage({
+                        content: `You have been muted on the Vencord Server by ${msg.author.tag}.\n## Reason:\n${codeblock(reason)}`
+                    }))
+            );
 
             await member.edit({ communicationDisabledUntil: until(duration), reason })
                 .then(() => mutedUsers.push(`**${member.tag}** (${member.mention})`))
