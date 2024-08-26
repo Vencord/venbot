@@ -52,29 +52,32 @@ defineCommand({
 
         const fails = [] as string[];
         const bannedUsers = [] as string[];
-        for (const member of members) {
-            if (getHighestRolePosition(member) >= authorHighestRolePosition) {
-                fails.push(`Failed to ban **${member.tag}** (${member.mention}): You can't ban that person!`);
-                continue;
-            }
 
-            await silently(
-                member.user.createDM()
-                    .then(dm => dm.createMessage({
-                        content: `You have been banned from the Vencord Server by ${msg.author.tag}.\n## Reason:\n${codeblock(reason)}`
-                    }))
-            );
+        await Promise.all([
+            ...members.map(async member => {
+                if (getHighestRolePosition(member) >= authorHighestRolePosition) {
+                    fails.push(`Failed to ban **${member.tag}** (${member.mention}): You can't ban that person!`);
+                    return;
+                }
 
-            await member.ban({ reason, deleteMessageDays: daysToDelete as 0 })
-                .then(() => bannedUsers.push(`**${member.tag}** (${member.mention})`))
-                .catch(e => fails.push(`Failed to ban **${member.tag}** (${member.mention}): \`${String(e)}\``));
-        }
+                await silently(
+                    member.user.createDM()
+                        .then(dm => dm.createMessage({
+                            content: `You have been banned from the Vencord Server by ${msg.author.tag}.\n## Reason:\n${codeblock(reason)}`
+                        }))
+                );
 
-        for (const id of restIds) {
-            await msg.guild.createBan(id, { reason, deleteMessageDays: daysToDelete as 0 })
-                .then(() => bannedUsers.push(`**<@${id}>**`))
-                .catch(e => fails.push(`Failed to ban **<@${id}>**: \`${String(e)}\``));
-        }
+                await member.ban({ reason, deleteMessageDays: daysToDelete as 0 })
+                    .then(() => bannedUsers.push(`**${member.tag}** (${member.mention})`))
+                    .catch(e => fails.push(`Failed to ban **${member.tag}** (${member.mention}): \`${String(e)}\``));
+            }),
+
+            ...restIds.map(async id => {
+                await msg.guild.createBan(id, { reason, deleteMessageDays: daysToDelete as 0 })
+                    .then(() => bannedUsers.push(`**<@${id}>**`))
+                    .catch(e => fails.push(`Failed to ban **<@${id}>**: \`${String(e)}\``));
+            })
+        ]);
 
         let content = fails.join("\n") || "Done! <:BAN:1112433028917121114>";
         if (bannedUsers.length) {
