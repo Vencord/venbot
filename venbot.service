@@ -1,0 +1,13 @@
+[Unit]
+Description=venbot
+
+[Service]
+Type=exec
+Restart=always
+ExecStartPre=pnpm install --frozen-lockfile
+ExecStartPre=pnpm build
+ExecStart=pnpm start
+WorkingDirectory=%h/venbot
+
+[Install]
+WantedBy=default.target
