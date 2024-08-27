@@ -34,7 +34,7 @@ defineCommand({
         }
 
         if (!ids.length)
-            reply(msg, { content: "Gimme some users dummy" });
+            return reply(msg, { content: "Gimme some users dummy" });
 
         reason = `${msg.author.tag}: ${reason}`;
 
