@@ -4,7 +4,8 @@ import "~commands";
 import "~modules";
 
 import {
-    ApplicationCommandTypes
+    ApplicationCommandTypes,
+    DiscordHTTPError
 } from "oceanic.js";
 
 import { Vaius } from "./Client";
@@ -37,6 +38,9 @@ if (PROD) {
 initModListeners();
 
 async function handleError(title: string, err: unknown) {
+    if (err instanceof DiscordHTTPError && err.status >= 500)
+        return;
+
     console.error(`${title}:`, err);
 
     const stack = err instanceof Error && err.stack;
