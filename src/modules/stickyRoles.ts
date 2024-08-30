@@ -43,7 +43,7 @@ Vaius.on("guildAuditLogEntryCreate", async (maybeUncachedGuild, entry) => {
 
     if (roleIds.length === 0) {
         if (entry.changes!.some(c => c.key === "$remove"))
-            await db.deleteFrom("stickyRoles").where("id", "=", entry.targetID).execute();
+            await removeStickyRoles(entry.targetID);
     } else {
         await db
             .insertInto("stickyRoles")
@@ -86,3 +86,10 @@ defineCommand({
         await reply(msg, { content: `Saved ${rows.length} users' roles!` });
     },
 });
+
+export function removeStickyRoles(memberId: string) {
+    return db
+        .deleteFrom("stickyRoles")
+        .where("id", "=", memberId)
+        .execute();
+}

@@ -36,8 +36,11 @@ const configSchema = object({
         number()
     ),
     HTTP_DOMAIN: string(),
+
+    GITHUB_PAT: string(),
     GITHUB_CLIENT_ID: string(),
     GITHUB_CLIENT_SECRET: string(),
+
     CONTRIBUTOR_ROLE_ID: string(),
 });
 
@@ -65,6 +68,8 @@ export const {
 
     HTTP_SERVER_LISTEN_PORT,
     HTTP_DOMAIN,
+
+    GITHUB_PAT,
     GITHUB_CLIENT_ID,
     GITHUB_CLIENT_SECRET,
 

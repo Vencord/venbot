@@ -1,21 +1,115 @@
 import { randomUUID } from "crypto";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { AnyTextableChannel, Message } from "oceanic.js";
+import { InferOutput, nullable, number, object, parse, safeParse, string, union } from "valibot";
 
 import { defineCommand } from "~/Command";
-import { Millis } from "~/constants";
+import { DONOR_ROLE_ID, Millis } from "~/constants";
 import { db } from "~/db";
-import { CONTRIBUTOR_ROLE_ID, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, HTTP_DOMAIN } from "~/env";
+import { CONTRIBUTOR_ROLE_ID, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, GITHUB_PAT, HTTP_DOMAIN } from "~/env";
+import { removeStickyRoles } from "~/modules/stickyRoles";
 import { fastify } from "~/server";
-import { checkPromise, getAsMemberInMainGuild, reply, sendDm, silently } from "~/util";
+import { getAsMemberInMainGuild, reply, sendDm, silently } from "~/util";
 import { fetchJson } from "~/util/fetch";
-import { pluralise } from "~/util/text";
 
 export const githubAuthStates = new Map<string, {
     id: string;
     timeoutId: NodeJS.Timeout;
     message: Message<AnyTextableChannel>;
 }>();
+
+const userSchema = object({
+    login: string(),
+    id: union([number(), string()])
+});
+
+const sponsorSchema = object({
+    user: object({
+        sponsorshipForViewerAsSponsorable: nullable(object({
+            tier: object({
+                name: string(),
+                monthlyPriceInDollars: number()
+            })
+        }))
+    })
+});
+
+const eventsSchema = object({
+    total_count: number()
+});
+
+type User = InferOutput<typeof userSchema>;
+
+class CheckError extends Error { }
+
+const LinkedRoles: Array<{
+    name: string;
+    id: string;
+    check(user: User, accessToken: string): Promise<false | string>;
+}> = [
+        {
+            name: "Donor",
+            id: DONOR_ROLE_ID,
+            async check(user, accessToken) {
+                const res = await fetchJson("https://api.github.com/graphql", {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${GITHUB_PAT}`
+                    },
+                    body: `
+                query {
+                    user(login: ${JSON.stringify(user.login)}) {
+                        sponsorshipForViewerAsSponsorable(activeOnly: true) {
+                            tier {
+                                name
+                                monthlyPriceInDollars
+                            }
+                        }
+                    }
+                }
+            `
+                }).catch(() => null);
+
+                if (!res)
+                    throw new CheckError("Failed to fetch sponsor info from GitHub");
+
+                const sponsorInfo = safeParse(sponsorSchema, res.data);
+                if (!sponsorInfo.success)
+                    throw new CheckError("Failed to parse sponsor info from GitHub");
+
+                const sponsorTier = sponsorInfo.output.user.sponsorshipForViewerAsSponsorable?.tier;
+                if (!sponsorTier)
+                    return false;
+
+                return `Based on your ${sponsorTier.name} sponsorship`;
+            }
+        },
+        {
+            name: "Contributor",
+            id: CONTRIBUTOR_ROLE_ID,
+            async check(user, accessToken) {
+                const res = await fetchJson(`https://api.github.com/search/commits?q=author:${user.login}+org:Vencord+repo:Vendicated%2FVencord&per_page=1`, {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`
+                    }
+                }).catch(() => null);
+
+                if (!res)
+                    throw new CheckError("Failed to fetch user events from GitHub");
+
+                const events = safeParse(eventsSchema, res);
+                if (!events.success)
+                    throw new CheckError("Failed to parse user events from GitHub");
+
+                if (!events.output.total_count)
+                    return false;
+
+                return `Based on ${events.output.total_count} commits`;
+            }
+        }
+    ];
+
+
 
 fastify.register(
     (fastify, opts, done) => {
@@ -87,43 +181,84 @@ fastify.register(
                 });
 
                 if (!githubResponse.ok)
-                    return res.status(500).send("Failed to authorize with GitHub");
+                    return res.status(502).send("Failed to authorise with GitHub");
 
                 const { access_token: accessToken } = await githubResponse.json() as any;
 
-                const user = await fetchJson("https://api.github.com/user", {
+                const githubUser = await fetchJson("https://api.github.com/user", {
                     headers: {
                         Authorization: `Bearer ${accessToken}`
                     }
-                }).catch(() => null);
+                })
+                    .then(data => parse(userSchema, data))
+                    .catch(() => null);
 
-                if (!user)
-                    return res.status(500).send("Failed to fetch user data from GitHub");
+                if (!githubUser)
+                    return res.status(502).send("Failed to fetch user data from GitHub");
 
-                const events = await fetchJson(`https://api.github.com/search/commits?q=author:${user.login}+org:Vencord+repo:Vendicated%2FVencord&per_page=1`, {
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`
-                    }
-                });
-
-                if (!events)
-                    return res.status(500).send("Failed to fetch user events from GitHub");
+                const userAsMember = await getAsMemberInMainGuild(req.query.userId);
+                if (!userAsMember)
+                    return res.status(500).send("You must be in the Vencord server to link your GitHub");
 
                 clearTimeout(state.timeoutId);
                 githubAuthStates.delete(req.query.userId);
 
+                try {
+                    var rolesToAdd = await Promise.all(LinkedRoles.map(async data => (
+                        {
+                            name: data.name,
+                            id: data.id,
+                            result: await data.check(githubUser, accessToken)
+                        }
+                    )));
+                    rolesToAdd = rolesToAdd.filter(role => role.result !== false);
+                } catch (err) {
+                    if (!(err instanceof CheckError))
+                        console.error("Error while linking role for", req.query.userId, err);
+
+                    const message = err instanceof CheckError
+                        ? err.message
+                        : "Something unexpected happen";
+
+                    return res.status(502).send(`Failed to link Github: ${message}.\n\nPlease try again later.`);
+                }
+
+                let result = `Successfully linked your GitHub account ${githubUser.login}.\n\n`;
+
+                if (!rolesToAdd.length) {
+                    result += "It doesn't seem like you have any roles to claim. Make sure you used the correct GitHub account\n\nYou can close this tab now.";
+                    return res.send(result);
+                }
+
+                try {
+                    const newRoles = rolesToAdd.map(role => role.id);
+                    await userAsMember.edit({
+                        roles: [
+                            ...newRoles,
+                            ...userAsMember.roles.filter(role => !newRoles.includes(role))
+                        ],
+                        reason: `Linked GitHub ${githubUser.login}`
+                    });
+                } catch {
+                    result += "Failed to add roles to you. Please try again later.";
+                    return res.status(500).send(result);
+                }
+
                 const existingLink = await db.transaction().execute(async t => {
+                    const githubId = String(githubUser.id);
+
                     const existingLink = await t
                         .selectFrom("linkedGitHubs")
                         .select("discordId")
-                        .where("githubId", "=", user.id)
+                        .where("githubId", "=", githubId)
                         .where("discordId", "!=", req.query.userId)
                         .executeTakeFirst();
 
-                    const value = { discordId: req.query.userId, githubId: user.id };
-
                     await t.insertInto("linkedGitHubs")
-                        .values(value)
+                        .values({
+                            discordId: req.query.userId,
+                            githubId: githubId
+                        })
                         .onConflict(oc =>
                             oc
                                 .column("githubId")
@@ -134,34 +269,29 @@ fastify.register(
                         .execute();
 
                     return existingLink;
-                });
+                }).catch(() => null);
 
-                let message = `Successfully linked your GitHub account ${user.login}.\n\n`;
-
-                if (events.total_count > 0) {
-                    const amount = pluralise(events.total_count, "commit");
-                    const member = await getAsMemberInMainGuild(req.query.userId);
-                    if (member && await checkPromise(member.addRole(CONTRIBUTOR_ROLE_ID))) {
-                        message += `You now have the contributor role! (Based on ${amount})`;
-
-                        if (existingLink) {
-                            const oldMember = await getAsMemberInMainGuild(existingLink.discordId);
-                            if (oldMember && await checkPromise(oldMember.removeRole(CONTRIBUTOR_ROLE_ID)))
-                                message += `\nI removed the contributor role from your old account <@${oldMember.id}>.`;
-                        }
+                if (existingLink) {
+                    const previousMember = await getAsMemberInMainGuild(existingLink.discordId);
+                    if (previousMember) {
+                        silently(previousMember.edit({
+                            roles: previousMember.roles.filter(role => !rolesToAdd.some(r => r.id === role)),
+                            reason: `Linked new Discord account ${req.query.userId} to GitHub ${githubUser.login}`
+                        }));
                     } else {
-                        message += `You have contributed ${amount} to Vencord repositories, but I failed give you the contributor role.\nPlease try again or open a modmail`;
+                        removeStickyRoles(existingLink.discordId);
                     }
-                } else {
-                    message += "You have not contributed to any Vencord repositories.";
                 }
 
-                res.send(`${message}\n\nYou can close this tab now.`);
+                result += "Gave you the following role(s):\n";
+                result += rolesToAdd.map(role => `- ${role.name} (${role.result})`).join("\n");
+
+                res.send(`${result}\n\nYou can close this tab now.`);
 
                 try {
-                    await state.message.edit({ content: message });
+                    await state.message.edit({ content: result });
                 } catch {
-                    silently(state.message.channel.createMessage({ content: message }));
+                    silently(state.message.channel.createMessage({ content: result }));
                 }
             }
         );
@@ -176,7 +306,7 @@ fastify.register(
 
 defineCommand({
     name: "link-github",
-    description: "Link your GitHub account to claim the contributor role",
+    description: "Link your GitHub account to claim the contributor and donor role",
     aliases: ["github", "linkgithub", "gh", "link-gh"],
     usage: null,
     async execute(msg) {
@@ -191,7 +321,7 @@ defineCommand({
         const oauthLink = `${HTTP_DOMAIN}/github/authorize?userId=${msg.author.id}&state=${id}`;
 
         const sentMessage = await sendDm(msg.author, {
-            content: `To claim the contributor role, please [authorize with GitHub](<${oauthLink}>)\n\nThis link will expire in 5 minutes.`
+            content: `To link your GitHub account, please authorise [here](<${oauthLink}>)\n\nThis link will expire in 5 minutes.`
         });
 
         if (!sentMessage)
