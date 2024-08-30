@@ -136,7 +136,7 @@ fastify.register(
                     return existingLink;
                 });
 
-                let message = "Successfully authorised.\n\n";
+                let message = `Successfully linked your GitHub account ${user.login}.\n\n`;
 
                 if (events.total_count > 0) {
                     const amount = pluralise(events.total_count, "commit");
