@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import { object, optional, picklist, string } from "valibot";
+import { number, object, optional, picklist, pipe, string, transform } from "valibot";
 
 import { mustParse } from "./util/validation";
 
@@ -28,7 +28,17 @@ const configSchema = object({
 
     MOD_MAIL_CHANNEL_ID: string(),
     MOD_MAIL_LOG_CHANNEL_ID: string(),
-    MOD_MAIL_BAN_ROLE_ID: string()
+    MOD_MAIL_BAN_ROLE_ID: string(),
+
+    HTTP_SERVER_LISTEN_PORT: pipe(
+        string(),
+        transform(Number),
+        number()
+    ),
+    HTTP_DOMAIN: string(),
+    GITHUB_CLIENT_ID: string(),
+    GITHUB_CLIENT_SECRET: string(),
+    CONTRIBUTOR_ROLE_ID: string(),
 });
 
 const parsed = mustParse("Invalid environment variables", configSchema, process.env);
@@ -51,5 +61,12 @@ export const {
 
     MOD_MAIL_CHANNEL_ID,
     MOD_MAIL_LOG_CHANNEL_ID,
-    MOD_MAIL_BAN_ROLE_ID
+    MOD_MAIL_BAN_ROLE_ID,
+
+    HTTP_SERVER_LISTEN_PORT,
+    HTTP_DOMAIN,
+    GITHUB_CLIENT_ID,
+    GITHUB_CLIENT_SECRET,
+
+    CONTRIBUTOR_ROLE_ID,
 } = parsed;

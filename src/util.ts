@@ -1,5 +1,7 @@
 import { CreateMessageOptions, Message, User } from "oceanic.js";
 
+import { Vaius } from "./Client";
+import { GUILD_ID } from "./env";
 import { doFetch } from "./util/fetch";
 
 export const ZWSP = "\u200B";
@@ -57,15 +59,23 @@ export function until(ms: number) {
     return new Date(Date.now() + ms).toISOString();
 }
 
-export async function silently<T>(p?: Promise<T>) {
+export async function silently<T extends Promise<any>>(p?: T) {
     try {
         return await p;
     } catch { }
 }
 
+export const checkPromise = (p: Promise<any>) =>
+    p
+        .then(() => true)
+        .catch(() => false);
+
 export async function sendDm(user: User, data: CreateMessageOptions) {
     const dm = await silently(user.createDM());
-    return !!dm && dm?.createMessage(data).then(() => true).catch(() => false);
+    if (!dm) return false;
+
+    return dm.createMessage(data)
+        .catch(() => false as const);
 }
 
 export function makeCachedJsonFetch<T>(url: string, msUntilStale = 60_000 * 5) {
@@ -89,4 +99,11 @@ export function debounce<T extends Function>(func: T, delay = 300): T {
         clearTimeout(timeout);
         timeout = setTimeout(() => { func(...args); }, delay);
     } as any;
+}
+
+export async function getAsMemberInMainGuild(userId: string) {
+    const guild = Vaius.guilds.get(GUILD_ID);
+    if (!guild) return null;
+
+    return guild.members.get(userId) ?? guild.getMember(userId).catch(() => null);
 }

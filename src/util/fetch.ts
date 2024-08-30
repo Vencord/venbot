@@ -23,6 +23,11 @@ export async function fetchBuffer(url: Url, options?: RequestInit) {
     return Buffer.from(await res.arrayBuffer());
 }
 
+export async function fetchJson<T = any>(url: Url, options?: RequestInit) {
+    const res = await doFetch(url, options);
+    return res.json() as Promise<T>;
+}
+
 export async function downloadToFile(url: Url, path: string, options?: RequestInit) {
     const res = await doFetch(url, options);
     if (!res.body) throw new Error(`Download ${url}: response body is empty`);

@@ -26,3 +26,10 @@ CREATE TABLE IF NOT EXISTS stickyRoles (
     id      TEXT NOT NULL PRIMARY KEY,
     roleIds TEXT NOT NULL              -- Comma separated list of role IDs. Sqlite doesn't support arrays.
 );
+
+CREATE TABLE IF NOT EXISTS linkedGitHubs (
+    githubId  TEXT NOT NULL PRIMARY KEY,
+    discordId TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS discordIdIndex on linkedGitHubs (discordId);
