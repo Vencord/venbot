@@ -191,7 +191,7 @@ defineCommand({
         const oauthLink = `${HTTP_DOMAIN}/github/authorize?userId=${msg.author.id}&state=${id}`;
 
         const sentMessage = await sendDm(msg.author, {
-            content: `To claim the contributor role, please [authorize with GitHub](${oauthLink})\n\nThis link will expire in 5 minutes.`
+            content: `To claim the contributor role, please [authorize with GitHub](<${oauthLink}>)\n\nThis link will expire in 5 minutes.`
         });
 
         if (!sentMessage)
