@@ -1,0 +1,3 @@
+venbot.vencord.dev {
+    reverse_proxy localhost:8152
+}
