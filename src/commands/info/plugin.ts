@@ -44,7 +44,11 @@ defineCommand({
     async execute(msg, query) {
         if (!msg.inCachedGuildChannel()) return;
 
-        if (!query) return reply(msg, { content: "Gimme a plugin name silly" });
+        if (!query) return reply(msg, "Gimme a plugin name silly");
+
+        if (query.toLowerCase() === "shiggy")
+            return reply(msg, "https://cdn.discordapp.com/emojis/1024751291504791654.gif?size=48&quality=lossless&name=shiggy");
+
 
         const plugins = await fetchPlugins();
 
@@ -102,16 +106,16 @@ defineCommand({
             .sort((a, b) => a.distance - b.distance);
 
         if (similarPlugins.length > 0) {
-            return reply(msg, {
-                content: `Couldn't quite find the plugin you were looking for. Did you mean...\n${similarPlugins
-                    .map(p => `- ${p.name}`)
-                    .join("\n")}`,
-            });
+            const suggestions = similarPlugins
+                .map(p => `- ${p.name}`)
+                .join("\n");
+
+            return reply(
+                msg,
+                `Couldn't quite find the plugin you were looking for. Did you mean...\n${suggestions}`
+            );
         }
 
-        return reply(msg, {
-            content:
-                "Couldn't find a plugin with that name, and there are no plugins with similar names.",
-        });
+        return reply(msg, "Couldn't find a plugin with that name, and there are no plugins with similar names.");
     },
 });
