@@ -31,23 +31,46 @@ async function readDirRecursive(dir, base = "") {
 }
 
 /**
- * @type {(namespace: string) => esbuild.Plugin}
+ * @type {(files: string[], baseDir?: string) => string}
+ */
+const makeImportAllCode = (files, baseDir = "") => files.map(f => `require("./${baseDir}${f.replace(".ts", "")}")`).join("\n");
+
+/**
+ * @type {(dir: string, baseDir?: string) => Promise<string>}
+ */
+const makeImportDirRecursiveCode = (dir, baseDir) => readDirRecursive(dir).then(files => makeImportAllCode(files, baseDir));
+
+/**
+ * @type {(namespace: string, withCategories?: boolean) => esbuild.Plugin}
  */
 const includeDirPlugin = namespace => ({
     name: `include-dir-plugin:${namespace}`,
     setup(build) {
-        const filter = new RegExp(`^~${namespace}$`);
-        const dir = `./src/${namespace}`;
+        const filter = new RegExp(`^__${namespace}__$`);
+        const dir = `src/${namespace}`;
 
         build.onResolve(
             { filter },
             args => ({ path: args.path, namespace })
         );
 
-        build.onLoad({ filter, namespace }, async () => {
-            const files = await readDirRecursive(dir);
+        build.onLoad({ filter, namespace }, async args => {
+            if (namespace === "commands") {
+                let contents = "export default {\n";
+                for (const category of await readdir(dir)) {
+                    const categoryLoader = await makeImportDirRecursiveCode(join(dir, category), category + "/");
+                    contents += `[${JSON.stringify(category)}]() {\n${categoryLoader}\n},\n`;
+                }
+                contents += "}";
+
+                return {
+                    contents,
+                    resolveDir: dir
+                };
+            }
+
             return {
-                contents: files.map(f => `import "./${f.replace(".ts", "")}"`).join("\n"),
+                contents: await makeImportDirRecursiveCode(dir),
                 resolveDir: dir
             };
         });

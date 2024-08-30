@@ -2,7 +2,7 @@ import { readdir, readFile } from "fs/promises";
 import { join } from "path";
 import { object, optional, string } from "valibot";
 
-import { defineCommand } from "~/Command";
+import { defineCommand } from "~/Commands";
 import { ASSET_DIR, Emoji, SUPPORT_ALLOWED_CHANNELS } from "~/constants";
 import { reply, silently } from "~/util";
 import { toInlineCode } from "~/util/text";

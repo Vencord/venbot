@@ -1,4 +1,4 @@
-import { defineCommand } from "~/Command";
+import { defineCommand } from "~/Commands";
 import { BotState } from "~/db/botState";
 import { reply, silently } from "~/util";
 

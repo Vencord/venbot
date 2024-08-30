@@ -1,7 +1,6 @@
+import { defineCommand } from "~/Commands";
+import { reply } from "~/util";
 import { makeLazy } from "~/util/lazy";
-
-import { defineCommand } from "../Command";
-import { reply } from "../util";
 
 const ApiUrl = {
     Local: "http://localhost:47822",

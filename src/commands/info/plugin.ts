@@ -1,9 +1,9 @@
 import leven from "leven";
 
-import { defineCommand } from "../Command";
-import { VENCORD_SITE } from "../constants";
-import { makeCachedJsonFetch, reply } from "../util";
-import { isTruthy } from "../util/guards";
+import { defineCommand } from "~/Commands";
+import { VENCORD_SITE } from "~/constants";
+import { makeCachedJsonFetch, reply } from "~/util";
+import { isTruthy } from "~/util/guards";
 
 interface Plugin {
     name: string;

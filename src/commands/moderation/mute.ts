@@ -1,6 +1,6 @@
 import parseDuration from "parse-duration";
 
-import { defineCommand } from "~/Command";
+import { defineCommand } from "~/Commands";
 import { Millis } from "~/constants";
 import { codeblock, ID_REGEX, reply, silently, until } from "~/util";
 import { msToHumanReadable } from "~/util/text";

@@ -3,7 +3,7 @@ import { AnyTextableChannel, Message, Uncached } from "oceanic.js";
 import { join } from "path";
 
 import { OwnerId } from "~/Client";
-import { defineCommand } from "~/Command";
+import { defineCommand } from "~/Commands";
 import { ASSET_DIR } from "~/constants";
 import { DISCORD_TOKEN } from "~/env";
 import { codeblock, reply, silently } from "~/util";

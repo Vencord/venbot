@@ -3,7 +3,7 @@ import { ButtonStyles, ComponentTypes, CreateMessageOptions, EmbedOptions, Inter
 
 import { Emoji, Millis } from "~/constants";
 import { handleInteraction } from "~/SlashCommands";
-import { reply } from "~/util";
+import { Promiseable, reply } from "~/util";
 
 const paginators = new Map<string, Paginator<any>>();
 
@@ -17,11 +17,14 @@ export class Paginator<T> {
     public userId: string = "";
     public currentPage = 0;
 
+    public getPageData: (page: number) => T[] = this._getPageData;
+    public getTitle = (page: number) => this.title;
+
     constructor(
         readonly title: string,
         readonly data: T[],
         readonly pageSize: number,
-        readonly renderPage: (data: T[], page: number) => string | Omit<EmbedOptions, "footer">,
+        readonly renderPage: (data: T[], page: number) => Promiseable<string | Omit<EmbedOptions, "footer">>,
         readonly footerExtra?: string
     ) {
         if (!data.length)
@@ -41,7 +44,7 @@ export class Paginator<T> {
     async create(targetMessage: Message) {
         await this.destroy();
 
-        this.message = await reply(targetMessage, this.buildMessageData(0));
+        this.message = await reply(targetMessage, await this.buildMessageData(0));
 
         this.userId = targetMessage.author.id;
         this.startTimeout();
@@ -59,7 +62,7 @@ export class Paginator<T> {
     }
 
     async navigateTo(page: number) {
-        await this.message!.edit(this.buildMessageData(page));
+        await this.message!.edit(await this.buildMessageData(page));
         this.startTimeout();
         this.currentPage = page;
     }
@@ -76,13 +79,13 @@ export class Paginator<T> {
         }
     }
 
-    private buildMessageData(page: number) {
+    private async buildMessageData(page: number) {
         const { id, totalPages } = this;
         const isFirstPage = page === 0;
         const isLastPage = page === totalPages - 1;
 
         return {
-            embeds: [this.buildEmbed(page)],
+            embeds: [await this.buildEmbed(page)],
             components: [{
                 type: ComponentTypes.ACTION_ROW,
                 components: [
@@ -126,12 +129,14 @@ export class Paginator<T> {
         } satisfies CreateMessageOptions;
     }
 
-    private buildEmbed(page: number) {
+    private _getPageData(page: number) {
         const start = page * this.pageSize;
         const end = start + this.pageSize;
-        const pageData = this.data.slice(start, end);
+        return this.data.slice(start, end);
+    }
 
-        const data = this.renderPage(pageData, page);
+    private async buildEmbed(page: number) {
+        const data = await this.renderPage(this.getPageData(page), page);
 
         let footerText = `Page ${page + 1}/${this.totalPages}`;
         if (this.footerExtra) {
@@ -139,7 +144,7 @@ export class Paginator<T> {
         }
 
         const baseEmbed: EmbedOptions = {
-            title: this.title,
+            title: this.getTitle(page),
             footer: {
                 text: footerText,
             }

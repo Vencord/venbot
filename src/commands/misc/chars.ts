@@ -1,5 +1,5 @@
-import { defineCommand } from "../Command";
-import { reply, ZWSP } from "../util";
+import { defineCommand } from "~/Commands";
+import { reply, ZWSP } from "~/util";
 
 let unicodeNameMap: Record<number, string> | undefined;
 

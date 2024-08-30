@@ -3,7 +3,7 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { AnyTextableChannel, Message } from "oceanic.js";
 import { InferOutput, nullable, number, object, parse, safeParse, string, union } from "valibot";
 
-import { defineCommand } from "~/Command";
+import { defineCommand } from "~/Commands";
 import { DONOR_ROLE_ID, Millis } from "~/constants";
 import { db } from "~/db";
 import { CONTRIBUTOR_ROLE_ID, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, GITHUB_PAT, HTTP_DOMAIN } from "~/env";

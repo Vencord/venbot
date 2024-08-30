@@ -7,7 +7,7 @@ import { sendDm } from "~/util";
 import { stripIndent } from "~/util/text";
 
 import { Vaius } from "../Client";
-import { defineCommand } from "../Command";
+import { defineCommand } from "../Commands";
 import { Emoji, PROD } from "../constants";
 
 const enum Ids {

@@ -1,6 +1,6 @@
 import { AnyTextableGuildChannel, Message } from "oceanic.js";
 
-import { defineCommand } from "~/Command";
+import { defineCommand } from "~/Commands";
 import { DONOR_ROLE_ID, Emoji } from "~/constants";
 import { codeblock, ID_REGEX, reply, swallow } from "~/util";
 import { makeConstants } from "~/util/objects";

@@ -1,5 +1,7 @@
 import { ZWSP } from "../util";
 
+export const makeEmbedSpaces = (amount: number) => ` ${ZWSP}`.repeat(amount);
+
 export function pluralise(amount: number, singular: string, plural = singular + "s") {
     return amount === 1 ? `${amount} ${singular}` : `${amount} ${plural}`;
 }
@@ -14,9 +16,9 @@ export function stripIndent(strings: TemplateStringsArray, ...values: any[]) {
     return string.replace(new RegExp(`^[ \\t]{${minIndent}}`, "gm"), "").trim();
 }
 
-export function toTitle(s: string) {
+export function toTitle(s: string, separator: string | RegExp = " ") {
     return s
-        .split(" ")
+        .split(separator)
         .map(w => w && (w[0].toUpperCase() + w.slice(1).toLowerCase()))
         .join(" ");
 }

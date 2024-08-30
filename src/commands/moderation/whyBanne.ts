@@ -1,4 +1,4 @@
-import { defineCommand } from "~/Command";
+import { defineCommand } from "~/Commands";
 import { codeblock, reply } from "~/util";
 import { resolveUser } from "~/util/resolvers";
 

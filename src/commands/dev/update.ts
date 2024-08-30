@@ -1,6 +1,6 @@
 import { execSync } from "child_process";
 
-import { defineCommand } from "~/Command";
+import { defineCommand } from "~/Commands";
 import { codeblock, reply, silently } from "~/util";
 
 import { restart } from "./restart";

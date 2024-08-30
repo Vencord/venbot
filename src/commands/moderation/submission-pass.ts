@@ -1,7 +1,7 @@
 import { ChannelTypes } from "oceanic.js";
 
 import { Vaius } from "~/Client";
-import { defineCommand } from "~/Command";
+import { defineCommand } from "~/Commands";
 import { Emoji } from "~/constants";
 import { COMMUNITY_CATEGORY_CHANNEL_ID, COMMUNITY_POST_PASS_ROLE_ID } from "~/env";
 import { reply, silently } from "~/util";

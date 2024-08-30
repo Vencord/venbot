@@ -107,3 +107,5 @@ export async function getAsMemberInMainGuild(userId: string) {
 
     return guild.members.get(userId) ?? guild.getMember(userId).catch(() => null);
 }
+
+export type Promiseable<T> = T | Promise<T>;

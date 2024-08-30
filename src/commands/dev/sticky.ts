@@ -1,4 +1,4 @@
-import { defineCommand } from "~/Command";
+import { defineCommand } from "~/Commands";
 import { Emoji } from "~/constants";
 import { BotState } from "~/db/botState";
 import { createStickyMessage, deleteStickyMessage, initStickyDebouncer } from "~/modules/sticky";

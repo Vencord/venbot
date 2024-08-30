@@ -1,6 +1,6 @@
 import { AnyTextableChannel, Client, Message } from "oceanic.js";
 
-import { Commands } from "./Command";
+import { Commands } from "./Commands";
 import { Emoji, SUPPORT_ALLOWED_CHANNELS } from "./constants";
 import { BotState } from "./db/botState";
 import { DISCORD_TOKEN, MOD_ROLE_ID, PREFIX } from "./env";

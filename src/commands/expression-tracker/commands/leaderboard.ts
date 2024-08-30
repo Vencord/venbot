@@ -1,6 +1,6 @@
 import { Message } from "oceanic.js";
 
-import { defineCommand } from "~/Command";
+import { defineCommand } from "~/Commands";
 import { db, ExpressionType, ExpressionUsageType } from "~/db";
 import { reply } from "~/util";
 import { Paginator } from "~/util/Paginator";

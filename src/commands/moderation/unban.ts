@@ -1,4 +1,4 @@
-import { defineCommand } from "~/Command";
+import { defineCommand } from "~/Commands";
 import { reply } from "~/util";
 
 import { parseUserIdsAndReason } from "./utils";

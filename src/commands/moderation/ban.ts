@@ -1,6 +1,6 @@
 import { AnyTextableGuildChannel, Message } from "oceanic.js";
 
-import { defineCommand } from "~/Command";
+import { defineCommand } from "~/Commands";
 import { Millis } from "~/constants";
 import { codeblock, reply, silently } from "~/util";
 import { pluralise, stripIndent } from "~/util/text";

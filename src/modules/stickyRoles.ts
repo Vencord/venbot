@@ -1,7 +1,7 @@
 import { AuditLogActionTypes, Guild } from "oceanic.js";
 
 import { Vaius } from "~/Client";
-import { defineCommand } from "~/Command";
+import { defineCommand } from "~/Commands";
 import { db } from "~/db";
 import { GUILD_ID } from "~/env";
 import { reply } from "~/util";

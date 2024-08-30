@@ -1,6 +1,6 @@
 import { Message } from "oceanic.js";
 
-import { defineCommand } from "~/Command";
+import { defineCommand } from "~/Commands";
 import { reply } from "~/util";
 
 defineCommand({

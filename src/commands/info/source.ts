@@ -1,10 +1,9 @@
+import { defineCommand } from "~/Commands";
+import { reply } from "~/util";
 import { execFile } from "~/util/childProcess";
 import { makeLazy } from "~/util/lazy";
 
-import { defineCommand } from "../Command";
-import { reply } from "../util";
-
-const getRemote = makeLazy(async () => {
+export const getRemote = makeLazy(async () => {
     const res = await execFile("git", ["remote", "get-url", "origin"]);
     return res.stdout
         .trim()

@@ -1,7 +1,7 @@
 import { sql } from "kysely";
 import { CreateMessageOptions } from "oceanic.js";
 
-import { defineCommand } from "~/Command";
+import { defineCommand } from "~/Commands";
 import { db } from "~/db";
 import { codeblock, reply } from "~/util";
 import { inspect } from "~/util/inspect";
