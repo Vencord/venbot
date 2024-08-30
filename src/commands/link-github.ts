@@ -181,7 +181,7 @@ fastify.register(
                 });
 
                 if (!githubResponse.ok)
-                    return res.status(502).send("Failed to authorise with GitHub");
+                    return res.status(400).send("Failed to authorise with GitHub");
 
                 const { access_token: accessToken } = await githubResponse.json() as any;
 
@@ -194,11 +194,11 @@ fastify.register(
                     .catch(() => null);
 
                 if (!githubUser)
-                    return res.status(502).send("Failed to fetch user data from GitHub");
+                    return res.status(400).send("Failed to fetch user data from GitHub");
 
                 const userAsMember = await getAsMemberInMainGuild(req.query.userId);
                 if (!userAsMember)
-                    return res.status(500).send("You must be in the Vencord server to link your GitHub");
+                    return res.status(400).send("You must be in the Vencord server to link your GitHub");
 
                 clearTimeout(state.timeoutId);
                 githubAuthStates.delete(req.query.userId);
@@ -220,7 +220,7 @@ fastify.register(
                         ? err.message
                         : "Something unexpected happen";
 
-                    return res.status(502).send(`Failed to link Github: ${message}.\n\nPlease try again later.`);
+                    return res.status(400).send(`Failed to link Github: ${message}.\n\nPlease try again later.`);
                 }
 
                 let result = `Successfully linked your GitHub account ${githubUser.login}.\n\n`;
@@ -241,7 +241,7 @@ fastify.register(
                     });
                 } catch {
                     result += "Failed to add roles to you. Please try again later.";
-                    return res.status(500).send(result);
+                    return res.status(400).send(result);
                 }
 
                 const existingLink = await db.transaction().execute(async t => {
