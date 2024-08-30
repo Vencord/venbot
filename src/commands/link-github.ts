@@ -51,23 +51,24 @@ const LinkedRoles: Array<{
             name: "Donor",
             id: DONOR_ROLE_ID,
             async check(user, accessToken) {
+                const query = `
+                    {
+                        user(login: ${JSON.stringify(user.login)}) {
+                            sponsorshipForViewerAsSponsorable(activeOnly: true) {
+                                tier {
+                                    name
+                                    monthlyPriceInDollars
+                                }
+                            }
+                        }
+                    }
+                `;
                 const res = await fetchJson("https://api.github.com/graphql", {
                     method: "POST",
                     headers: {
                         Authorization: `Bearer ${GITHUB_PAT}`
                     },
-                    body: `
-                query {
-                    user(login: ${JSON.stringify(user.login)}) {
-                        sponsorshipForViewerAsSponsorable(activeOnly: true) {
-                            tier {
-                                name
-                                monthlyPriceInDollars
-                            }
-                        }
-                    }
-                }
-            `
+                    body: JSON.stringify({ query })
                 }).catch(() => null);
 
                 if (!res)
