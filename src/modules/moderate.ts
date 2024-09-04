@@ -276,6 +276,8 @@ export async function lobotomiseMaybe(msg: Message<AnyTextableGuildChannel>) {
             reason: "showing screenshot of automodded message"
         });
 
+        silently(msg.referencedMessage.delete());
+
         silently(reply(msg, {
             content: "Lobotomised! 🔨"
         }));
