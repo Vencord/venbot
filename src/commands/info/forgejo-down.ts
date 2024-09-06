@@ -14,6 +14,6 @@ defineCommand({
             )
             .catch(() => "Yes (Unreachable)");
 
-        return reply(msg, res ? "No" : "Yes");
+        return reply(msg, res);
     }
 });
