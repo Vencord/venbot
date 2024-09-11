@@ -3,7 +3,7 @@ import { ButtonStyles, ComponentTypes, CreateMessageOptions, EmbedOptions, Inter
 
 import { Emoji, Millis } from "~/constants";
 import { handleInteraction } from "~/SlashCommands";
-import { Promiseable, reply } from "~/util";
+import { Promiseable, reply, silently } from "~/util";
 
 const paginators = new Map<string, Paginator<any>>();
 
@@ -53,7 +53,8 @@ export class Paginator<T> {
 
     async destroy() {
         if (this.message) {
-            await this.message.edit({ components: [] });
+            // might error if the message is deleted
+            silently(this.message.edit({ components: [] }));
             this.message = null;
         }
 
