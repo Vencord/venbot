@@ -18,6 +18,6 @@ defineCommand({
 
         const percent = (seededRandom(user.tag + "hg") * 100).toFixed(2);
 
-        return reply(msg, `🌈 ${userResolvable ? `${user.username} is` : "You are"} ${percent}% gay`);
+        return reply(msg, `🌈   ${userResolvable ? `${user.username} is` : "You are"} ${percent}% gay`);
     },
 });
