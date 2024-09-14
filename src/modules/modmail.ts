@@ -40,6 +40,7 @@ const ChannelNameAndPrompt: Record<string, [string, string]> = {
             - No NSFW
             - No official Discord badges (staff, partner, early supported, etc.)
         `
+    ]
 };
 
 const COMMAND_NAME = PROD ? "modmail" : "devmodmail";
