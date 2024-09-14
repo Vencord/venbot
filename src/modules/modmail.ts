@@ -39,6 +39,7 @@ const ChannelNameAndPrompt: Record<string, [string, string]> = {
             Badge Rules:
             - No NSFW
             - No official Discord badges (staff, partner, early supported, etc.)
+            - For it to look good, the badge must be square (and fit in a circle) and not have too much detail. try adding it as an emoji on discord to see how it will look! https://ezgif.com/crop is an amazing crop tool
         `
     ]
 };
