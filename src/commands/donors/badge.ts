@@ -2,10 +2,10 @@ import { createHash } from "crypto";
 import { mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "fs";
 import { ApplicationCommandOptions, ApplicationCommandOptionTypes, ApplicationCommandTypes, ApplicationIntegrationTypes, CreateChatInputApplicationCommandOptions, InteractionContextTypes, InteractionTypes, MessageFlags } from "oceanic.js";
 
-import { GUILD_ID } from "~/env";
+import { GUILD_ID, MOD_ROLE_ID } from "~/env";
 import { handleInteraction } from "~/SlashCommands";
 
-import { Vaius } from "../../Client";
+import { OwnerId, Vaius } from "../../Client";
 import { DONOR_ROLE_ID, PROD } from "../../constants";
 import { fetchBuffer } from "../../util/fetch";
 
@@ -46,6 +46,11 @@ handleInteraction({
     type: InteractionTypes.APPLICATION_COMMAND,
     isMatch: i => i.data.name.startsWith(`${Name}-`),
     async handle(i) {
+        if (i.user.id !== OwnerId) {
+            if (i.guildID !== GUILD_ID || !i.member?.roles.includes(MOD_ROLE_ID))
+                return;
+        }
+
         const { data } = i;
         const guild = i.guild ?? i.client.guilds.get(GUILD_ID);
 

@@ -29,7 +29,7 @@
 export function seededRandom(seed: string) {
     let n = 0xefc8249d;
 
-    function mash(data: any) {
+    function mash(data: string) {
         data = String(data);
         for (let i = 0; i < data.length; i++) {
             n += data.charCodeAt(i);
