@@ -48,4 +48,6 @@ export const Emoji = {
     InputNumbers: "🔢",
     Right: "▶️",
     DoubleRight: "⏩",
+
+    Claim: "🛄",
 } as const;

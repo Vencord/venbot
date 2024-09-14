@@ -1,4 +1,4 @@
-import { ActivityTypes, AnyTextableGuildChannel, ApplicationCommandTypes, ButtonStyles, ChannelTypes, CommandInteraction, ComponentInteraction, ComponentTypes, InteractionTypes, MessageFlags, SelectMenuTypes, TextChannel } from "oceanic.js";
+import { ActivityTypes, AnyTextableGuildChannel, ApplicationCommandTypes, ButtonBase, ButtonComponent, ButtonStyles, ChannelTypes, CommandInteraction, ComponentInteraction, ComponentTypes, InteractionTypes, MessageFlags, SelectMenuTypes, TextButton, TextChannel } from "oceanic.js";
 
 import { db } from "~/db";
 import { GUILD_ID, MOD_MAIL_BAN_ROLE_ID, MOD_MAIL_CHANNEL_ID, MOD_MAIL_LOG_CHANNEL_ID, MOD_ROLE_ID, SUPPORT_CHANNEL_ID } from "~/env";
@@ -245,6 +245,15 @@ handleComponentInteraction({
                         emoji: {
                             name: Emoji.Hammer
                         }
+                    },
+                    {
+                        type: ComponentTypes.BUTTON,
+                        label: "Claim ticket",
+                        style: ButtonStyles.SECONDARY,
+                        customID: `modmail:claim-ticket:${thread.id}`,
+                        emoji: {
+                            name: Emoji.Claim
+                        }
                     }
                 ]
             }],
@@ -331,6 +340,40 @@ handleInteraction({
                 `
             });
         }
+    }
+});
+
+handleInteraction({
+    type: InteractionTypes.MESSAGE_COMPONENT,
+    guildOnly: true,
+    isMatch: i => i.data.customID.startsWith("modmail:claim-ticket:"),
+    async handle(interaction) {
+        const isModAction = interaction.member.roles.includes(MOD_ROLE_ID);
+
+        if (!isModAction) return;
+
+        await interaction.defer(MessageFlags.EPHEMERAL);
+
+        await interaction.channel.edit({
+            name: `[${interaction.member.username}] ${interaction.channel.name}`
+        });
+
+        // replace the Claim ticket button with a disabled one
+        const { components } = interaction.message;
+        components[0].components.find(
+            component =>
+                component.type === ComponentTypes.BUTTON
+                && (component as TextButton).customID.startsWith("modmail:claim-ticket:")
+        )!.disabled = true;
+
+        await interaction.message.edit({
+            components
+        });
+
+        await interaction.createFollowup({
+            content: "Ticket claimed.",
+            flags: MessageFlags.EPHEMERAL
+        });
     }
 });
 
