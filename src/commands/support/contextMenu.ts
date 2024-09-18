@@ -24,9 +24,9 @@ Vaius.once("ready", () => {
     });
 });
 
-handleCommandInteraction(
-    Commands.Support,
-    async interaction => {
+handleCommandInteraction({
+    name: Commands.Support,
+    async handle(interaction) {
         const options = SupportTagList.map(tags => ({
             value: tags[0],
             label: tags[0],
@@ -45,11 +45,11 @@ handleCommandInteraction(
             }]
         });
     }
-);
+});
 
-handleCommandInteraction(
-    Commands.Faq,
-    async interaction => {
+handleCommandInteraction({
+    name: Commands.Faq,
+    async handle(interaction) {
         const [_, faqs] = await Promise.all([interaction.defer(MessageFlags.EPHEMERAL), fetchFaq()]);
         const options = faqs.map(f => ({
             value: f.question,
@@ -68,9 +68,10 @@ handleCommandInteraction(
             }]
         });
     }
-);
+});
 
-handleInteraction(InteractionTypes.MESSAGE_COMPONENT, {
+handleInteraction({
+    type: InteractionTypes.MESSAGE_COMPONENT,
     isMatch: i =>
         i.data.componentType === ComponentTypes.STRING_SELECT && (
             i.data.customID.startsWith(Commands.Support + ":") ||
