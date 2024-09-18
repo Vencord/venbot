@@ -1,5 +1,3 @@
-
-
 import { Message } from "oceanic.js";
 
 import { hourly } from "~/util/hourly";

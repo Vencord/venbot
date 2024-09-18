@@ -14,6 +14,9 @@ defineCommand({
         const limit = Number(amount) + 1;
         if (!limit) return reply(msg, { content: "?" });
 
+        if (limit > 200)
+            return reply(msg, { content: "You can't delete more than 200 messages at once" });
+
         const filter: ((msg: Message) => boolean) | undefined = (() => {
             switch (modifier) {
                 case "by":
