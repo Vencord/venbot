@@ -6,7 +6,12 @@ const millisToNextFullHour = () => Millis.HOUR - (Date.now() % Millis.HOUR);
 
 function runHourlyCallbacks() {
     for (const callback of hourlyCallbacks) {
-        callback();
+        try {
+            callback();
+        } catch (err: any) {
+            // let the global uncaught rejection handler handle this
+            Promise.reject(new Error("Failed to run hourly callback", { cause: err }));
+        }
     }
 
     setTimeout(runHourlyCallbacks, millisToNextFullHour());
