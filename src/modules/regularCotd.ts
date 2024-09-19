@@ -17,7 +17,7 @@ interface ColorResponse {
 let baseImage: Image;
 let tintImage: Image;
 
-async function drawIcon(color: string) {
+export async function drawBlobCatCozy(color: string) {
     const base = join(ASSET_DIR, "image-gen/regular-icon");
 
     if (!baseImage) {
@@ -37,7 +37,7 @@ async function drawIcon(color: string) {
     ctx.globalCompositeOperation = "source-over";
     ctx.drawImage(baseImage, 0, 0, 128, 128);
 
-    return canvas.toDataURL();
+    return canvas.toBuffer();
 }
 
 export async function rerollCotd() {
@@ -54,7 +54,7 @@ export async function rerollCotd() {
     await Vaius.guilds.get(GUILD_ID)!.editRole(REGULAR_ROLE_ID, {
         name: "regular " + name.toLowerCase(),
         color,
-        icon: await drawIcon(hex)
+        icon: await drawBlobCatCozy(hex)
     });
 }
 
