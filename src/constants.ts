@@ -18,6 +18,7 @@ export const SUPPORT_ALLOWED_CHANNELS = [
 ];
 
 export const DONOR_ROLE_ID = "1042507929485586532";
+export const REGULAR_ROLE_ID = "1026504932959977532";
 
 export const enum Seconds {
     SECOND = 1,
