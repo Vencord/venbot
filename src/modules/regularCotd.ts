@@ -28,7 +28,7 @@ async function drawIcon(color: string) {
     const canvas = createCanvas(128, 128);
 
     const ctx = canvas.getContext("2d");
-    ctx.fillStyle = `#${color}`;
+    ctx.fillStyle = color;
     ctx.fillRect(0, 0, 128, 128);
 
     ctx.globalCompositeOperation = "destination-atop";
