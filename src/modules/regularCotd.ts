@@ -1,4 +1,5 @@
-import { createCanvas, Image, loadImage } from "canvas";
+import { createCanvas, loadImage } from "canvas";
+import { readFile } from "fs/promises";
 import { join } from "path";
 
 import { Vaius } from "~/Client";
@@ -14,34 +15,27 @@ interface ColorResponse {
     }
 }
 
-let baseImage: Image;
-let tintImage: Image;
-
-export async function drawBlobCatCozy(color: string) {
+export async function drawBlobCatCozy(color: string, w = 256, h = 256) {
     const base = join(ASSET_DIR, "image-gen/regular-icon");
+    const svgPath = join(base, "bcc.svg");
 
-    if (!baseImage) {
-        baseImage = await loadImage(join(base, "base-layer.png"));
-        tintImage = await loadImage(join(base, "tint-layer.png"));
-    }
+    const svgData = await readFile(svgPath, "utf-8");
+    const tintedSvg = svgData.replace(/#1a2b3c/g, color);
+    const svg = await loadImage(Buffer.from(tintedSvg));
 
-    const canvas = createCanvas(128, 128);
+    svg.width = w;
+    svg.height = h;
+
+    const canvas = createCanvas(w, h);
 
     const ctx = canvas.getContext("2d");
-    ctx.fillStyle = color;
-    ctx.fillRect(0, 0, 128, 128);
+    ctx.drawImage(svg, 0, 0, w, h);
 
-    ctx.globalCompositeOperation = "destination-atop";
-    ctx.drawImage(tintImage, 0, 0, 128, 128);
-
-    ctx.globalCompositeOperation = "source-over";
-    ctx.drawImage(baseImage, 0, 0, 128, 128);
-
-    return canvas.toBuffer();
+    return canvas.toBuffer("image/png");
 }
 
-export async function rerollCotd() {
-    const randomHex = ((1 << 24) * Math.random() | 0).toString(16);
+export async function rerollCotd(inputHex?: string) {
+    const randomHex = inputHex ?? Math.floor(Math.random() * 0xffffff).toString(16);
     const {
         name: {
             value: name,
@@ -50,11 +44,13 @@ export async function rerollCotd() {
     } = await fetchJson<ColorResponse>("https://www.thecolorapi.com/id?hex=" + randomHex);
 
     const color = parseInt(hex.slice(1), 16);
+    const icon = await drawBlobCatCozy(hex);
 
     await Vaius.guilds.get(GUILD_ID)!.editRole(REGULAR_ROLE_ID, {
-        name: "regular " + name.toLowerCase(),
+        name: `regular (${name.toLowerCase()})`,
         color,
-        icon: await drawBlobCatCozy(hex)
+        icon,
+        reason: "Rerolled cozy of the day"
     });
 }
 
