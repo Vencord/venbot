@@ -24,7 +24,7 @@ defineCommand({
             }],
             files: [{
                 name: "blobcatcozy.png",
-                contents: await drawBlobCatCozy("#" + toHexColorString(regularRole.color)) // role icons are non-perma links
+                contents: await drawBlobCatCozy(toHexColorString(regularRole.color)) // role icons are non-perma links
             }]
         });
     }
