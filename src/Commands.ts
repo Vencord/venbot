@@ -22,7 +22,7 @@ export interface FullCommand extends Command {
     category: string;
 }
 
-export const Commands = {} as Record<string, FullCommand>;
+export const Commands: Record<string, FullCommand> = Object.create(null);
 
 let currentCategory = "";
 
