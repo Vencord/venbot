@@ -43,13 +43,13 @@ export async function drawBlobCatCozy(color: string, size = 512) {
 }
 
 export async function rerollCotd(inputHex?: string) {
-    const randomHex = inputHex ?? randomHexColor();
+    const hexColor = inputHex ?? randomHexColor();
     const {
         name: {
             value: name,
             closest_named_hex: hex
         }
-    } = await fetchJson<ColorResponse>("https://www.thecolorapi.com/id?hex=" + randomHex);
+    } = await fetchJson<ColorResponse>("https://www.thecolorapi.com/id?hex=" + hexColor.slice(1));
 
     const color = parseInt(hex.slice(1), 16);
     const icon = await drawBlobCatCozy(hex);
