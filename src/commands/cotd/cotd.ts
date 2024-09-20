@@ -2,6 +2,7 @@ import { defineCommand } from "~/Commands";
 import { REGULAR_ROLE_ID } from "~/constants";
 import { drawBlobCatCozy } from "~/modules/regularCotd";
 import { reply } from "~/util";
+import { toHexColorString } from "~/util/colors";
 
 defineCommand({
     name: "cotd",
@@ -23,7 +24,7 @@ defineCommand({
             }],
             files: [{
                 name: "blobcatcozy.png",
-                contents: await drawBlobCatCozy("#" + regularRole.color.toString(16)) // role icons are non-perma links
+                contents: await drawBlobCatCozy("#" + toHexColorString(regularRole.color)) // role icons are non-perma links
             }]
         });
     }

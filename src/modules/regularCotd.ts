@@ -5,6 +5,7 @@ import { join } from "path";
 import { Vaius } from "~/Client";
 import { ASSET_DIR, REGULAR_ROLE_ID } from "~/constants";
 import { GUILD_ID } from "~/env";
+import { randomHexColor } from "~/util/colors";
 import { daily } from "~/util/daily";
 import { fetchJson } from "~/util/fetch";
 
@@ -28,7 +29,6 @@ export async function drawBlobCatCozy(color: string, size = 512) {
 
     const svgData = await readFile(svgPath, "utf-8");
     const tintedSvg = svgData.replaceAll("#1a2b3c", color);
-    console.log(tintedSvg);
     const svg = await loadImage(Buffer.from(tintedSvg));
 
     svg.width = size;
@@ -43,7 +43,7 @@ export async function drawBlobCatCozy(color: string, size = 512) {
 }
 
 export async function rerollCotd(inputHex?: string) {
-    const randomHex = inputHex ?? Math.floor(Math.random() * 0xffffff).toString(16);
+    const randomHex = inputHex ?? randomHexColor();
     const {
         name: {
             value: name,

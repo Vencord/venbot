@@ -1,6 +1,7 @@
 import { defineCommand } from "~/Commands";
 import { drawBlobCatCozy } from "~/modules/regularCotd";
 import { reply } from "~/util";
+import { randomHexColor, toHexColorString } from "~/util/colors";
 
 
 defineCommand({
@@ -10,11 +11,11 @@ defineCommand({
     usage: "[color]",
     async execute(msg, color) {
         if (!color)
-            color = "#" + Math.floor(Math.random() * 0xffffff).toString(16);
+            color = randomHexColor();
         else {
             const parsed = Number(color.replace(/^#/, "0x"));
             if (parsed)
-                color = "#" + parsed.toString(16);
+                color = toHexColorString(parsed);
         }
 
         const cozy = await drawBlobCatCozy(color);
