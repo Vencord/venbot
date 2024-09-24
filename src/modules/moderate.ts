@@ -129,7 +129,7 @@ export async function moderateNick(member: Member) {
     const normalizedName = name
         .normalize("NFKC")
         .replace(HoistCharactersRegex, "")
-        .replaceAll("\u3099", "") // renders as a space and can be used for "empty" usernames
+        .replaceAll(/[\u3099-\u309C]/g, "") // renders as a space and can be used for "empty" usernames
         .replaceAll("﷽", "")
         || member.username.replace(HoistCharactersRegex, "");
 
