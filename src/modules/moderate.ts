@@ -132,7 +132,8 @@ export async function moderateNick(member: Member) {
         .replaceAll(/[\u3099-\u309C]/g, "") // renders as a space and can be used for "empty" usernames
         .replaceAll("﷽", "")
         .trim()
-        || member.username.replace(HoistCharactersRegex, "");
+        || member.username.replace(HoistCharactersRegex, "").trim()
+        || "lame username";
 
     if (name !== normalizedName)
         silently(member.edit({ nick: normalizedName }));
