@@ -1,7 +1,7 @@
 import { ActivityTypes, AnyTextableGuildChannel, ApplicationCommandTypes, ButtonStyles, ChannelTypes, CommandInteraction, ComponentInteraction, ComponentTypes, InteractionTypes, MessageFlags, SelectMenuTypes, TextButton, TextChannel } from "oceanic.js";
 
 import { db } from "~/db";
-import { GUILD_ID, MOD_MAIL_BAN_ROLE_ID, MOD_MAIL_CHANNEL_ID, MOD_MAIL_LOG_CHANNEL_ID, MOD_ROLE_ID, SUPPORT_CHANNEL_ID } from "~/env";
+import { GUILD_ID, MOD_MAIL_BAN_ROLE_ID, MOD_MAIL_CHANNEL_ID, MOD_MAIL_LOG_CHANNEL_ID, MOD_PERMS_ROLE_ID, MOD_ROLE_ID, SUPPORT_CHANNEL_ID } from "~/env";
 import { handleCommandInteraction, handleComponentInteraction, handleInteraction } from "~/SlashCommands";
 import { sendDm } from "~/util";
 import { stripIndent } from "~/util/text";
@@ -285,7 +285,7 @@ handleInteraction({
 
         const isBan = interaction.data.customID.startsWith("modmail:close-ban:");
 
-        const isModAction = interaction.member.roles.includes(MOD_ROLE_ID);
+        const isModAction = interaction.member.roles.includes(MOD_PERMS_ROLE_ID);
 
         if (isBan && !isModAction) return;
 
@@ -341,7 +341,7 @@ handleInteraction({
     guildOnly: true,
     isMatch: i => i.data.customID.startsWith("modmail:claim-ticket:"),
     async handle(interaction) {
-        const isModAction = interaction.member.roles.includes(MOD_ROLE_ID);
+        const isModAction = interaction.member.roles.includes(MOD_PERMS_ROLE_ID);
 
         if (!isModAction) return;
 

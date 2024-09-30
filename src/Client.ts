@@ -3,7 +3,7 @@ import { AnyTextableChannel, Client, Message } from "oceanic.js";
 import { Commands } from "./Commands";
 import { Emoji, SUPPORT_ALLOWED_CHANNELS } from "./constants";
 import { BotState } from "./db/botState";
-import { DISCORD_TOKEN, MOD_ROLE_ID, PREFIX } from "./env";
+import { DISCORD_TOKEN, MOD_PERMS_ROLE_ID, PREFIX } from "./env";
 import { lobotomiseMaybe, moderateMessage } from "./modules/moderate";
 import { reply, silently } from "./util";
 
@@ -71,7 +71,7 @@ Vaius.on("messageCreate", async msg => {
     if (cmd.modOnly) {
         if (!msg.inCachedGuildChannel()) return;
 
-        if (!msg.member.roles.includes(MOD_ROLE_ID))
+        if (!msg.member.roles.includes(MOD_PERMS_ROLE_ID))
             return silently(msg.createReaction(Emoji.Anger));
     }
 
