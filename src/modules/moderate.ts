@@ -107,6 +107,10 @@ export async function moderateMessage(msg: Message) {
     if (!msg.inCachedGuildChannel()) return;
     if (!msg.channel.permissionsOf(Vaius.user.id).has("MANAGE_MESSAGES")) return;
 
+    // FIXME: make this less bad
+    if (msg.messageSnapshots?.length)
+        msg.content = msg.messageSnapshots[0].message?.content || msg.content;
+
     const warnText = ChannelRules[msg.channel.id]?.(msg);
     if (warnText !== void 0) {
         silently(msg.delete().then(() => !!warnText && sendDm(msg.author, { content: warnText })));

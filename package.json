@@ -26,7 +26,7 @@
         "leven": "^3.1.0",
         "markdown-table": "^3.0.3",
         "nanoid": "^3.3.7",
-        "oceanic.js": "1.10.5-dev.9f95b4a",
+        "oceanic.js": "1.11.2",
         "pako": "^2.1.0",
         "parse-duration": "^1.1.0",
         "source-map-support": "^0.5.21",
