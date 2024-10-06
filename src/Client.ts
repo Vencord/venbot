@@ -77,8 +77,11 @@ Vaius.on("messageCreate", async msg => {
 
     const noRateLimit = SUPPORT_ALLOWED_CHANNELS.includes(msg.channel?.id!) || msg.member?.permissions.has("MANAGE_MESSAGES");
 
-    if (!noRateLimit && cmd.rateLimits.getOrAdd(msg.author.id))
+    if (!noRateLimit && cmd.rateLimits.getOrAdd(msg.author.id)) {
+        silently(msg.createReaction("🛑"));
+        silently(msg.createReaction("snailcat:1217891976108576839"));
         return;
+    }
 
     if (!msg.channel)
         await msg.client.rest.channels.get(msg.channelID);
