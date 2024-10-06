@@ -157,7 +157,7 @@ function shouldHandleReactionEvent(msg: PossiblyUncachedMessage, emoji?: Partial
     return ("bot" in user) && !user.bot;
 }
 
-Vaius.on("messageReactionAdd", async (msg, user, emoji) => {
+Vaius.on("messageReactionAdd", async (msg, user, { emoji }) => {
     if (!shouldHandleReactionEvent(msg, emoji, user)) return;
 
     const row = emoji.id
@@ -167,7 +167,7 @@ Vaius.on("messageReactionAdd", async (msg, user, emoji) => {
     if (row) insertRows([row]);
 });
 
-Vaius.on("messageReactionRemove", async (msg, user, emoji) => {
+Vaius.on("messageReactionRemove", async (msg, user, { emoji }) => {
     if (!shouldHandleReactionEvent(msg, emoji, user)) return;
 
     db

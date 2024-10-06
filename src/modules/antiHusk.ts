@@ -13,13 +13,13 @@ const HuskAbuserIds = new Set([
 
 const HusksUsedPerUser = new Map<string, number>();
 
-Vaius.on("messageReactionAdd", async (msg, reactor, reaction) => {
+Vaius.on("messageReactionAdd", async (msg, reactor, { emoji }) => {
     if (!msg.guildID) return;
     if (!HuskAbuserIds.has(reactor.id)) return;
-    if (!reaction.name.toLowerCase().includes("husk")) return;
+    if (!emoji.name.toLowerCase().includes("husk")) return;
 
     if (msg instanceof Message) {
-        const existingReactions = msg.reactions.find(r => r.emoji.id === reaction.id);
+        const existingReactions = msg.reactions.find(r => r.emoji.id === emoji.id);
         if (existingReactions?.count! >= 3) // if 2 other people reacted, it means this husk is probably a no-brainer so don't count
             return;
     }
@@ -27,7 +27,7 @@ Vaius.on("messageReactionAdd", async (msg, reactor, reaction) => {
     const husksUsed = HusksUsedPerUser.get(reactor.id) ?? 0;
 
     if (husksUsed >= MaxAllowedHusksPerHour) {
-        await Vaius.rest.channels.deleteReaction(msg.channelID, msg.id, `${reaction.name}:${reaction.id}`, reactor.id);
+        await Vaius.rest.channels.deleteReaction(msg.channelID, msg.id, `${emoji.name}:${emoji.id}`, reactor.id);
         return;
     }
 
