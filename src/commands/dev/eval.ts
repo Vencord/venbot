@@ -76,6 +76,16 @@ defineCommand({
         console.log = console.error = console.warn = console.info = console._log.bind(console);
 
         const { client, channel, author, content, guild, member } = msg;
+        const fs = require("fs");
+        const http = require("http");
+        const https = require("https");
+        const crypto = require("crypto");
+        const net = require("net");
+        const path = require("path");
+        const util = require("util");
+        const assert = require("assert");
+        const os = require("os");
+        const oceanic = require("oceanic.js");
 
         let script = code.replace(/(^`{3}(js|javascript)?|`{3}$)/g, "");
         if (script.includes("await")) script = `(async () => { ${script} })()`;
