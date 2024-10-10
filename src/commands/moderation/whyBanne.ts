@@ -26,7 +26,7 @@ defineCommand({
         if (ban.reason?.split(" ")[0].endsWith(":")) {
             const [a, ...rest] = ban.reason.split(" ");
             reason = rest.join(" ");
-            actor = a;
+            actor = a.slice(0, -1);
         }
 
         reply(msg, `Banned by **${actor}**: ${codeblock(reason)}`);
