@@ -89,7 +89,7 @@ defineCommand({
                 const identifiedUpdate = i.incident_updates.find(update => update.status === "identified");
 
                 return stripIndent`
-                    **Incident:** ${impactEmoji(i.impact)} ${i.name}
+                    **Incident:** ${impactEmoji(i.impact)} [${i.name}](https://discordstatus.com/incidents/${i.id})
                     **Status:** 🔴 ${toTitle(i.status)}
                     **Identified At:** ${identifiedUpdate ? `<t:${Math.floor(new Date(identifiedUpdate.created_at).getTime() / 1000)}:F>` : "N/A"}
                     **Last Updated:** <t:${Math.floor(new Date(i.incident_updates[0].updated_at).getTime() / 1000)}:F>\n
@@ -103,6 +103,7 @@ defineCommand({
         return reply(msg, {
             embeds: [{
                 title: "Discord Status",
+                url: "https://discordstatus.com/",
                 color: 0x5865F2,
                 description: systemStatus + systemOutagesText,
             }],
