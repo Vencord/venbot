@@ -59,7 +59,7 @@ interface DiscordIncdentsResponse {
 defineCommand({
     name: "discord-status",
     aliases: ["dstatus", "ds"],
-    description: "Check if discord incendents are happening",
+    description: "Check if discord incidents are happening",
     usage: null,
     async execute(msg) {
         const components = await getDiscordStatusComponents();
@@ -95,7 +95,7 @@ defineCommand({
                     **Last Updated:** <t:${Math.floor(new Date(i.incident_updates[0].updated_at).getTime() / 1000)}:F>\n
                 `;
             })
-            .join("\n");
+            .join("\n\n");
 
         const systemOutagesText =
             `\n### Latest Outage Information\n${systemOutages}`;
