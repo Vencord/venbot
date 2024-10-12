@@ -1,4 +1,5 @@
 import leven from "leven";
+import { AnyTextableChannel, Message } from "oceanic.js";
 
 import { defineCommand } from "~/Commands";
 import { VENCORD_SITE } from "~/constants";
@@ -34,12 +35,48 @@ const Emojis = {
     Dev: "<:dev:1240029459449512029>",
 };
 
+function sendPluginInfo(msg: Message<AnyTextableChannel>, plugin: Plugin) {
+    const traits = [
+        plugin.required && `${Emojis.Required} required`,
+        plugin.enabledByDefault && `${Emojis.EnabledByDefault} enabled by default`,
+        plugin.hasCommands && `${Emojis.HasCommands} has chat commands`,
+        plugin.target === "desktop" && `${Emojis.Desktop} desktop only`,
+        plugin.target === "discordDesktop" && `${Emojis.DiscordDesktop} discord desktop only`,
+        plugin.target === "web" && `${Emojis.Web} web only`,
+        plugin.target === "dev" && `${Emojis.Dev} development build only`
+    ].filter(isTruthy).join("\n");
+
+    return reply(msg, {
+        embeds: [
+            {
+                title: plugin.name,
+                description: plugin.description,
+                url: `https://vencord.dev/plugins/${encodeURIComponent(
+                    plugin.name
+                )}`,
+                color: 0xdd7878,
+                fields: [
+                    {
+                        name: "Authors",
+                        value: plugin.authors
+                            .map(a => a.name)
+                            .join(", "),
+                    },
+                    traits && {
+                        name: "Traits",
+                        value: traits,
+                    },
+                ].filter(isTruthy),
+            },
+        ],
+    });
+}
+
 defineCommand({
     name: "plugin",
     aliases: ["viewplugin", "p"],
     description: "Provides information on a plugin",
     usage: "<plugin name>",
-    guildOnly: true,
     rawContent: true, // since we just want the plugin name, and at least one has spaces
     async execute(msg, query) {
         if (!msg.inCachedGuildChannel()) return;
@@ -59,42 +96,8 @@ defineCommand({
             return plugins.find(p => p.name.toLowerCase().includes(query));
         })();
 
-        if (match) {
-            const traits = [
-                match.required && `${Emojis.Required} required`,
-                match.enabledByDefault && `${Emojis.EnabledByDefault} enabled by default`,
-                match.hasCommands && `${Emojis.HasCommands} has chat commands`,
-                match.target === "desktop" && `${Emojis.Desktop} desktop only`,
-                match.target === "discordDesktop" && `${Emojis.DiscordDesktop} discord desktop only`,
-                match.target === "web" && `${Emojis.Web} web only`,
-                match.target === "dev" && `${Emojis.Dev} development build only`
-            ].filter(isTruthy).join("\n");
-
-            return reply(msg, {
-                embeds: [
-                    {
-                        title: match.name,
-                        description: match.description,
-                        url: `https://vencord.dev/plugins/${encodeURIComponent(
-                            match.name
-                        )}`,
-                        color: 0xdd7878,
-                        fields: [
-                            {
-                                name: "Authors",
-                                value: match.authors
-                                    .map(a => a.name)
-                                    .join(", "),
-                            },
-                            traits && {
-                                name: "Traits",
-                                value: traits,
-                            },
-                        ].filter(isTruthy),
-                    },
-                ],
-            });
-        }
+        if (match)
+            return sendPluginInfo(msg, match);
 
         // find plugins with similar names, in case of minor typos
         const similarPlugins = plugins
@@ -104,6 +107,9 @@ defineCommand({
             }))
             .filter(p => p.distance <= 3)
             .sort((a, b) => a.distance - b.distance);
+
+        if (similarPlugins.length === 1)
+            return sendPluginInfo(msg, plugins.find(p => p.name === similarPlugins[0].name)!);
 
         if (similarPlugins.length > 0) {
             const suggestions = similarPlugins
