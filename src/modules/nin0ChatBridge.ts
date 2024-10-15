@@ -11,7 +11,7 @@ const enum Role {
 
 const Emojis = {
     [Role.Admin]: "👑",
-    [Role.Bot]: "🤖",
+    [Role.Bot]: "🔧",
 };
 
 const NinaChatThreadId = "1295541912010362932";
@@ -61,7 +61,7 @@ function onMessage(rawData: RawData) {
         .replaceAll("&#039;", "'")
         .replaceAll("&amp;", "&");
 
-    let emoji = Emojis[data.role];
+    let emoji = Emojis[data.role] || "";
     emoji &&= "`" + emoji + "` ";
 
     Vaius.rest.channels.createMessage(NinaChatThreadId, {
