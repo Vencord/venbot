@@ -16,7 +16,7 @@ defineCommand({
 
         return reply(msg, {
             embeds: [{
-                description: `The cozy of the day is ${colorName}!`,
+                description: `The cozy of the day is ${colorName}! (${toHexColorString(regularRole.color)})`,
                 color: regularRole.color,
                 image: {
                     url: "attachment://blobcatcozy.png"
