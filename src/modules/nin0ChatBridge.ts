@@ -65,7 +65,7 @@ function onMessage(rawData: RawData) {
     emoji &&= "`" + emoji + "` ";
 
     Vaius.rest.channels.createMessage(NinaChatThreadId, {
-        content: `${emoji}**${data.username}**:   ${content}`
+        content: `${emoji}<**${data.username}**>   ${content}`
     });
 }
 
