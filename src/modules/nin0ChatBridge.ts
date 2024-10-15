@@ -4,9 +4,15 @@ import { Vaius } from "~/Client";
 import { NINA_CHAT_KEY } from "~/env";
 
 const enum Role {
+    Admin = 2,
     Discord = 3,
     Bot = 12,
 }
+
+const Emojis = {
+    [Role.Admin]: "👑",
+    [Role.Bot]: "🤖",
+};
 
 const NinaChatThreadId = "1295541912010362932";
 
@@ -55,8 +61,11 @@ function onMessage(rawData: RawData) {
         .replaceAll("&#039;", "'")
         .replaceAll("&amp;", "&");
 
+    let emoji = Emojis[data.role];
+    emoji &&= ` ${emoji}`;
+
     Vaius.rest.channels.createMessage(NinaChatThreadId, {
-        content: `**<${data.username}${data.role === Role.Bot ? " 🤖" : ""}>**   ${content}`
+        content: `**<${data.username}${emoji}>**   ${content}`
     });
 }
 
