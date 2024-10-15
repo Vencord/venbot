@@ -47,6 +47,9 @@ importers:
       valibot:
         specifier: ^0.34.0
         version: 0.34.0
+      ws:
+        specifier: ^8.18.0
+        version: 8.18.0
     devDependencies:
       '@types/better-sqlite3':
         specifier: ^7.6.10
@@ -54,6 +57,9 @@ importers:
       '@types/node':
         specifier: ^20.12.7
         version: 20.12.11
+      '@types/ws':
+        specifier: ^8.5.12
+        version: 8.5.12
       '@typescript-eslint/parser':
         specifier: ^7.7.0
         version: 7.8.0(eslint@8.57.0)(typescript@5.4.5)
@@ -1560,7 +1566,6 @@ snapshots:
   '@types/ws@8.5.12':
     dependencies:
       '@types/node': 20.12.11
-    optional: true
 
   '@typescript-eslint/parser@7.8.0(eslint@8.57.0)(typescript@5.4.5)':
     dependencies:

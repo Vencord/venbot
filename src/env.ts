@@ -43,6 +43,8 @@ const configSchema = object({
     GITHUB_CLIENT_SECRET: string(),
 
     CONTRIBUTOR_ROLE_ID: string(),
+
+    NINA_CHAT_KEY: optional(string()),
 });
 
 const parsed = mustParse("Invalid environment variables", configSchema, process.env);
@@ -76,4 +78,6 @@ export const {
     GITHUB_CLIENT_SECRET,
 
     CONTRIBUTOR_ROLE_ID,
+
+    NINA_CHAT_KEY,
 } = parsed;
