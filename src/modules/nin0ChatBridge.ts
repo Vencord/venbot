@@ -62,10 +62,10 @@ function onMessage(rawData: RawData) {
         .replaceAll("&amp;", "&");
 
     let emoji = Emojis[data.role];
-    emoji &&= ` ${emoji}`;
+    emoji &&= "`" + emoji + "` ";
 
     Vaius.rest.channels.createMessage(NinaChatThreadId, {
-        content: `**<${data.username}${emoji}>**   ${content}`
+        content: `${emoji}**${data.username}**:   ${content}`
     });
 }
 
