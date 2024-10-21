@@ -97,6 +97,7 @@ function mirrorToDiscord(payload: IncomingMessage) {
     const { username, roles } = payload.d.userInfo;
 
     if (hasFlag(roles, Role.Bot)) return;
+    if (hasFlag(roles, Role.System)) return;
 
     const content = String(payload.d.content)
         .replaceAll("[img]", "")
