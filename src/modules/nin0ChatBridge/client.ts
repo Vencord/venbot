@@ -42,7 +42,7 @@ function sendMessage(content: string, username = "venbot bridge") {
     sendPayload({
         op: OutgoingOpcode.Message,
         d: {
-            content
+            content: `${username} ~ ${content}`
         }
     });
 }
