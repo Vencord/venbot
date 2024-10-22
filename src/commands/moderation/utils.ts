@@ -1,6 +1,6 @@
 import { Member } from "oceanic.js";
 
-import { ID_REGEX } from "~/util";
+import { getHighestRole, ID_REGEX } from "~/util";
 
 export function hasHigherRoleThan(roleId: string, member: Member) {
     const g = member.guild;
@@ -9,11 +9,8 @@ export function hasHigherRoleThan(roleId: string, member: Member) {
     return member.roles.some(r => g.roles.get(r)!.position > pos);
 }
 
-export function getHighestRolePosition({ roles, guild }: Member) {
-    return roles.reduce((position, role) =>
-        Math.max(position, guild.roles.get(role)!.position),
-        0
-    );
+export function getHighestRolePosition(member: Member) {
+    return getHighestRole(member)?.position ?? 0;
 }
 
 export function parseUserIdsAndReason(args: string[], defaultReason: string = "No reason provided") {

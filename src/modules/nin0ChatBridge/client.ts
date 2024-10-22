@@ -2,10 +2,13 @@ import { RawData, WebSocket } from "ws";
 
 import { Vaius } from "~/Client";
 import { NINA_CHAT_TOKEN } from "~/env";
+import { getHighestRole } from "~/util";
+import { toHexColorString } from "~/util/colors";
 
 import { AnyIncomingPayload, AnyOutgoingPayload, IncomingMessage, IncomingOpcode, OutgoingOpcode, Role } from "./types";
 
 const NinaChatThreadId = "1295541912010362932";
+const bridgeFrom = "venbot";
 
 let socket: WebSocket;
 let closeCount = 0;
@@ -38,11 +41,16 @@ function sendPayload(payload: AnyOutgoingPayload) {
     socket.send(JSON.stringify(payload));
 }
 
-function sendMessage(content: string, username = "venbot bridge") {
+function sendMessage(content: string, username = "venbot bridge", color?: string) {
     sendPayload({
         op: OutgoingOpcode.Message,
         d: {
-            content: `${username} ~ ${content}`
+            content: content,
+            bridgeMetadata: {
+                username,
+                color,
+                from: bridgeFrom
+            }
         }
     });
 }
@@ -94,10 +102,11 @@ function getRoleEmoji(roles: Role) {
 }
 
 function mirrorToDiscord(payload: IncomingMessage) {
-    const { username, roles } = payload.d.userInfo;
+    const { username, roles, bridgeMetadata } = payload.d.userInfo;
 
-    if (hasFlag(roles, Role.Bot)) return;
-    if (hasFlag(roles, Role.System)) return;
+    if (hasFlag(roles, Role.Bot) && !hasFlag(roles, Role.Admin)) return;
+    if (hasFlag(roles, Role.System) && !hasFlag(roles, Role.Admin)) return;
+    if (bridgeMetadata?.from === bridgeFrom) return;
 
     const content = String(payload.d.content)
         .replaceAll("[img]", "")
@@ -120,8 +129,8 @@ function mirrorToDiscord(payload: IncomingMessage) {
     });
 }
 
-Vaius.on("messageCreate", msg => {
-    if (msg.channelID !== NinaChatThreadId || msg.author.bot) return;
+Vaius.on("messageCreate", async msg => {
+    if (msg.channelID !== NinaChatThreadId || msg.author.bot || !msg.member) return;
 
     let content = msg.content
         .replaceAll(/<@!?(\d+)>/g, (_, id) => `@${Vaius.users.get(id)?.tag ?? "unknown-user"}`)
@@ -132,5 +141,10 @@ Vaius.on("messageCreate", msg => {
         content += "\n" + msg.attachments.map(a => `[img]${a.proxyURL.replace("https://", "http://")}[/img]`).join("\n");
     }
 
-    sendMessage(content, msg.author.tag);
+    const highestRole = getHighestRole(msg.member);
+    const color = highestRole
+        ? toHexColorString(highestRole.color)
+        : "0";
+
+    sendMessage(content, msg.author.tag, color);
 });

@@ -73,6 +73,11 @@ export interface Message extends OutgoingPayload {
     op: OutgoingOpcode.Message;
     d: {
         content: string;
+        bridgeMetadata?: {
+            username: string;
+            from: string;
+            color?: string;
+        }
     }
 }
 
@@ -83,6 +88,9 @@ export interface IncomingMessage extends IncomingPayload {
             username: string;
             roles: number;
             id: string;
+            bridgeMetadata?: {
+                from: string;
+            }
         },
         timestamp: bigint;
         content: string;
