@@ -37,7 +37,7 @@ if (PROD) {
 
 initModListeners();
 
-async function handleError(title: string, err: unknown) {
+export async function handleError(title: string, err: unknown) {
     if (err instanceof DiscordHTTPError && err.status >= 500)
         return;
 

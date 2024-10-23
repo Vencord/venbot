@@ -2,6 +2,7 @@ import { RawData, WebSocket } from "ws";
 
 import { Vaius } from "~/Client";
 import { NINA_CHAT_TOKEN } from "~/env";
+import { handleError } from "~/index";
 import { getHighestRole } from "~/util";
 
 import { AnyIncomingPayload, AnyOutgoingPayload, IncomingMessage, IncomingOpcode, OutgoingOpcode, Role } from "./types";
@@ -29,6 +30,7 @@ export function init() {
     socket.on("open", onOpen);
     socket.on("message", onMessage);
     socket.on("close", init);
+    socket.on("error", e => handleError("nin0chat webhook error", e));
 }
 
 function sendPayload(payload: AnyOutgoingPayload) {
