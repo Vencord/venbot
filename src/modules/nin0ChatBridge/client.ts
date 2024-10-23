@@ -139,7 +139,7 @@ Vaius.on("messageCreate", async msg => {
         content += "\n" + msg.attachments.map(a => `![${a.description || a.filename}](${a.proxyURL})`).join("\n");
     }
 
-    const highestRole = getHighestRole(msg.member);
+    const highestRole = getHighestRole(msg.member, r => r.color !== 0);
     const color = highestRole
         ? toHexColorString(highestRole.color)
         : "0";

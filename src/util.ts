@@ -1,4 +1,4 @@
-import { CreateMessageOptions, Member, Message, User } from "oceanic.js";
+import { CreateMessageOptions, Member, Message, Role, User } from "oceanic.js";
 
 import { Vaius } from "./Client";
 import { GUILD_ID } from "./env";
@@ -110,10 +110,12 @@ export async function getAsMemberInMainGuild(userId: string) {
 
 export type Promiseable<T> = T | Promise<T>;
 
-export function getHighestRole({ guild, roles }: Member) {
+export function getHighestRole({ guild, roles }: Member, filter?: (r: Role) => boolean) {
     if (!roles.length) return null;
 
-    return roles
-        .map(r => guild.roles.get(r)!)
-        .reduce((a, b) => a.position > b.position ? a : b);
+    let resolvedRoles = roles.map(r => guild.roles.get(r)!);
+
+    if (filter) resolvedRoles = resolvedRoles.filter(filter);
+
+    return resolvedRoles.reduce((a, b) => a.position > b.position ? a : b);
 }
