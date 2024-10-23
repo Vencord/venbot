@@ -109,8 +109,6 @@ function mirrorToDiscord(payload: IncomingMessage) {
     if (bridgeMetadata?.from === bridgeFrom) return;
 
     const content = String(payload.d.content)
-        .replaceAll("[img]", "")
-        .replaceAll("[/img]", "")
         .replaceAll("&lt;", "<")
         .replaceAll("&gt;", ">")
         .replaceAll("&quot;", "\"")
@@ -138,7 +136,7 @@ Vaius.on("messageCreate", async msg => {
         .replace(/<#(\d+)>/g, (_, id) => `#${(Vaius.getChannel(id) as any)?.name ?? "unknown-channel"}`);
 
     if (msg.attachments.size) {
-        content += "\n" + msg.attachments.map(a => `[img]${a.proxyURL.replace("https://", "http://")}[/img]`).join("\n");
+        content += "\n" + msg.attachments.map(a => `![${a.description || a.filename}](${a.proxyURL})`).join("\n");
     }
 
     const highestRole = getHighestRole(msg.member);
