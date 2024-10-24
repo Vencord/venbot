@@ -43,6 +43,8 @@ export async function handleError(title: string, err: unknown) {
 
     console.error(`${title}:`, err);
 
+    if (PROD) return;
+
     const stack = err instanceof Error && err.stack;
     const text = stack || inspect(err);
 
