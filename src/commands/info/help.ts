@@ -36,7 +36,7 @@ const formatCategory = (category: string) => toTitle(category, /[ -]/);
 
 async function renderTableOfContents(pages: string[]): Promise<EmbedOptions> {
     const description = stripIndent`
-        My prefixes are \`${PREFIXES.map(toInlineCode).join(", ")}\`.
+        My prefixes are ${PREFIXES.map(toInlineCode).join(", ")}.
         Use \`${PREFIXES[0]}help <command>\` for more information on a specific command!
 
         You can find my source code [here](${await getGitRemote()}).
