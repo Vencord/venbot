@@ -1,7 +1,7 @@
 import { AnyTextableChannel, EmbedOptions, Message } from "oceanic.js";
 
 import { Commands, defineCommand, FullCommand } from "~/Commands";
-import { PREFIX } from "~/env";
+import { PREFIXES } from "~/env";
 import { reply, ZWSP } from "~/util";
 import { getGitRemote } from "~/util/git";
 import { groupBy } from "~/util/groupBy";
@@ -18,8 +18,11 @@ defineCommand({
             return await createCommandList(msg);
 
         let cmd = Commands[commandName];
-        if (!cmd && commandName?.startsWith(PREFIX))
-            cmd = Commands[commandName.slice(PREFIX.length)];
+        if (!cmd) {
+            const prefix = PREFIXES.find(p => commandName.startsWith(p));
+            if (prefix)
+                cmd = Commands[commandName.slice(prefix.length)];
+        }
 
         const content = cmd
             ? commandHelp(cmd)
@@ -33,8 +36,8 @@ const formatCategory = (category: string) => toTitle(category, /[ -]/);
 
 async function renderTableOfContents(pages: string[]): Promise<EmbedOptions> {
     const description = stripIndent`
-        My prefix is \`${PREFIX}\`.
-        Use \`${PREFIX}help <command>\` for more information on a specific command!
+        My prefixes are \`${PREFIXES.map(toInlineCode).join(", ")}\`.
+        Use \`${PREFIXES[0]}help <command>\` for more information on a specific command!
 
         You can find my source code [here](${await getGitRemote()}).
     `;
@@ -58,7 +61,7 @@ function renderHelpPage(Commands: FullCommand[]) {
         return `\`${i === 0 ? ZWSP : ""} ${paddedName}\`${makeEmbedSpaces(3)}${description}`;
     }).join("\n");
 
-    const footer = `Use \`${PREFIX}help <command>\` for more information on a specific command!`;
+    const footer = `Use \`${PREFIXES[0]}help <command>\` for more information on a specific command!`;
 
     return commandDescriptions + "\n\n" + footer;
 }
@@ -102,7 +105,7 @@ function commandHelp(cmd: FullCommand) {
         ### Usage
 
         ${"```"}
-        ${PREFIX}${cmd.name} ${cmd.usage}
+        ${PREFIXES[0]}${cmd.name} ${cmd.usage}
         ${"```"}
     `;
 

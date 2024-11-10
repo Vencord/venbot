@@ -8,7 +8,10 @@ if (error)
     throw error;
 
 const configSchema = object({
-    PREFIX: string(),
+    PREFIXES: pipe(
+        string(),
+        transform(s => s.split(/ +/))
+    ),
     DISCORD_TOKEN: string(),
     DATABASE_URL: string(),
 
@@ -50,7 +53,7 @@ const configSchema = object({
 const parsed = mustParse("Invalid environment variables", configSchema, process.env);
 
 export const {
-    PREFIX,
+    PREFIXES,
     DISCORD_TOKEN,
     DATABASE_URL,
     NODE_ENV,

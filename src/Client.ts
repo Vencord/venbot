@@ -3,7 +3,7 @@ import { AnyTextableChannel, Client, Message } from "oceanic.js";
 import { Commands } from "./Commands";
 import { Emoji, SUPPORT_ALLOWED_CHANNELS } from "./constants";
 import { BotState } from "./db/botState";
-import { DISCORD_TOKEN, MOD_PERMS_ROLE_ID, PREFIX } from "./env";
+import { DISCORD_TOKEN, MOD_PERMS_ROLE_ID, PREFIXES } from "./env";
 import { lobotomiseMaybe, moderateMessage } from "./modules/moderate";
 import { reply, silently } from "./util";
 
@@ -45,9 +45,12 @@ Vaius.on("messageCreate", async msg => {
     if (msg.author.bot && msg.author.id !== GEN_AI_ID) return;
     moderateMessage(msg);
 
-    if (!msg.content?.toLowerCase().startsWith(PREFIX)) return;
+    const lowerContent = msg.content.toLowerCase();
 
-    const content = msg.content.slice(PREFIX.length).trim();
+    const prefix = PREFIXES.find(p => lowerContent.startsWith(p));
+    if (!prefix) return;
+
+    const content = msg.content.slice(prefix.length).trim();
     const args = content.split(whitespaceRe);
 
     const cmdName = args.shift()?.toLowerCase()!;
