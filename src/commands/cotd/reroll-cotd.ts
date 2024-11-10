@@ -9,7 +9,7 @@ defineCommand({
     usage: "[hex]",
     guildOnly: true,
     modOnly: true,
-    async execute(msg, hex?: string) {
+    async execute({ msg }, hex?: string) {
         if (hex) {
             const parsed = Number(hex.replace(/^#/, "0x"));
 

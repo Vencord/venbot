@@ -53,11 +53,9 @@ defineCommand({
     usage: "<code>",
     aliases: ["e", "$"],
     rawContent: true,
-    async execute(msg, code) {
+    async execute({ msg }, code) {
         if (msg.author.id !== OwnerId) {
-            if (!/^ve\b/.test(msg.content)) {
-                silently(sendVoiceMessage(msg));
-            }
+            silently(sendVoiceMessage(msg));
 
             return;
         }

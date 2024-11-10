@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import { number, object, optional, picklist, pipe, string, transform } from "valibot";
+import { array, minLength, number, object, optional, picklist, pipe, string, transform } from "valibot";
 
 import { mustParse } from "./util/validation";
 
@@ -10,7 +10,9 @@ if (error)
 const configSchema = object({
     PREFIXES: pipe(
         string(),
-        transform(s => s.split(/ +/))
+        transform(s => s.split(/ +/).filter(Boolean)),
+        array(string()),
+        minLength(1)
     ),
     DISCORD_TOKEN: string(),
     DATABASE_URL: string(),

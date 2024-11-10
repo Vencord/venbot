@@ -14,7 +14,7 @@ defineCommand({
     usage: "query",
     rawContent: true,
     ownerOnly: true,
-    async execute(msg, query) {
+    async execute({ msg }, query) {
         query = query.replace(/(^`{3}(sql)?|`{3}$)/g, "");
 
         const param: TemplateStringsArray = Object.assign([query], { raw: [query] });

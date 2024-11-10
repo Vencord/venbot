@@ -1,6 +1,6 @@
-import { AnyTextableChannel, EmbedOptions, Message } from "oceanic.js";
+import { EmbedOptions } from "oceanic.js";
 
-import { Commands, defineCommand, FullCommand } from "~/Commands";
+import { CommandContext, Commands, defineCommand, FullCommand } from "~/Commands";
 import { PREFIXES } from "~/env";
 import { reply, ZWSP } from "~/util";
 import { getGitRemote } from "~/util/git";
@@ -13,31 +13,28 @@ defineCommand({
     aliases: ["theylp", "shelp", "shiglp", "yardim", "yardım", "h", "?"],
     description: "List all commands or get help for a specific command",
     usage: "[command]",
-    async execute(msg, commandName) {
+    async execute(ctx, commandName) {
         if (!commandName)
-            return await createCommandList(msg);
+            return await createCommandList(ctx);
 
         let cmd = Commands[commandName];
-        if (!cmd) {
-            const prefix = PREFIXES.find(p => commandName.startsWith(p));
-            if (prefix)
-                cmd = Commands[commandName.slice(prefix.length)];
-        }
+        if (!cmd && commandName.startsWith(ctx.prefix))
+            cmd = Commands[commandName.slice(ctx.prefix.length)];
 
         const content = cmd
-            ? commandHelp(cmd)
+            ? commandHelp(cmd, ctx)
             : `Command ${toInlineCode(commandName)} not found.`;
 
-        return reply(msg, { content });
+        return reply(ctx.msg, { content });
     },
 });
 
 const formatCategory = (category: string) => toTitle(category, /[ -]/);
 
-async function renderTableOfContents(pages: string[]): Promise<EmbedOptions> {
+async function renderTableOfContents(pages: string[], { prefix, commandName }: CommandContext): Promise<EmbedOptions> {
     const description = stripIndent`
-        My prefixes are ${PREFIXES.map(toInlineCode).join(", ")}.
-        Use \`${PREFIXES[0]}help <command>\` for more information on a specific command!
+        My ${PREFIXES.length === 1 ? "prefix is" : "prefixes are"} ${PREFIXES.map(toInlineCode).join(", ")}.
+        Use \`${prefix}${commandName} <command>\` for more information on a specific command!
 
         You can find my source code [here](${await getGitRemote()}).
     `;
@@ -53,7 +50,7 @@ async function renderTableOfContents(pages: string[]): Promise<EmbedOptions> {
     };
 }
 
-function renderHelpPage(Commands: FullCommand[]) {
+function renderHelpPage(Commands: FullCommand[], { prefix, commandName }: CommandContext) {
     const longestNameLength = Commands.reduce((max, { name }) => Math.max(max, name.length), 0) + 1;
 
     const commandDescriptions = Commands.map(({ name, description }, i) => {
@@ -61,12 +58,12 @@ function renderHelpPage(Commands: FullCommand[]) {
         return `\`${i === 0 ? ZWSP : ""} ${paddedName}\`${makeEmbedSpaces(3)}${description}`;
     }).join("\n");
 
-    const footer = `Use \`${PREFIXES[0]}help <command>\` for more information on a specific command!`;
+    const footer = `Use \`${prefix}${commandName} <command>\` for more information on a specific command!`;
 
     return commandDescriptions + "\n\n" + footer;
 }
 
-async function createCommandList(msg: Message<AnyTextableChannel>) {
+async function createCommandList(ctx: CommandContext) {
     const categories = groupBy(
         Object.entries(Commands)
             .filter(([name, cmd]) => !cmd.ownerOnly && cmd.name === name && cmd.category !== "dev")
@@ -82,8 +79,8 @@ async function createCommandList(msg: Message<AnyTextableChannel>) {
         1,
         (commands, page) =>
             page === 0
-                ? renderTableOfContents(pages)
-                : renderHelpPage(commands),
+                ? renderTableOfContents(pages, ctx)
+                : renderHelpPage(commands, ctx),
     );
     paginator.getPageData = page => categories[pages[page]];
     paginator.getTitle = page =>
@@ -91,10 +88,10 @@ async function createCommandList(msg: Message<AnyTextableChannel>) {
             ? "Help Menu"
             : `${formatCategory(pages[page])} Commands`;
 
-    paginator.create(msg);
+    paginator.create(ctx.msg);
 }
 
-function commandHelp(cmd: FullCommand) {
+function commandHelp(cmd: FullCommand, { prefix }: CommandContext) {
     let help = stripIndent`
         ## \`${toTitle(cmd.name)}\` ${cmd.aliases ? `(${cmd.aliases.join(", ")})` : ""}
 
@@ -105,7 +102,7 @@ function commandHelp(cmd: FullCommand) {
         ### Usage
 
         ${"```"}
-        ${PREFIXES[0]}${cmd.name} ${cmd.usage}
+        ${prefix}${cmd.name} ${cmd.usage}
         ${"```"}
     `;
 

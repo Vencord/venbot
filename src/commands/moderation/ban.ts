@@ -31,7 +31,7 @@ defineCommand({
     aliases: ["yeet", "🍌"],
     guildOnly: true,
     modOnly: true,
-    async execute(msg, ...args) {
+    async execute({ msg }, ...args) {
         const [daysToDelete, ids, reason] = parseCrap(msg, args);
 
         if (!ids.length) {
@@ -95,7 +95,7 @@ defineCommand({
     guildOnly: true,
     ownerOnly: true,
     modOnly: true,
-    async execute(msg, ...args) {
+    async execute({ msg }, ...args) {
         const [daysToDelete, userIDs, reason] = parseCrap(msg, args);
         if (!userIDs.length) return reply(msg, { content: "Gimme some users silly" });
         if (userIDs.length > 200) return reply(msg, { content: "That's tooooo many users bestie...." });

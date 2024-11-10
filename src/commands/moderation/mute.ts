@@ -14,7 +14,7 @@ defineCommand({
     usage: "<duration> <user> [user...] [reason]",
     guildOnly: true,
     modOnly: true,
-    async execute(msg, ...args) {
+    async execute({ msg }, ...args) {
         let durationString = args.shift()!;
         while (args.length && !ID_REGEX.test(args[0])) {
             durationString += " " + args.shift();

@@ -10,7 +10,7 @@ defineCommand({
     usage: "<amount> [by|from|embeds|files|invites] [extra]",
     guildOnly: true,
     permissions: ["MANAGE_MESSAGES"],
-    async execute(msg, amount, modifier, extra) {
+    async execute({ msg }, amount, modifier, extra) {
         const limit = Number(amount) + 1;
         if (!limit) return reply(msg, { content: "?" });
 

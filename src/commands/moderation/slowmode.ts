@@ -9,7 +9,7 @@ defineCommand({
     usage: "<seconds>",
     guildOnly: true,
     modOnly: true,
-    async execute(msg, secondsArg) {
+    async execute({ msg }, secondsArg) {
         if (secondsArg === "off") secondsArg = "0";
 
         const seconds = Number(secondsArg);

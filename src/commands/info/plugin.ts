@@ -78,7 +78,7 @@ defineCommand({
     description: "Provides information on a plugin",
     usage: "<plugin name>",
     rawContent: true, // since we just want the plugin name, and at least one has spaces
-    async execute(msg, query) {
+    async execute({ msg }, query) {
         if (!msg.inCachedGuildChannel()) return;
 
         if (!query) return reply(msg, "Gimme a plugin name silly");

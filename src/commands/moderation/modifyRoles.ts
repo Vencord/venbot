@@ -55,7 +55,7 @@ defineCommand({
     usage: "<role> <user> [user...]",
     guildOnly: true,
     modOnly: true,
-    async execute(msg, ...args) {
+    async execute({ msg }, ...args) {
         const { role, users } = parseArgs(msg, args);
         if (!role) return msg.createReaction(Emoji.QuestionMark).catch(swallow);
         if (!hasHigherRoleThan(role, msg.member)) return msg.createReaction(Emoji.Anger).catch(swallow);
@@ -79,7 +79,7 @@ defineCommand({
     usage: "<role> <user> [user...]",
     guildOnly: true,
     modOnly: true,
-    async execute(msg, ...args) {
+    async execute({ msg }, ...args) {
         const { role, users } = parseArgs(msg, args);
         if (!role) return msg.createReaction(Emoji.QuestionMark).catch(swallow);
         if (!hasHigherRoleThan(role, msg.member)) return msg.createReaction(Emoji.Anger).catch(swallow);

@@ -7,11 +7,11 @@ import { restart } from "./restart";
 
 defineCommand({
     name: "update",
-    // aliases: ["up"],
+    aliases: ["up"],
     description: "Update the bot",
     usage: null,
     ownerOnly: true,
-    async execute(msg) {
+    async execute({ msg }) {
         try {
             if (!execSync("git pull").toString().includes("Fast-forward"))
                 return reply(msg, {

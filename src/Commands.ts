@@ -4,6 +4,12 @@ import { AnyTextableChannel, AnyTextableGuildChannel, Message, PermissionName } 
 import { Millis } from "./constants";
 import { Deduper } from "./util/Deduper";
 
+export interface CommandContext<GuildOnly extends boolean = false> {
+    msg: GuildOnly extends true ? Message<AnyTextableGuildChannel> : Message<AnyTextableChannel>;
+    prefix: string;
+    commandName: string;
+}
+
 export interface Command<GuildOnly extends boolean = false> {
     name: string;
     aliases?: string[];
@@ -13,8 +19,8 @@ export interface Command<GuildOnly extends boolean = false> {
     permissions?: Array<PermissionName>,
     ownerOnly?: boolean;
     modOnly?: boolean;
-    execute(message: GuildOnly extends true ? Message<AnyTextableGuildChannel> : Message<AnyTextableChannel>, ...args: string[]): Promise<any> | void;
     rawContent?: boolean;
+    execute(context: CommandContext<GuildOnly>, ...args: string[]): Promise<any> | void;
 }
 
 export interface FullCommand extends Command {

@@ -67,7 +67,7 @@ defineCommand({
     guildOnly: true,
     ownerOnly: true,
     usage: null,
-    async execute(msg) {
+    async execute({ msg }) {
         if (msg.guildID !== GUILD_ID) return;
 
         const members = await msg.guild.fetchMembers();

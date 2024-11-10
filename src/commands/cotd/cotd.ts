@@ -9,7 +9,7 @@ defineCommand({
     description: "Shows the current cozy of the day",
     usage: null,
     guildOnly: true,
-    async execute(msg, hex: string) {
+    async execute({ msg }, hex: string) {
         const regularRole = msg.guild!.roles.get(REGULAR_ROLE_ID)!;
 
         const [, colorName] = regularRole.name.match(/\((.+)\)/i)!;

@@ -14,7 +14,7 @@ defineCommand({
     usage: "<user>",
     guildOnly: true,
     modOnly: true,
-    async execute(msg, user) {
+    async execute({ msg }, user) {
         const id = resolveUserId(user);
         if (!id)
             return reply(msg, "Invalid user input");

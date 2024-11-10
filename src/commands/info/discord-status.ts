@@ -61,7 +61,7 @@ defineCommand({
     aliases: ["dstatus", "ds"],
     description: "Check if discord incidents are happening",
     usage: null,
-    async execute(msg) {
+    async execute({ msg }) {
         const components = await getDiscordStatusComponents();
         const incidents = await getDiscordStatusIncidents();
 

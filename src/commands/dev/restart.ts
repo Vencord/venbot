@@ -14,7 +14,7 @@ defineCommand({
     description: "Restart the bot",
     usage: null,
     ownerOnly: true,
-    async execute(msg) {
+    async execute({ msg }) {
         await silently(reply(msg, {
             content: "Restarting..."
         }));

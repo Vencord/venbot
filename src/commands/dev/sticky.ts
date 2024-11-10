@@ -10,7 +10,7 @@ defineCommand({
     ownerOnly: true,
     usage: "<off | on | set | delay> [value]",
     rawContent: true,
-    execute(msg, content) {
+    execute({ msg }, content) {
         let response: string | undefined;
 
         const [operation, value, ...extra] = content.split(" ");

@@ -19,7 +19,7 @@ defineCommand({
     aliases: ["s"],
     description: "Query a support tag",
     usage: "[topic]",
-    async execute(msg, ...guide) {
+    async execute({ msg }, ...guide) {
         if (!SUPPORT_ALLOWED_CHANNELS.includes(msg.channel?.id!)) return;
 
         if (guide.length === 0 || (guide.length === 1 && ["help", "list"].includes(guide[0])))

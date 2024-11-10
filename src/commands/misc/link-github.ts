@@ -310,7 +310,7 @@ defineCommand({
     description: "Link your GitHub account to claim the contributor and donor role",
     aliases: ["github", "linkgithub", "gh", "link-gh"],
     usage: null,
-    async execute(msg) {
+    async execute({ msg }) {
         if (githubAuthStates.has(msg.author.id))
             return reply(msg, "You already have a pending GitHub link prompt. Check in our DMs!");
 

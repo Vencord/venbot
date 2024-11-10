@@ -10,7 +10,7 @@ defineCommand({
     aliases: ["unyeet", "🍌💥"],
     guildOnly: true,
     modOnly: true,
-    async execute(msg, ...args) {
+    async execute({ msg }, ...args) {
         const { ids, reason } = parseUserIdsAndReason(args);
 
         if (!ids.length)

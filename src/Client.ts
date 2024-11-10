@@ -1,6 +1,6 @@
 import { AnyTextableChannel, Client, Message } from "oceanic.js";
 
-import { Commands } from "./Commands";
+import { CommandContext, Commands } from "./Commands";
 import { Emoji, SUPPORT_ALLOWED_CHANNELS } from "./constants";
 import { BotState } from "./db/botState";
 import { DISCORD_TOKEN, MOD_PERMS_ROLE_ID, PREFIXES } from "./env";
@@ -89,11 +89,17 @@ Vaius.on("messageCreate", async msg => {
     if (!msg.channel)
         await msg.client.rest.channels.get(msg.channelID);
 
+    const context: CommandContext = {
+        msg: msg as Message<AnyTextableChannel>,
+        prefix,
+        commandName: cmdName
+    };
+
     try {
         if (cmd.rawContent)
-            await cmd.execute(msg as Message<AnyTextableChannel>, content.slice(cmdName.length).trim());
+            await cmd.execute(context, content.slice(cmdName.length).trim());
         else
-            await cmd.execute(msg as Message<AnyTextableChannel>, ...args);
+            await cmd.execute(context, ...args);
     } catch (e) {
         console.error(
             `Failed to run ${cmd.name}`,

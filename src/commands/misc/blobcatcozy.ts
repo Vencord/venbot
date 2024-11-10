@@ -9,7 +9,7 @@ defineCommand({
     aliases: ["bcc", "blobcat", "blob", "cat", "cozy"],
     description: "you wouldn't generate a cozy blobcat",
     usage: "[color]",
-    async execute(msg, color) {
+    async execute({ msg }, color) {
         if (!color)
             color = randomHexColor();
         else {

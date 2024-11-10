@@ -6,7 +6,7 @@ defineCommand({
     aliases: ["fj-down?", "ifd", "is-forgejo-down", "fjd?"],
     description: "Check if Ninos Forgejo is down",
     usage: null,
-    async execute(msg) {
+    async execute({ msg }) {
         const res = await fetch("https://git.nin0.dev/")
             .then(r => r.ok
                 ? "No"

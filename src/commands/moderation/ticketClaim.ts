@@ -12,7 +12,7 @@ defineCommand({
     usage: null,
     guildOnly: true,
     modOnly: true,
-    async execute(msg) {
+    async execute({ msg }) {
         if (msg.channel.parentID !== MOD_MAIL_CHANNEL_ID) {
             return reply(msg, "what, you wanna claim the channel, dummy?");
         }

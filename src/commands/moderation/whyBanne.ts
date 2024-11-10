@@ -8,7 +8,7 @@ defineCommand({
     aliases: ["wb", "whybanned", "banreason", "baninfo", "bi"],
     guildOnly: true,
     usage: "<user>",
-    async execute(msg, userResolvable) {
+    async execute({ msg }, userResolvable) {
         const user = await resolveUser(userResolvable).catch(() => null);
         if (!user) {
             return reply(msg, "who?");

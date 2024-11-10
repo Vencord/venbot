@@ -8,7 +8,7 @@ defineCommand({
     aliases: ["hg"],
     description: "Check how gay someone is",
     usage: "[user (defaults to self)]",
-    async execute(msg, userResolvable) {
+    async execute({ msg }, userResolvable) {
         const user = userResolvable
             ? await resolveUser(userResolvable)
             : msg.author;

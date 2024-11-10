@@ -24,7 +24,7 @@ defineCommand({
     description: "Inspect the unicode characters in a string",
     usage: "<text>",
     rawContent: true,
-    async execute(msg, text) {
+    async execute({ msg }, text) {
         text = text.replaceAll("\n", "") || msg.referencedMessage?.content!;
 
         if (!text)

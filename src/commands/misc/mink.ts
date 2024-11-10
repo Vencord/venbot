@@ -18,7 +18,7 @@ defineCommand({
     aliases: ["mink", "minker"],
     description: "minker",
     usage: null,
-    async execute(msg) {
+    async execute({ msg }) {
         const url = await hasLocalMinkerApi()
             ? ApiUrl.Local
             : ApiUrl.Remote;
