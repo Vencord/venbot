@@ -1,6 +1,5 @@
-import { Message } from "oceanic.js";
 
-import { defineCommand } from "~/Commands";
+import { CommandContext, defineCommand } from "~/Commands";
 import { db, ExpressionType, ExpressionUsageType } from "~/db";
 import { reply } from "~/util";
 import { Paginator } from "~/util/Paginator";
@@ -10,7 +9,7 @@ import { formatCountAndName } from "./shared";
 
 const customEmojiRe = /<a?:\w+:(\d+)>/;
 
-const makeLeaderboard = (usageType: ExpressionUsageType, expressionType = ExpressionType.EMOJI) => async (msg: Message, emoji: string) => {
+const makeLeaderboard = (usageType: ExpressionUsageType, expressionType = ExpressionType.EMOJI) => async ({ msg }: CommandContext, emoji: string) => {
     let name = emoji;
     let id: string | undefined;
     if (expressionType === ExpressionType.EMOJI) {

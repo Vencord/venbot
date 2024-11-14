@@ -1,7 +1,7 @@
 import { Message, User } from "oceanic.js";
 
 import { Vaius } from "~/Client";
-import { defineCommand } from "~/Commands";
+import { CommandContext, defineCommand } from "~/Commands";
 import { db, ExpressionFormatType, ExpressionType, ExpressionUsageType } from "~/db";
 import { GUILD_ID } from "~/env";
 import { reply } from "~/util";
@@ -101,7 +101,7 @@ async function createTop(msg: Message, user: User | null, expressionType: Expres
     await paginator.create(msg);
 }
 
-const makeTop = (isUserMode: boolean) => async (msg: Message, type?: string, userInput?: string) => {
+const makeTop = (isUserMode: boolean) => async ({ msg }: CommandContext, type?: string, userInput?: string) => {
     type ||= "emojis";
     type = type.toLowerCase();
 
