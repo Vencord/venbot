@@ -11,7 +11,6 @@ const NinaChatThreadId = "1295541912010362932";
 const bridgeFrom = "venbot";
 
 let socket: WebSocket;
-const closeCount = 0;
 const onOpenCallbacks = [] as Function[];
 
 function openConnection() {
