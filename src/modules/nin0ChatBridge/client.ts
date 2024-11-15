@@ -3,6 +3,7 @@ import { RawData, WebSocket } from "ws";
 import { Vaius } from "~/Client";
 import { NINA_CHAT_TOKEN } from "~/env";
 import { getHighestRole } from "~/util";
+import { tryWithBackoff } from "~/util/backoff";
 
 import { AnyIncomingPayload, AnyOutgoingPayload, IncomingMessage, IncomingOpcode, OutgoingOpcode, Role } from "./types";
 
@@ -10,29 +11,51 @@ const NinaChatThreadId = "1295541912010362932";
 const bridgeFrom = "venbot";
 
 let socket: WebSocket;
-let closeCount = 0;
+const closeCount = 0;
 const onOpenCallbacks = [] as Function[];
 
-export function init() {
+function openConnection() {
+    return new Promise<boolean>(resolve => {
+        if (socket?.readyState === WebSocket.OPEN)
+            return resolve(true);
+
+        let didConnect = false;
+        socket = new WebSocket("wss://chatws.nin0.dev/");
+
+        socket.once("open", () => {
+            didConnect = true;
+            onOpen();
+            resolve(true);
+        });
+
+        socket.on("message", onMessage);
+
+        socket.once("close", () => {
+            if (!didConnect)
+                return resolve(false);
+
+            console.log("Lost connection to nin0chat, reconnecting...");
+            init();
+        });
+
+        socket.once("error", e => {
+            if (!didConnect)
+                return resolve(false);
+
+            console.error("Nin0chat error ~ reconnecting...:", e);
+            socket.close();
+            init();
+        });
+    });
+}
+
+export async function init() {
     if (!NINA_CHAT_TOKEN) {
         console.log("NINA_CHAT_TOKEN not set, skipping chat bridge");
         return;
     }
 
-    closeCount++;
-    if (closeCount >= 5) return;
-    setTimeout(() => closeCount--, 5000);
-
-    socket?.close();
-
-    socket = new WebSocket("wss://chatws.nin0.dev/");
-    socket.on("open", onOpen);
-    socket.on("message", onMessage);
-    socket.on("close", init);
-    socket.on("error", e => {
-        // that shit is SOOOOO unstable we don't need to handle this
-        init();
-    });
+    await tryWithBackoff(openConnection);
 }
 
 function sendPayload(payload: AnyOutgoingPayload) {
