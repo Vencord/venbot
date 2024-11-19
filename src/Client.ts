@@ -41,7 +41,11 @@ const whitespaceRe = /\s+/;
 const GEN_AI_ID = "974297735559806986";
 
 Vaius.on("messageCreate", handleMessage);
-Vaius.on("messageUpdate", handleMessage);
+Vaius.on("messageUpdate", (msg, oldMsg) => {
+    if (oldMsg && msg.content === oldMsg?.content) return;
+
+    handleMessage(msg);
+});
 
 async function handleMessage(msg: Message) {
     if (msg.inCachedGuildChannel() && await lobotomiseMaybe(msg)) return;
