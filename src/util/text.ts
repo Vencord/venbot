@@ -58,6 +58,8 @@ export function msToHumanReadable(ms: number, short = false) {
         [seconds, "second"]
     ] as const).filter(([v]) => v > 0);
 
+    if (!values.length) return "0 seconds";
+
     return values
         .map(
             short

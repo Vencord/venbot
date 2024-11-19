@@ -21,7 +21,7 @@ defineCommand({
         }
 
         const duration = parseDuration(durationString);
-        if (duration == null || duration <= 0 || duration > 28 * Millis.DAY) {
+        if (duration == null || duration < 1 || duration > 28 * Millis.DAY) {
             return reply(msg, { content: "Duration must be a valid time span not longer than 28 days" });
         }
         const durationText = msToHumanReadable(duration);
