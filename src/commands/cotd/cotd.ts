@@ -1,7 +1,6 @@
 import { defineCommand } from "~/Commands";
 import { REGULAR_ROLE_ID } from "~/constants";
 import { drawBlobCatCozy } from "~/modules/regularCotd";
-import { reply } from "~/util";
 import { toHexColorString } from "~/util/colors";
 
 defineCommand({
@@ -9,12 +8,12 @@ defineCommand({
     description: "Shows the current cozy of the day",
     usage: null,
     guildOnly: true,
-    async execute({ msg }, hex: string) {
+    async execute({ msg, reply }, hex: string) {
         const regularRole = msg.guild!.roles.get(REGULAR_ROLE_ID)!;
 
         const [, colorName] = regularRole.name.match(/\((.+)\)/i)!;
 
-        return reply(msg, {
+        return reply({
             embeds: [{
                 description: `The cozy of the day is ${colorName}! (${toHexColorString(regularRole.color)})`,
                 color: regularRole.color,

@@ -2,7 +2,7 @@ import parseDuration from "parse-duration";
 
 import { defineCommand } from "~/Commands";
 import { Millis } from "~/constants";
-import { codeblock, ID_REGEX, reply, silently, until } from "~/util";
+import { codeblock, ID_REGEX, silently, until } from "~/util";
 import { msToHumanReadable } from "~/util/text";
 
 import { getHighestRolePosition, parseUserIdsAndReason } from "./utils";
@@ -14,7 +14,7 @@ defineCommand({
     usage: "<duration> <user> [user...] [reason]",
     guildOnly: true,
     modOnly: true,
-    async execute({ msg }, ...args) {
+    async execute({ msg, reply }, ...args) {
         let durationString = args.shift()!;
         while (args.length && !ID_REGEX.test(args[0])) {
             durationString += " " + args.shift();
@@ -22,7 +22,7 @@ defineCommand({
 
         const duration = parseDuration(durationString);
         if (duration == null || duration < 1 || duration > 28 * Millis.DAY) {
-            return reply(msg, { content: "Duration must be a valid time span not longer than 28 days" });
+            return reply("Duration must be a valid time span not longer than 28 days");
         }
         const durationText = msToHumanReadable(duration);
 
@@ -34,7 +34,7 @@ defineCommand({
         }
 
         if (!ids.length)
-            return reply(msg, { content: "Gimme some users dummy" });
+            return reply("Gimme some users dummy");
 
         reason = `${msg.author.tag}: ${reason}`;
 
@@ -70,6 +70,6 @@ defineCommand({
             content += `\n\nMuted ${mutedUsers.join(", ")} for ${durationText}`;
         }
 
-        return reply(msg, { content });
+        return reply(content);
     },
 });

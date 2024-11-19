@@ -2,7 +2,7 @@ import { AnyTextableGuildChannel, Message } from "oceanic.js";
 
 import { defineCommand } from "~/Commands";
 import { Millis } from "~/constants";
-import { codeblock, reply, silently } from "~/util";
+import { codeblock, silently } from "~/util";
 import { pluralise, stripIndent } from "~/util/text";
 
 import { getHighestRolePosition, parseUserIdsAndReason } from "./utils";
@@ -31,18 +31,18 @@ defineCommand({
     aliases: ["yeet", "🍌"],
     guildOnly: true,
     modOnly: true,
-    async execute({ msg }, ...args) {
+    async execute({ msg, reply }, ...args) {
         const [daysToDelete, ids, reason] = parseCrap(msg, args);
 
         if (!ids.length) {
             if (!msg.referencedMessage)
-                return reply(msg, { content: "Gimme some users silly" });
+                return reply("Gimme some users silly");
 
             ids.push(msg.referencedMessage.author.id);
         }
 
         if (ids.length > 100) {
-            return reply(msg, { content: "That's tooooo many users bestie...." });
+            return reply("That's tooooo many users bestie....");
         }
 
         const members = await msg.guild.fetchMembers({ userIDs: ids });
@@ -84,7 +84,7 @@ defineCommand({
             content += `\n\nBanned ${bannedUsers.join(", ")}`;
         }
 
-        return reply(msg, { content });
+        return reply(content);
     }
 });
 
@@ -95,21 +95,19 @@ defineCommand({
     guildOnly: true,
     ownerOnly: true,
     modOnly: true,
-    async execute({ msg }, ...args) {
+    async execute({ msg, reply }, ...args) {
         const [daysToDelete, userIDs, reason] = parseCrap(msg, args);
-        if (!userIDs.length) return reply(msg, { content: "Gimme some users silly" });
-        if (userIDs.length > 200) return reply(msg, { content: "That's tooooo many users bestie...." });
+        if (!userIDs.length) return reply("Gimme some users silly");
+        if (userIDs.length > 200) return reply("That's tooooo many users bestie....");
 
         const res = await msg.guild.bulkBan({ userIDs, reason, deleteMessageSeconds: daysToDelete * Millis.DAY / 1000 })
             .catch(e => null);
 
-        if (!res || !res.bannedUsers.length) return reply(msg, { content: "No bans succeeded." });
-        if (!res.failedUsers.length) return reply(msg, { content: `Success! Banned ${pluralise(res.bannedUsers.length, "user")}.` });
-        return reply(msg, {
-            content: stripIndent`
+        if (!res || !res.bannedUsers.length) return reply("No bans succeeded.");
+        if (!res.failedUsers.length) return reply(`Success! Banned ${pluralise(res.bannedUsers.length, "user")}.`);
+        return reply(stripIndent`
             Successfully banned ${pluralise(res.bannedUsers.length, "user")}.
             Failed to ban ${pluralise(res.failedUsers.length, "user")} (${res.failedUsers.join(", ")}).
-            `
-        });
+        `);
     }
 });

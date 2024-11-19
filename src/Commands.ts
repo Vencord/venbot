@@ -1,13 +1,86 @@
 import CommandsMap from "__commands__";
-import { AnyTextableChannel, AnyTextableGuildChannel, Message, PermissionName } from "oceanic.js";
+import { AnyTextableChannel, AnyTextableGuildChannel, CreateMessageOptions, DiscordRESTError, EditMessageOptions, Message, PermissionName } from "oceanic.js";
 
 import { Millis } from "./constants";
+import { silently } from "./util";
 import { Deduper } from "./util/Deduper";
+import { TTLMap } from "./util/TTLMap";
 
-export interface CommandContext<GuildOnly extends boolean = false> {
-    msg: GuildOnly extends true ? Message<AnyTextableGuildChannel> : Message<AnyTextableChannel>;
-    prefix: string;
-    commandName: string;
+
+const PreviousCommandResponses = new TTLMap<string, string>(10 * Millis.MINUTE);
+
+type CommandReplyOptions = CreateMessageOptions & EditMessageOptions;
+
+export class CommandContext<GuildOnly extends boolean = false> {
+    private responseId?: string;
+
+    constructor(
+        readonly msg: GuildOnly extends true ? Message<AnyTextableGuildChannel> : Message<AnyTextableChannel>,
+        readonly prefix: string,
+        readonly commandName: string,
+    ) {
+        this.responseId = PreviousCommandResponses.get(msg.id);
+    }
+
+    private _normalizeOptions(opts: string | CommandReplyOptions): CommandReplyOptions {
+        if (typeof opts === "string")
+            opts = { content: opts };
+
+        // use empty values so if the edit has less fields than the original message, it doesn't keep the old values
+        return {
+            attachments: [],
+            embeds: [],
+            content: "",
+            components: [],
+            stickerIDs: [],
+            files: [],
+            ...opts,
+        };
+    }
+
+    private async _createMessage(opts: CreateMessageOptions) {
+        const { msg } = this;
+
+        const response = await msg.client.rest.channels.createMessage(msg.channelID, opts);
+
+        PreviousCommandResponses.set(msg.id, response.id);
+    }
+
+    createMessage = async (opts: string | CommandReplyOptions) => {
+        opts = this._normalizeOptions(opts);
+
+        const { responseId, msg } = this;
+
+        if (!responseId)
+            return this._createMessage(opts);
+
+        try {
+            await msg.client.rest.channels.editMessage(msg.channelID, responseId, opts);
+        } catch (e) {
+            if (!(e instanceof DiscordRESTError) || e.status !== 404)
+                throw e;
+
+            this.responseId = undefined;
+            return this.createMessage(opts);
+        }
+    };
+
+    reply = async (opts: string | EditMessageOptions & CreateMessageOptions) => {
+        opts = this._normalizeOptions(opts);
+
+        return this.createMessage({
+            ...opts,
+            messageReference: {
+                messageID: this.msg.id,
+                channelID: this.msg.channelID,
+                guildID: this.msg.guildID!
+            }
+        });
+    };
+
+    react = async (emoji: string) => {
+        await silently(this.msg.createReaction(emoji));
+    };
 }
 
 export interface Command<GuildOnly extends boolean = false> {

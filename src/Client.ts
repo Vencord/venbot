@@ -40,7 +40,10 @@ Vaius.once("ready", async () => {
 const whitespaceRe = /\s+/;
 const GEN_AI_ID = "974297735559806986";
 
-Vaius.on("messageCreate", async msg => {
+Vaius.on("messageCreate", handleMessage);
+Vaius.on("messageUpdate", handleMessage);
+
+async function handleMessage(msg: Message) {
     if (msg.inCachedGuildChannel() && await lobotomiseMaybe(msg)) return;
     if (msg.author.bot && msg.author.id !== GEN_AI_ID) return;
     moderateMessage(msg);
@@ -89,11 +92,11 @@ Vaius.on("messageCreate", async msg => {
     if (!msg.channel)
         await msg.client.rest.channels.get(msg.channelID);
 
-    const context: CommandContext = {
-        msg: msg as Message<AnyTextableChannel>,
+    const context = new CommandContext(
+        msg as Message<AnyTextableChannel>,
         prefix,
-        commandName: cmdName
-    };
+        cmdName
+    );
 
     try {
         if (cmd.rawContent)
@@ -108,4 +111,4 @@ Vaius.on("messageCreate", async msg => {
         );
         silently(reply(msg, { content: "oop, that didn't go well 💥" }));
     }
-});
+}

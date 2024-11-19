@@ -4,7 +4,6 @@ import { Vaius } from "~/Client";
 import { defineCommand } from "~/Commands";
 import { Emoji } from "~/constants";
 import { COMMUNITY_CATEGORY_CHANNEL_ID, COMMUNITY_POST_PASS_ROLE_ID } from "~/env";
-import { reply, silently } from "~/util";
 import { resolveUserId } from "~/util/resolvers";
 
 defineCommand({
@@ -14,10 +13,10 @@ defineCommand({
     usage: "<user>",
     guildOnly: true,
     modOnly: true,
-    async execute({ msg }, user) {
+    async execute({ msg, react, reply }, user) {
         const id = resolveUserId(user);
         if (!id)
-            return reply(msg, "Invalid user input");
+            return reply("Invalid user input");
 
         await msg.guild.addMemberRole(
             id,
@@ -25,7 +24,7 @@ defineCommand({
             `Submission pass granted by ${msg.author.tag}`
         );
 
-        silently(msg.createReaction(Emoji.CheckMark));
+        return react(Emoji.CheckMark);
     },
 });
 

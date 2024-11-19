@@ -9,7 +9,7 @@ import { db } from "~/db";
 import { CONTRIBUTOR_ROLE_ID, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, GITHUB_PAT, HTTP_DOMAIN } from "~/env";
 import { removeStickyRoles } from "~/modules/stickyRoles";
 import { fastify } from "~/server";
-import { getAsMemberInMainGuild, reply, sendDm, silently } from "~/util";
+import { getAsMemberInMainGuild, sendDm, silently } from "~/util";
 import { fetchJson } from "~/util/fetch";
 
 export const githubAuthStates = new Map<string, {
@@ -310,13 +310,13 @@ defineCommand({
     description: "Link your GitHub account to claim the contributor and donor role",
     aliases: ["github", "linkgithub", "gh", "link-gh"],
     usage: null,
-    async execute({ msg }) {
+    async execute({ msg, reply }) {
         if (githubAuthStates.has(msg.author.id))
-            return reply(msg, "You already have a pending GitHub link prompt. Check in our DMs!");
+            return reply("You already have a pending GitHub link prompt. Check in our DMs!");
 
         const member = await getAsMemberInMainGuild(msg.author.id);
         if (!member)
-            return reply(msg, "You must be in the Vencord server to link your GitHub.");
+            return reply("You must be in the Vencord server to link your GitHub.");
 
         const id = randomUUID();
         const oauthLink = `${HTTP_DOMAIN}/github/authorize?userId=${msg.author.id}&state=${id}`;
@@ -326,10 +326,10 @@ defineCommand({
         });
 
         if (!sentMessage)
-            return reply(msg, "I couldn't send you a DM. Please allow DMs from server members and try again.");
+            return reply("I couldn't send you a DM. Please allow DMs from server members and try again.");
 
         if (msg.guildID)
-            reply(msg, "I've sent you a DM with more info!");
+            reply("I've sent you a DM with more info!");
 
         const timeoutId = setTimeout(() => {
             githubAuthStates.delete(msg.author.id);

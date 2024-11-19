@@ -1,6 +1,5 @@
 import { defineCommand } from "~/Commands";
 import { drawBlobCatCozy } from "~/modules/regularCotd";
-import { reply } from "~/util";
 import { randomHexColor, toHexColorString } from "~/util/colors";
 
 
@@ -9,7 +8,7 @@ defineCommand({
     aliases: ["bcc", "blobcat", "blob", "cat", "cozy"],
     description: "you wouldn't generate a cozy blobcat",
     usage: "[color]",
-    async execute({ msg }, color) {
+    async execute({ reply }, color) {
         if (!color)
             color = randomHexColor();
         else {
@@ -20,7 +19,7 @@ defineCommand({
 
         const cozy = await drawBlobCatCozy(color);
 
-        return reply(msg, {
+        return reply({
             files: [{
                 name: "blobcatcozy.png",
                 contents: cozy

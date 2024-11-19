@@ -40,7 +40,7 @@ defineCommand({
     description: "Create a graphic guiding people to the correct channel (usually support)",
     usage: "[destination channel] [destination caption] | [origin caption]",
     guildOnly: true,
-    async execute({ msg }, channelId, ...captionElements) {
+    async execute({ msg, createMessage }, channelId, ...captionElements) {
         let channel = msg.client.getChannel(SUPPORT_CHANNEL_ID) as AnyGuildChannelWithoutThreads;
         let caption = captionElements.join(" ");
         if (channelId) {
@@ -75,7 +75,7 @@ defineCommand({
             silently(msg.delete());
         }
 
-        msg.channel.createMessage({
+        return createMessage({
             content,
             files: [
                 {

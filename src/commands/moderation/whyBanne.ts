@@ -1,5 +1,5 @@
 import { defineCommand } from "~/Commands";
-import { codeblock, reply } from "~/util";
+import { codeblock } from "~/util";
 import { resolveUser } from "~/util/resolvers";
 
 defineCommand({
@@ -8,15 +8,15 @@ defineCommand({
     aliases: ["wb", "whybanned", "banreason", "baninfo", "bi"],
     guildOnly: true,
     usage: "<user>",
-    async execute({ msg }, userResolvable) {
+    async execute({ msg, reply }, userResolvable) {
         const user = await resolveUser(userResolvable).catch(() => null);
         if (!user) {
-            return reply(msg, "who?");
+            return reply("who?");
         }
 
         const ban = await msg.guild.getBan(user.id).catch(() => null);
         if (!ban) {
-            return reply(msg, "bro is not banne");
+            return reply("bro is not banne");
         }
 
         let reason = ban.reason || "No reason provided";
@@ -29,6 +29,6 @@ defineCommand({
             actor = a.slice(0, -1);
         }
 
-        reply(msg, `Banned by **${actor}**: ${codeblock(reason)}`);
+        reply(`Banned by **${actor}**: ${codeblock(reason)}`);
     },
 });

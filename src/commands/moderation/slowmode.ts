@@ -1,6 +1,6 @@
 import { defineCommand } from "~/Commands";
 import { Emoji } from "~/constants";
-import { reply, silently } from "~/util";
+import { reply } from "~/util";
 
 defineCommand({
     name: "slowmode",
@@ -9,7 +9,7 @@ defineCommand({
     usage: "<seconds>",
     guildOnly: true,
     modOnly: true,
-    async execute({ msg }, secondsArg) {
+    async execute({ msg, react }, secondsArg) {
         if (secondsArg === "off") secondsArg = "0";
 
         const seconds = Number(secondsArg);
@@ -19,6 +19,6 @@ defineCommand({
 
         await msg.channel.edit({ rateLimitPerUser: seconds });
 
-        silently(msg.createReaction(Emoji.CheckMark));
+        return react(Emoji.CheckMark);
     }
 });

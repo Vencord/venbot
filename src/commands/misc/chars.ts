@@ -1,5 +1,5 @@
 import { defineCommand } from "~/Commands";
-import { reply, ZWSP } from "~/util";
+import { ZWSP } from "~/util";
 
 let unicodeNameMap: Record<number, string> | undefined;
 
@@ -24,11 +24,11 @@ defineCommand({
     description: "Inspect the unicode characters in a string",
     usage: "<text>",
     rawContent: true,
-    async execute({ msg }, text) {
+    async execute({ msg, reply }, text) {
         text = text.replaceAll("\n", "") || msg.referencedMessage?.content!;
 
         if (!text)
-            return reply(msg, { content: "https://www.youtube.com/watch?v=hiRacdl02w4" });
+            return reply("https://www.youtube.com/watch?v=hiRacdl02w4");
 
         const map = await requireMap();
 
@@ -41,6 +41,6 @@ defineCommand({
         if (result.length > 2000)
             result = "Result too long D:";
 
-        return reply(msg, result);
+        return reply(result);
     },
 });

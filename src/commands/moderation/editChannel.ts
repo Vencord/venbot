@@ -10,13 +10,15 @@ defineCommand({
     guildOnly: true,
     modOnly: true,
     rawContent: true,
-    async execute({ msg }, value) {
+    async execute({ msg, react }, value) {
         if (!value)
             return reply(msg, "What's the new name?");
 
         msg.channel.edit({ name: value })
-            .then(() => msg.createReaction(Emoji.CheckMark))
-            .catch(() => msg.createReaction(Emoji.X));
+            .then(
+                () => react(Emoji.CheckMark),
+                () => react(Emoji.X)
+            );
     }
 });
 
@@ -28,12 +30,14 @@ defineCommand({
     guildOnly: true,
     modOnly: true,
     rawContent: true,
-    async execute({ msg }, value) {
+    async execute({ msg, react, reply }, value) {
         if (!value)
-            return reply(msg, "Did you forget the topic or something?");
+            return reply("Did you forget the topic or something?");
 
         await msg.channel.edit({ topic: value })
-            .then(() => msg.createReaction(Emoji.CheckMark))
-            .catch(() => msg.createReaction(Emoji.X));
+            .then(
+                () => react(Emoji.CheckMark),
+                () => react(Emoji.X)
+            );
     }
 });

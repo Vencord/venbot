@@ -6,7 +6,7 @@ import { OwnerId } from "~/Client";
 import { defineCommand } from "~/Commands";
 import { ASSET_DIR } from "~/constants";
 import { DISCORD_TOKEN } from "~/env";
-import { codeblock, reply, silently } from "~/util";
+import { codeblock, silently } from "~/util";
 import { inspect } from "~/util/inspect";
 import { countOccurrences } from "~/util/text";
 
@@ -53,7 +53,7 @@ defineCommand({
     usage: "<code>",
     aliases: ["e", "$"],
     rawContent: true,
-    async execute({ msg }, code) {
+    async execute({ msg, reply }, code) {
         if (msg.author.id !== OwnerId) {
             silently(sendVoiceMessage(msg));
 
@@ -102,8 +102,6 @@ defineCommand({
 
         if (consoleOutput) output += `\n${codeblock(consoleOutput)}`;
 
-        return reply(msg, {
-            content: output
-        });
+        return reply(output);
     }
 });

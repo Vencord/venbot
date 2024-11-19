@@ -1,5 +1,4 @@
 import { defineCommand } from "~/Commands";
-import { reply } from "~/util";
 import { makeLazy } from "~/util/lazy";
 
 const ApiUrl = {
@@ -18,7 +17,7 @@ defineCommand({
     aliases: ["mink", "minker"],
     description: "minker",
     usage: null,
-    async execute({ msg }) {
+    async execute({ reply }) {
         const url = await hasLocalMinkerApi()
             ? ApiUrl.Local
             : ApiUrl.Remote;
@@ -27,9 +26,9 @@ defineCommand({
             .then(r => r.ok ? r.arrayBuffer() : null);
 
         if (!minker)
-            return reply(msg, { content: "no mink :(" });
+            return reply("no mink :(");
 
-        return reply(msg, {
+        return reply({
             files: [{
                 name: "mink.jpeg",
                 contents: Buffer.from(minker)

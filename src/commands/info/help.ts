@@ -2,7 +2,7 @@ import { EmbedOptions } from "oceanic.js";
 
 import { CommandContext, Commands, defineCommand, FullCommand } from "~/Commands";
 import { PREFIXES } from "~/env";
-import { reply, ZWSP } from "~/util";
+import { ZWSP } from "~/util";
 import { getGitRemote } from "~/util/git";
 import { groupBy } from "~/util/groupBy";
 import { Paginator } from "~/util/Paginator";
@@ -14,18 +14,20 @@ defineCommand({
     description: "List all commands or get help for a specific command",
     usage: "[command]",
     async execute(ctx, commandName) {
+        const { prefix, reply } = ctx;
+
         if (!commandName)
             return await createCommandList(ctx);
 
         let cmd = Commands[commandName];
-        if (!cmd && commandName.startsWith(ctx.prefix))
-            cmd = Commands[commandName.slice(ctx.prefix.length)];
+        if (!cmd && commandName.startsWith(prefix))
+            cmd = Commands[commandName.slice(prefix.length)];
 
         const content = cmd
             ? commandHelp(cmd, ctx)
             : `Command ${toInlineCode(commandName)} not found.`;
 
-        return reply(ctx.msg, { content });
+        return reply(content);
     },
 });
 

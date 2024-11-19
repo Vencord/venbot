@@ -1,5 +1,4 @@
 import { defineCommand } from "~/Commands";
-import { reply } from "~/util";
 import { fetchJson } from "~/util/fetch";
 import { stripIndent, toTitle } from "~/util/text";
 
@@ -61,12 +60,12 @@ defineCommand({
     aliases: ["dstatus", "ds"],
     description: "Check if discord incidents are happening",
     usage: null,
-    async execute({ msg }) {
+    async execute({ reply }) {
         const components = await getDiscordStatusComponents();
         const incidents = await getDiscordStatusIncidents();
 
         if (!components || !incidents) {
-            return reply(msg, "Can't get discord status at the moment :c");
+            return reply("Can't get discord status at the moment :c");
         }
 
         const systemStatus = components.components
@@ -100,7 +99,7 @@ defineCommand({
         const systemOutagesText =
             `\n### Latest Outage Information\n${systemOutages}`;
 
-        return reply(msg, {
+        return reply({
             embeds: [{
                 title: "Discord Status",
                 url: "https://discordstatus.com/",

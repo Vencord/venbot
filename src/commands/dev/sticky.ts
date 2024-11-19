@@ -2,7 +2,6 @@ import { defineCommand } from "~/Commands";
 import { Emoji } from "~/constants";
 import { BotState } from "~/db/botState";
 import { createStickyMessage, deleteStickyMessage, initStickyDebouncer } from "~/modules/sticky";
-import { reply, silently } from "~/util";
 
 defineCommand({
     name: "sticky",
@@ -10,7 +9,7 @@ defineCommand({
     ownerOnly: true,
     usage: "<off | on | set | delay> [value]",
     rawContent: true,
-    execute({ msg }, content) {
+    execute({ reply, react }, content) {
         let response: string | undefined;
 
         const [operation, value, ...extra] = content.split(" ");
@@ -47,9 +46,9 @@ defineCommand({
                 break;
 
             default:
-                return silently(msg.createReaction(Emoji.QuestionMark));
+                return react(Emoji.QuestionMark);
         }
 
-        return reply(msg, response);
+        return reply(response);
     }
 });

@@ -1,5 +1,4 @@
 import { defineCommand } from "~/Commands";
-import { reply } from "~/util";
 
 import { parseUserIdsAndReason } from "./utils";
 
@@ -10,13 +9,11 @@ defineCommand({
     aliases: ["unyeet", "🍌💥"],
     guildOnly: true,
     modOnly: true,
-    async execute({ msg }, ...args) {
+    async execute({ msg, reply }, ...args) {
         const { ids, reason } = parseUserIdsAndReason(args);
 
         if (!ids.length)
-            return reply(msg, {
-                content: "Gimme some users dummy"
-            });
+            return reply("Gimme some users dummy");
 
         const fails = [] as string[];
         const unbannedUsers = [] as string[];
@@ -40,6 +37,6 @@ defineCommand({
                 .join(", ");
         }
 
-        return reply(msg, { content });
+        return reply(content);
     }
 });

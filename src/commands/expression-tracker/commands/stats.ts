@@ -1,10 +1,9 @@
-import { Message, User } from "oceanic.js";
+import { User } from "oceanic.js";
 
 import { Vaius } from "~/Client";
 import { CommandContext, defineCommand } from "~/Commands";
 import { db, ExpressionFormatType, ExpressionType, ExpressionUsageType } from "~/db";
 import { GUILD_ID } from "~/env";
-import { reply } from "~/util";
 import { Paginator } from "~/util/Paginator";
 import { resolveUser } from "~/util/resolvers";
 import { toInlineCode, toTitle } from "~/util/text";
@@ -59,7 +58,7 @@ function renderStickers(stickers: Expression[]) {
     return formatCountAndName(data);
 }
 
-async function createTop(msg: Message, user: User | null, expressionType: ExpressionType, usageType = ExpressionUsageType.MESSAGE) {
+async function createTop({ msg, reply }: CommandContext, user: User | null, expressionType: ExpressionType, usageType = ExpressionUsageType.MESSAGE) {
     let builder = db
         .selectFrom("expressionUses")
         .innerJoin("expressions", "expressions.id", "expressionUses.id")
@@ -85,7 +84,7 @@ async function createTop(msg: Message, user: User | null, expressionType: Expres
     const name = usageType === ExpressionUsageType.REACTION ? "reaction" : expressionType;
 
     if (!stats.length)
-        return reply(msg, `No ${name}s have been tracked yet! D:`);
+        return reply(`No ${name}s have been tracked yet! D:`);
 
     const render = expressionType === ExpressionType.EMOJI ? renderEmojis : renderStickers;
     const title = `${user ? `${toTitle(user.tag)}'s Top` : "Top"} ${toTitle(name)}s`;
@@ -101,7 +100,9 @@ async function createTop(msg: Message, user: User | null, expressionType: Expres
     await paginator.create(msg);
 }
 
-const makeTop = (isUserMode: boolean) => async ({ msg }: CommandContext, type?: string, userInput?: string) => {
+const makeTop = (isUserMode: boolean) => async (ctx: CommandContext, type?: string, userInput?: string) => {
+    const { msg, reply } = ctx;
+
     type ||= "emojis";
     type = type.toLowerCase();
 
@@ -109,19 +110,19 @@ const makeTop = (isUserMode: boolean) => async ({ msg }: CommandContext, type?: 
     if (isUserMode && userInput) {
         user = await resolveUser(userInput);
         if (!user)
-            return reply(msg, `Invalid user ${toInlineCode(userInput)}`);
+            return reply(`Invalid user ${toInlineCode(userInput)}`);
     }
 
     if ("emojis".startsWith(type) || "emotes".startsWith(type))
-        return createTop(msg, user, ExpressionType.EMOJI);
+        return createTop(ctx, user, ExpressionType.EMOJI);
 
     if ("stickers".startsWith(type))
-        return createTop(msg, user, ExpressionType.STICKER);
+        return createTop(ctx, user, ExpressionType.STICKER);
 
     if ("reactions".startsWith(type))
-        return createTop(msg, user, ExpressionType.EMOJI, ExpressionUsageType.REACTION);
+        return createTop(ctx, user, ExpressionType.EMOJI, ExpressionUsageType.REACTION);
 
-    return reply(msg, "Invalid type. Must be one of: `emojis`, `stickers`, `reactions`");
+    return reply("Invalid type. Must be one of: `emojis`, `stickers`, `reactions`");
 };
 
 defineCommand({

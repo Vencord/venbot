@@ -2,7 +2,7 @@ import { AnyTextableGuildChannel, Message } from "oceanic.js";
 
 import { defineCommand } from "~/Commands";
 import { DONOR_ROLE_ID, Emoji } from "~/constants";
-import { codeblock, ID_REGEX, reply, swallow } from "~/util";
+import { codeblock, ID_REGEX } from "~/util";
 import { makeConstants } from "~/util/objects";
 
 import { hasHigherRoleThan } from "./utils";
@@ -55,10 +55,10 @@ defineCommand({
     usage: "<role> <user> [user...]",
     guildOnly: true,
     modOnly: true,
-    async execute({ msg }, ...args) {
+    async execute({ msg, react, reply }, ...args) {
         const { role, users } = parseArgs(msg, args);
-        if (!role) return msg.createReaction(Emoji.QuestionMark).catch(swallow);
-        if (!hasHigherRoleThan(role, msg.member)) return msg.createReaction(Emoji.Anger).catch(swallow);
+        if (!role) return react(Emoji.QuestionMark);
+        if (!hasHigherRoleThan(role, msg.member)) return react(Emoji.Anger);
 
         const failed = [] as string[];
         for (const u of users) {
@@ -66,9 +66,9 @@ defineCommand({
                 .catch(e => failed.push(String(e)));
         }
 
-        if (!failed.length) return void msg.createReaction(Emoji.CheckMark).catch(swallow);
+        if (!failed.length) return void react(Emoji.CheckMark);
 
-        return reply(msg, "Failed to give some users that role:\n" + codeblock(failed.join("\n")));
+        return reply("Failed to give some users that role:\n" + codeblock(failed.join("\n")));
     },
 });
 
@@ -79,10 +79,10 @@ defineCommand({
     usage: "<role> <user> [user...]",
     guildOnly: true,
     modOnly: true,
-    async execute({ msg }, ...args) {
+    async execute({ msg, reply, react }, ...args) {
         const { role, users } = parseArgs(msg, args);
-        if (!role) return msg.createReaction(Emoji.QuestionMark).catch(swallow);
-        if (!hasHigherRoleThan(role, msg.member)) return msg.createReaction(Emoji.Anger).catch(swallow);
+        if (!role) return react(Emoji.QuestionMark);
+        if (!hasHigherRoleThan(role, msg.member)) return react(Emoji.Anger);
 
         const failed = [] as string[];
         for (const u of users) {
@@ -90,8 +90,8 @@ defineCommand({
                 .catch(() => failed.push(u));
         }
 
-        if (!failed.length) return void msg.createReaction(Emoji.CheckMark).catch(swallow);
+        if (!failed.length) return void react(Emoji.CheckMark);
 
-        return reply(msg, "Failed to remove that role from some users:\n" + codeblock(failed.join("\n")));
+        return reply("Failed to remove that role from some users:\n" + codeblock(failed.join("\n")));
     },
 });

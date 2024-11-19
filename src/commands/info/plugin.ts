@@ -1,9 +1,8 @@
 import leven from "leven";
-import { AnyTextableChannel, Message } from "oceanic.js";
 
-import { defineCommand } from "~/Commands";
+import { CommandContext, defineCommand } from "~/Commands";
 import { VENCORD_SITE } from "~/constants";
-import { makeCachedJsonFetch, reply } from "~/util";
+import { makeCachedJsonFetch } from "~/util";
 import { isTruthy } from "~/util/guards";
 
 interface Plugin {
@@ -35,7 +34,7 @@ const Emojis = {
     Dev: "<:dev:1240029459449512029>",
 };
 
-function sendPluginInfo(msg: Message<AnyTextableChannel>, plugin: Plugin) {
+function sendPluginInfo({ reply }: CommandContext, plugin: Plugin) {
     const traits = [
         plugin.required && `${Emojis.Required} required`,
         plugin.enabledByDefault && `${Emojis.EnabledByDefault} enabled by default`,
@@ -46,7 +45,7 @@ function sendPluginInfo(msg: Message<AnyTextableChannel>, plugin: Plugin) {
         plugin.target === "dev" && `${Emojis.Dev} development build only`
     ].filter(isTruthy).join("\n");
 
-    return reply(msg, {
+    return reply({
         embeds: [
             {
                 title: plugin.name,
@@ -78,13 +77,13 @@ defineCommand({
     description: "Provides information on a plugin",
     usage: "<plugin name>",
     rawContent: true, // since we just want the plugin name, and at least one has spaces
-    async execute({ msg }, query) {
-        if (!msg.inCachedGuildChannel()) return;
+    async execute(ctx, query) {
+        const { reply } = ctx;
 
-        if (!query) return reply(msg, "Gimme a plugin name silly");
+        if (!query) return reply("Gimme a plugin name silly");
 
         if (query.toLowerCase() === "shiggy")
-            return reply(msg, "https://cdn.discordapp.com/emojis/1024751291504791654.gif?size=48&quality=lossless&name=shiggy");
+            return reply("https://cdn.discordapp.com/emojis/1024751291504791654.gif?size=48&quality=lossless&name=shiggy");
 
 
         const plugins = await fetchPlugins();
@@ -97,7 +96,7 @@ defineCommand({
         })();
 
         if (match)
-            return sendPluginInfo(msg, match);
+            return sendPluginInfo(ctx, match);
 
         // find plugins with similar names, in case of minor typos
         const similarPlugins = plugins
@@ -109,7 +108,7 @@ defineCommand({
             .sort((a, b) => a.distance - b.distance);
 
         if (similarPlugins.length === 1)
-            return sendPluginInfo(msg, plugins.find(p => p.name === similarPlugins[0].name)!);
+            return sendPluginInfo(ctx, plugins.find(p => p.name === similarPlugins[0].name)!);
 
         if (similarPlugins.length > 0) {
             const suggestions = similarPlugins
@@ -117,11 +116,10 @@ defineCommand({
                 .join("\n");
 
             return reply(
-                msg,
                 `Couldn't quite find the plugin you were looking for. Did you mean...\n${suggestions}`
             );
         }
 
-        return reply(msg, "Couldn't find a plugin with that name, and there are no plugins with similar names.");
+        return reply("Couldn't find a plugin with that name, and there are no plugins with similar names.");
     },
 });

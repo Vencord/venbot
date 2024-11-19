@@ -1,6 +1,5 @@
 import { defineCommand } from "~/Commands";
 import { rerollCotd } from "~/modules/regularCotd";
-import { reply } from "~/util";
 import { toHexColorString } from "~/util/colors";
 
 defineCommand({
@@ -9,12 +8,12 @@ defineCommand({
     usage: "[hex]",
     guildOnly: true,
     modOnly: true,
-    async execute({ msg }, hex?: string) {
+    async execute({ msg, reply }, hex?: string) {
         if (hex) {
             const parsed = Number(hex.replace(/^#/, "0x"));
 
             if (isNaN(parsed)) {
-                return reply(msg, "wtf is that hex");
+                return reply("wtf is that hex");
             }
 
             hex = toHexColorString(parsed);
@@ -22,6 +21,6 @@ defineCommand({
 
         await rerollCotd(hex);
 
-        return reply(msg, "Rerolled!");
+        return reply("Rerolled!");
     }
 });
