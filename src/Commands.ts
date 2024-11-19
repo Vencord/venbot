@@ -27,15 +27,17 @@ export class CommandContext<GuildOnly extends boolean = false> {
             opts = { content: opts };
 
         // use empty values so if the edit has less fields than the original message, it doesn't keep the old values
-        return {
-            attachments: [],
+        opts = {
             embeds: [],
+            files: [],
+            attachments: [],
             content: "",
             components: [],
             stickerIDs: [],
-            files: [],
             ...opts,
         };
+
+        return opts;
     }
 
     private async _createMessage(opts: CreateMessageOptions) {
@@ -55,13 +57,16 @@ export class CommandContext<GuildOnly extends boolean = false> {
             return this._createMessage(opts);
 
         try {
-            await msg.client.rest.channels.editMessage(msg.channelID, responseId, opts);
+            // oceanic's editMessage function mutates your input options, so freeze it to prevent that
+            // FIXME: remove this spread when oceanic fixes this awful design
+
+            return await msg.client.rest.channels.editMessage(msg.channelID, responseId, { ...opts });
         } catch (e) {
             if (!(e instanceof DiscordRESTError) || e.status !== 404)
                 throw e;
 
             this.responseId = undefined;
-            return this.createMessage(opts);
+            return this._createMessage(opts);
         }
     };
 

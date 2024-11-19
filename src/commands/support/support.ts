@@ -4,7 +4,7 @@ import { object, optional, string } from "valibot";
 
 import { defineCommand } from "~/Commands";
 import { ASSET_DIR, Emoji, SUPPORT_ALLOWED_CHANNELS } from "~/constants";
-import { reply, silently } from "~/util";
+import { silently } from "~/util";
 import { toInlineCode } from "~/util/text";
 import { mustParse } from "~/util/validation";
 
@@ -19,11 +19,15 @@ defineCommand({
     aliases: ["s"],
     description: "Query a support tag",
     usage: "[topic]",
-    async execute({ msg, createMessage, react }, ...guide) {
+    async execute({ msg, createMessage, react, reply }, ...guide) {
         if (!SUPPORT_ALLOWED_CHANNELS.includes(msg.channel?.id!)) return;
 
         if (guide.length === 0 || (guide.length === 1 && ["help", "list"].includes(guide[0])))
-            return reply(msg, SupportTagList.map(n => `${toInlineCode(SupportInstructions[n[0]].emoji)} ` + n.join(", ")).join("\n"));
+            return reply(
+                SupportTagList
+                    .map(n => `${toInlineCode(SupportInstructions[n[0]].emoji)} ` + n.join(", "))
+                    .join("\n")
+            );
 
         let { content } = SupportInstructions[guide.join(" ").toLowerCase()] ?? {};
         if (!content) return react(Emoji.QuestionMark);
