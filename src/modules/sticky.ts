@@ -13,7 +13,7 @@ const getSupportChannel = () => Vaius.getChannel(SUPPORT_CHANNEL_ID) as AnyTexta
 export async function createStickyMessage() {
     await deleteStickyMessage();
 
-    const msg = await getSupportChannel().createMessage({ content: BotState.sticky.message });
+    const msg = await getSupportChannel().createMessage({ content: BotState.sticky.message + "\n-+ This is an automated sticky message." });
     lastMsgId = msg.id;
 }
 
