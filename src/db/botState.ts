@@ -2,6 +2,7 @@ import { readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 
 import { DATA_DIR } from "~/constants";
+import { run } from "~/util/run";
 import { stripIndent } from "~/util/text";
 
 const StateFile = join(DATA_DIR, "botState.json");
@@ -28,13 +29,13 @@ const defaultState: BotState = {
     }
 };
 
-const savedState = (() => {
+const savedState = run(() => {
     try {
         return JSON.parse(readFileSync(StateFile, "utf8"));
     } catch {
         return {};
     }
-})();
+});
 const state = { ...defaultState, ...savedState };
 
 function saveSettings() {

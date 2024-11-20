@@ -4,6 +4,7 @@ import { ApplicationCommandOptions, ApplicationCommandOptionTypes, ApplicationCo
 
 import { GUILD_ID } from "~/env";
 import { handleInteraction } from "~/SlashCommands";
+import { run } from "~/util/run";
 
 import { OwnerId, Vaius } from "../../Client";
 import { DONOR_ROLE_ID, PROD } from "../../constants";
@@ -13,13 +14,13 @@ const BasePath = "/var/www/badges.vencord.dev";
 const BadgeJson = `${BasePath}/badges.json`;
 const badgesForUser = (userId: string) => `${BasePath}/badges/${userId}`;
 
-const BadgeData: Record<string, Array<Record<"tooltip" | "badge", string>>> = (() => {
+const BadgeData: Record<string, Array<Record<"tooltip" | "badge", string>>> = run(() => {
     try {
         return JSON.parse(readFileSync(BadgeJson, "utf-8"));
     } catch {
         return {};
     }
-})();
+});
 
 const saveBadges = () => writeFileSync(BadgeJson, JSON.stringify(BadgeData));
 

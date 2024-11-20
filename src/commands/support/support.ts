@@ -5,6 +5,7 @@ import { object, optional, string } from "valibot";
 import { defineCommand } from "~/Commands";
 import { ASSET_DIR, Emoji, SUPPORT_ALLOWED_CHANNELS } from "~/constants";
 import { silently } from "~/util";
+import { run } from "~/util/run";
 import { toInlineCode } from "~/util/text";
 import { mustParse } from "~/util/validation";
 
@@ -50,7 +51,7 @@ const FrontMatterSchema = object({
     emoji: string()
 });
 
-(async () => {
+run(async () => {
     const supportDir = join(ASSET_DIR, "support");
     const files = await readdir(supportDir);
 
@@ -84,4 +85,4 @@ const FrontMatterSchema = object({
 
         SupportTagList.push(names);
     }
-})();
+});

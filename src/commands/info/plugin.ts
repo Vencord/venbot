@@ -4,6 +4,7 @@ import { CommandContext, defineCommand } from "~/Commands";
 import { VENCORD_SITE } from "~/constants";
 import { makeCachedJsonFetch } from "~/util";
 import { isTruthy } from "~/util/guards";
+import { run } from "~/util/run";
 
 interface Plugin {
     name: string;
@@ -88,12 +89,12 @@ defineCommand({
 
         const plugins = await fetchPlugins();
 
-        const match = (() => {
+        const match = run(() => {
             if (!query) return;
 
             query = query.toLowerCase();
             return plugins.find(p => p.name.toLowerCase().includes(query));
-        })();
+        });
 
         if (match)
             return sendPluginInfo(ctx, match);

@@ -4,6 +4,7 @@ import { Vaius } from "~/Client";
 import { defineCommand } from "~/Commands";
 import { KNOWN_ISSUES_CHANNEL_ID } from "~/env";
 import { silently } from "~/util";
+import { run } from "~/util/run";
 
 export async function findThreads(): Promise<PublicThreadChannel[]> {
     const forumChannel = Vaius.getChannel(KNOWN_ISSUES_CHANNEL_ID);
@@ -47,7 +48,7 @@ defineCommand({
         if (!threads)
             return reply("that ain't a forum channel ⁉️");
 
-        const match = (() => {
+        const match = run(() => {
             if (!query) return;
 
             const idx = Number(query);
@@ -55,7 +56,7 @@ defineCommand({
 
             query = query.toLowerCase();
             return threads.find(t => t.name.toLowerCase().includes(query));
-        })();
+        });
 
         if (match) {
             const isReply = !!msg.referencedMessage;

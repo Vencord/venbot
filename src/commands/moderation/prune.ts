@@ -1,6 +1,7 @@
 import { Message } from "oceanic.js";
 
 import { defineCommand } from "~/Commands";
+import { run } from "~/util/run";
 
 defineCommand({
     name: "prune",
@@ -16,7 +17,7 @@ defineCommand({
         if (limit > 200)
             return reply("You can't delete more than 200 messages at once");
 
-        const filter: ((msg: Message) => boolean) | undefined = (() => {
+        const filter: ((msg: Message) => boolean) | undefined = run(() => {
             switch (modifier) {
                 case "by":
                 case "from":
@@ -32,7 +33,7 @@ defineCommand({
                 case "invites":
                     return m => m.content.includes("discord.gg/") || m.content.includes("discord.com/invite/");
             }
-        })();
+        });
 
         await msg.channel.purge({
             limit,
