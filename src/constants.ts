@@ -57,4 +57,5 @@ export const Emoji = makeConstants({
 export const ChannelEmoji = makeConstants({
     Forum: "<:forums:1308638540833361981>",
     Hash: "<:hash:1308638553827315742>",
+    Voice: "<:voice:1308642929010671617>",
 });
