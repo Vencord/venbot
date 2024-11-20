@@ -26,6 +26,7 @@ const configSchema = object({
 
     DEV_CHANNEL_ID: string(),
     SUPPORT_CHANNEL_ID: string(),
+    KNOWN_ISSUES_CHANNEL_ID: string(),
     BOT_CHANNEL_ID: string(),
 
     MOD_PERMS_ROLE_ID: string(),
@@ -65,6 +66,7 @@ export const {
     COMMUNITY_POST_PASS_ROLE_ID,
 
     DEV_CHANNEL_ID,
+    KNOWN_ISSUES_CHANNEL_ID,
     BOT_CHANNEL_ID,
     MOD_LOG_CHANNEL_ID,
     MOD_PERMS_ROLE_ID,

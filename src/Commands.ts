@@ -110,6 +110,13 @@ export const Commands: Record<string, FullCommand> = Object.create(null);
 
 let currentCategory = "";
 
+function addCommand(name: string, cmd: FullCommand) {
+    if (Commands[name])
+        throw new Error(`Command ${name} already exists`);
+
+    Commands[name] = cmd;
+}
+
 export function defineCommand<C extends Command<true>>(c: C & { guildOnly: true }): void;
 export function defineCommand<C extends Command<false>>(c: C): void;
 export function defineCommand<C extends Command<boolean>>(c: C): void {
@@ -117,8 +124,8 @@ export function defineCommand<C extends Command<boolean>>(c: C): void {
     cmd.rateLimits = new Deduper(10 * Millis.SECOND);
     cmd.category = currentCategory;
 
-    Commands[cmd.name] = cmd;
-    cmd.aliases?.forEach(alias => Commands[alias] = cmd);
+    addCommand(cmd.name, cmd);
+    cmd.aliases?.forEach(alias => addCommand(alias, cmd));
 }
 
 for (const [category, load] of Object.entries(CommandsMap)) {

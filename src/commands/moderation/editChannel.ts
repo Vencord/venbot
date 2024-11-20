@@ -26,7 +26,7 @@ defineCommand({
     name: "set-topic",
     description: "Edit the current channel's topic",
     usage: "<value>",
-    aliases: ["settopic", "topic"],
+    aliases: ["settopic"],
     guildOnly: true,
     modOnly: true,
     rawContent: true,
