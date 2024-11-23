@@ -4,6 +4,7 @@ import { ApplicationCommandOptions, ApplicationCommandOptionTypes, ApplicationCo
 
 import { GUILD_ID } from "~/env";
 import { handleInteraction } from "~/SlashCommands";
+import { ZWSP } from "~/util";
 import { run } from "~/util/run";
 
 import { OwnerId, Vaius } from "../../Client";
@@ -39,7 +40,10 @@ handleInteraction({
         const user = i.data.options.getUserOption("user")!;
         const existingBadges = BadgeData[user.value];
 
-        return i.result(existingBadges?.map((b, i) => ({ name: b.tooltip, value: String(i) })) ?? []);
+        return i.result(existingBadges?.map((b, i) => ({
+            name: `${i} - ${b.tooltip === ZWSP ? "<ZWSP>" : b.tooltip}`,
+            value: String(i)
+        })) ?? []);
     }
 });
 
