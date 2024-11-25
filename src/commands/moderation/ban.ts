@@ -18,7 +18,7 @@ function parseCrap(msg: Message<AnyTextableGuildChannel>, args: string[]) {
     let { ids, reason, hasCustomReason } = parseUserIdsAndReason(args);
 
     if (!hasCustomReason && !ids.length && msg.referencedMessage) {
-        const content = msg.type === MessageTypes.AUTO_MODERATION_ACTION
+        const content = msg.referencedMessage.type === MessageTypes.AUTO_MODERATION_ACTION
             ? msg.referencedMessage.embeds[0].description!
             : msg.referencedMessage.content;
         reason = `Banned for message: "${content.slice(0, 400)}"`;
