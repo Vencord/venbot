@@ -1,4 +1,4 @@
-import { AnyTextableGuildChannel, Message } from "oceanic.js";
+import { AnyTextableGuildChannel, Message, MessageTypes } from "oceanic.js";
 
 import { defineCommand } from "~/Commands";
 import { Millis } from "~/constants";
@@ -18,7 +18,10 @@ function parseCrap(msg: Message<AnyTextableGuildChannel>, args: string[]) {
     let { ids, reason, hasCustomReason } = parseUserIdsAndReason(args);
 
     if (!hasCustomReason && !ids.length && msg.referencedMessage) {
-        reason = `Banned for message: "${msg.referencedMessage.content.slice(0, 400)}"`;
+        const content = msg.type === MessageTypes.AUTO_MODERATION_ACTION
+            ? msg.referencedMessage.embeds[0].description!
+            : msg.referencedMessage.content;
+        reason = `Banned for message: "${content.slice(0, 400)}"`;
     }
 
     return [possibleDays, ids, `${msg.author.tag}: ${reason}`] as const;
