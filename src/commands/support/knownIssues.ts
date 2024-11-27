@@ -1,10 +1,11 @@
-import { ChannelTypes, EmbedOptions, PublicThreadChannel, User } from "oceanic.js";
+import { ChannelTypes, EmbedOptions, MessageTypes, PublicThreadChannel, User } from "oceanic.js";
 
 import { Vaius } from "~/Client";
 import { defineCommand } from "~/Commands";
 import { KNOWN_ISSUES_CHANNEL_ID } from "~/env";
 import { silently } from "~/util";
 import { run } from "~/util/run";
+import { makeEmbedSpaces } from "~/util/text";
 
 export async function findThreads(): Promise<PublicThreadChannel[]> {
     const forumChannel = Vaius.getChannel(KNOWN_ISSUES_CHANNEL_ID);
@@ -20,18 +21,44 @@ export async function findThreads(): Promise<PublicThreadChannel[]> {
 }
 
 
-function buildURL(guildId: string, messageId: string): string {
-    return messageId && `https://discord.com/channels/${guildId}/${messageId}`;
+function buildURL(guildId: string, channelId: string, messageId: string) {
+    return `https://discord.com/channels/${guildId}/${channelId}/${messageId}`;
 }
 
-export async function buildIssueEmbed(thread: PublicThreadChannel, invoker: User, guildID: string): Promise<EmbedOptions> {
-    const firstMessage = await thread.getMessage(thread.id);
+export async function buildIssueEmbed(thread: PublicThreadChannel, invoker: User, guildId: string): Promise<EmbedOptions> {
+    const messages = await thread.getMessages({ limit: 50, after: (BigInt(thread.id) - 1n).toString() })
+        .then(res => res.reverse())
+        .then(res => res.filter(m =>
+            m.content && (m.type === MessageTypes.DEFAULT || m.type === MessageTypes.THREAD_STARTER_MESSAGE)
+        ))
+        .then(res => res.slice(0, 10));
+
+    if (!messages.length) throw new Error(`Failed to retrieve thread messages from ${thread.mention}`);
+
+    let { content } = messages.shift()!;
+
+    let i = 1;
+    for (const msg of messages) {
+        const previousContent = content;
+
+        content += "\n\n";
+        content += `**[\`🔗\`](${buildURL(guildId, thread.id, msg.id)})${makeEmbedSpaces(2)}Update ${i}**`;
+        content += "\n";
+        content += msg.content;
+
+        if (content.length > 4096) {
+            content = previousContent;
+            break;
+        }
+
+        i++;
+    }
 
     return {
         title: thread.name,
         color: 0xfc5858,
-        description: firstMessage.content,
-        url: buildURL(guildID, firstMessage.id),
+        description: content,
+        url: buildURL(guildId, thread.id, thread.id),
         footer: { text: `Auto-response invoked by ${invoker.tag}` },
     };
 }
