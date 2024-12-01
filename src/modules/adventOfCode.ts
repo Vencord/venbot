@@ -3,7 +3,7 @@ import { Message, TextChannel } from "oceanic.js";
 
 import { Vaius } from "~/Client";
 import { ADVENT_OF_CODE_CHANNEL_ID, ADVENT_OF_CODE_COOKIE } from "~/env";
-import { formatTable } from "~/util";
+import { codeblock, formatTable } from "~/util";
 
 interface Leaderboard {
     members: Record<string, {
@@ -17,6 +17,8 @@ interface Leaderboard {
 }
 
 const LEADERBOARD_URL = "https://adventofcode.com/2024/leaderboard/private/view/1776680";
+
+let lastMessage: Message;
 
 async function fetchLeaderboard() {
     const data = process.env.NODE_ENV === "production"
@@ -39,7 +41,7 @@ async function fetchLeaderboard() {
         );
 }
 
-async function makeAocContent() {
+async function postMessage() {
     const leaderboard = await fetchLeaderboard();
 
     const [lastStarTs, lastStarUser] = leaderboard.reduce<[number, string]>(
@@ -49,32 +51,36 @@ async function makeAocContent() {
 
     const digits = Math.floor(Math.log10(leaderboard[0].stars) + 1);
 
-    const rows = leaderboard.map((u, i) => [
-        `${i + 1})`,
-        `${u.stars.toString().padStart(digits, " ")}⭐`,
-        u.name || "Anonymous",
-        `(${u.local_score} points)`
-    ]);
+    const rows = leaderboard
+        .filter(u => u.local_score > 0)
+        .map((u, i) => [
+            `${i + 1})`,
+            `${u.stars.toString().padStart(digits, " ")}⭐`,
+            u.name || "Anon",
+            `(${u.local_score}P)`
+        ]);
 
-    return `
-**<a:shiggy:1024751291504791654> Advent of Code Leaderboard <a:shiggy:1024751291504791654>**
 
-Leaderboard: ${LEADERBOARD_URL}
-Last Submission: <t:${lastStarTs}> by ${lastStarUser}
+    const content = codeblock(formatTable(rows));
 
-` + "```\n" + formatTable(rows) + "```" + `\nLast Updated: <t:${Math.floor(Date.now() / 1000)}>`;
-}
+    const options = {
+        embeds: [{
+            title: "Advent of Code Leaderboard",
+            url: LEADERBOARD_URL,
+            footer: {
+                text: `Last Submission: <t:${lastStarTs}> by ${lastStarUser} • Last Updated: <t:${Math.floor(Date.now() / 1000)}>`
+            },
+            description: content
+        }]
+    };
 
-let lastMessage: Message;
-
-async function postMessage() {
-    const content = await makeAocContent();
-    if (lastMessage) {
-        if (lastMessage.content !== content)
-            lastMessage = await lastMessage.edit({ content });
-    } else {
-        lastMessage = await (Vaius.getChannel(ADVENT_OF_CODE_CHANNEL_ID!) as TextChannel).createMessage({ content });
+    if (!lastMessage) {
+        lastMessage = await (Vaius.getChannel(ADVENT_OF_CODE_CHANNEL_ID!) as TextChannel).createMessage(options);
+        return;
     }
+
+    if (lastMessage.content !== content)
+        lastMessage = await lastMessage.edit(options);
 }
 
 if (ADVENT_OF_CODE_CHANNEL_ID && ADVENT_OF_CODE_COOKIE) {
