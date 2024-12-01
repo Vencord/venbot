@@ -1,5 +1,5 @@
 import { readFile } from "fs/promises";
-import { Message, TextChannel } from "oceanic.js";
+import { CreateMessageOptions, Message, TextChannel } from "oceanic.js";
 
 import { Vaius } from "~/Client";
 import { ADVENT_OF_CODE_CHANNEL_ID, ADVENT_OF_CODE_COOKIE } from "~/env";
@@ -61,18 +61,21 @@ async function postMessage() {
         ]);
 
 
-    const content = codeblock(formatTable(rows));
+    const content =
+        `Last Submission: <t:${lastStarTs}> by ${lastStarUser}\n`
+        + `Last Updated: <t:${Math.floor(Date.now() / 1000)}>\n`
+        + codeblock(formatTable(rows));
 
     const options = {
         embeds: [{
-            title: "Advent of Code Leaderboard",
-            url: LEADERBOARD_URL,
-            footer: {
-                text: `Last Submission: <t:${lastStarTs}> by ${lastStarUser} • Last Updated: <t:${Math.floor(Date.now() / 1000)}>`
+            author: {
+                name: "Advent of Code Leaderboard",
+                iconURL: "https://adventofcode.com/favicon.png",
+                url: LEADERBOARD_URL
             },
             description: content
         }]
-    };
+    } satisfies CreateMessageOptions;
 
     if (!lastMessage) {
         lastMessage = await (Vaius.getChannel(ADVENT_OF_CODE_CHANNEL_ID!) as TextChannel).createMessage(options);
