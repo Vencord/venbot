@@ -82,7 +82,7 @@ async function postMessage() {
         return;
     }
 
-    if (lastMessage.content !== content)
+    if (lastMessage.embeds[0].description !== content)
         lastMessage = await lastMessage.edit(options);
 }
 
