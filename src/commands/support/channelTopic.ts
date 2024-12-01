@@ -2,7 +2,7 @@ import { ChannelTypes } from "oceanic.js";
 
 import { defineCommand } from "~/Commands";
 import { ChannelEmoji, Emoji } from "~/constants";
-import { silently } from "~/util";
+import { silently } from "~/util/functions";
 import { makeConstants } from "~/util/objects";
 
 const ChannelTextAndEmoji = makeConstants({

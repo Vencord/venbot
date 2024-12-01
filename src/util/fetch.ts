@@ -35,3 +35,18 @@ export async function downloadToFile(url: Url, path: string, options?: RequestIn
     const body = Readable.fromWeb(res.body);
     await finished(body.pipe(createWriteStream(path)));
 }
+
+export function makeCachedJsonFetch<T>(url: string, msUntilStale = 60_000 * 5) {
+    let cachedValue: unknown;
+    let cacheTimestamp = 0;
+
+    return async () => {
+        if (Date.now() - cacheTimestamp > msUntilStale) {
+            const res = await doFetch(url);
+
+            cachedValue = await res.json();
+            cacheTimestamp = Date.now();
+        }
+        return cachedValue as T;
+    };
+}

@@ -5,7 +5,7 @@ import { join } from "path";
 import { defineCommand } from "~/Commands";
 import { ASSET_DIR } from "~/constants";
 import { SUPPORT_CHANNEL_ID } from "~/env";
-import { silently } from "~/util";
+import { silently } from "~/util/functions";
 
 const WIDTH = 400;
 const HEIGHT = 260;

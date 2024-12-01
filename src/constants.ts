@@ -1,8 +1,8 @@
 import { mkdirSync } from "fs";
 import { join } from "path";
 
-import { BOT_CHANNEL_ID, DEV_CHANNEL_ID, NODE_ENV, SUPPORT_CHANNEL_ID } from "./env";
-import { makeConstants } from "./util/objects";
+import { BOT_CHANNEL_ID, DEV_CHANNEL_ID, NODE_ENV, SUPPORT_CHANNEL_ID } from "~/env";
+import { makeConstants } from "~/util/objects";
 
 export const VENCORD_SITE = "https://vencord.dev";
 
@@ -59,3 +59,5 @@ export const ChannelEmoji = makeConstants({
     Hash: "<:hash:1308638553827315742>",
     Voice: "<:voice:1308642929010671617>",
 });
+
+export const ZWSP = "\u200B";

@@ -2,8 +2,8 @@ import { RawData, WebSocket } from "ws";
 
 import { Vaius } from "~/Client";
 import { NINA_CHAT_TOKEN } from "~/env";
-import { getHighestRole } from "~/util";
 import { tryWithBackoff } from "~/util/backoff";
+import { getHighestRole } from "~/util/discord";
 
 import { AnyIncomingPayload, AnyOutgoingPayload, IncomingMessage, IncomingOpcode, OutgoingOpcode, Role } from "./types";
 

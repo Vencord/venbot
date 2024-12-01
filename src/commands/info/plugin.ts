@@ -2,9 +2,9 @@ import leven from "leven";
 
 import { CommandContext, defineCommand } from "~/Commands";
 import { VENCORD_SITE } from "~/constants";
-import { makeCachedJsonFetch } from "~/util";
+import { makeCachedJsonFetch } from "~/util/fetch";
+import { run } from "~/util/functions";
 import { isTruthy } from "~/util/guards";
-import { run } from "~/util/run";
 
 interface Plugin {
     name: string;

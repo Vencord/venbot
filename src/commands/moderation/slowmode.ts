@@ -1,6 +1,6 @@
 import { defineCommand } from "~/Commands";
 import { Emoji } from "~/constants";
-import { reply } from "~/util";
+import { reply } from "~/util/discord";
 
 defineCommand({
     name: "slowmode",

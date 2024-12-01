@@ -1,6 +1,6 @@
 import { defineCommand } from "~/Commands";
-import { codeblock } from "~/util";
 import { resolveUser } from "~/util/resolvers";
+import { toCodeblock } from "~/util/text";
 
 defineCommand({
     name: "whybanne",
@@ -29,6 +29,6 @@ defineCommand({
             actor = a.slice(0, -1);
         }
 
-        reply(`Banned by **${actor}**: ${codeblock(reason)}`);
+        reply(`Banned by **${actor}**: ${toCodeblock(reason)}`);
     },
 });

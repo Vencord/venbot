@@ -4,7 +4,7 @@
 
 const emojiRegex = /\p{RGI_Emoji}/v;
 
-export default function stringWidth(string) {
+export default function stringWidth(string: string) {
     if (typeof string !== "string" || string.length === 0) {
         return 0;
     }
@@ -13,7 +13,7 @@ export default function stringWidth(string) {
     let width = 0;
 
     for (const character of string) {
-        const codePoint = character.codePointAt(0);
+        const codePoint = character.codePointAt(0)!;
 
         // Ignore control characters
         if (codePoint <= 0x1F || (codePoint >= 0x7F && codePoint <= 0x9F)) {

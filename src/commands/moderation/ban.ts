@@ -2,8 +2,8 @@ import { AnyTextableGuildChannel, Message, MessageTypes } from "oceanic.js";
 
 import { defineCommand } from "~/Commands";
 import { Millis } from "~/constants";
-import { codeblock, silently } from "~/util";
-import { pluralise, stripIndent } from "~/util/text";
+import { silently } from "~/util/functions";
+import { pluralise, stripIndent, toCodeblock } from "~/util/text";
 
 import { getHighestRolePosition, parseUserIdsAndReason } from "./utils";
 
@@ -66,7 +66,7 @@ defineCommand({
                 await silently(
                     member.user.createDM()
                         .then(dm => dm.createMessage({
-                            content: `You have been banned from the Vencord Server by ${msg.author.tag}.\n## Reason:\n${codeblock(reason)}`
+                            content: `You have been banned from the Vencord Server by ${msg.author.tag}.\n## Reason:\n${toCodeblock(reason)}`
                         }))
                 );
 

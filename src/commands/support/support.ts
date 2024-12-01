@@ -4,8 +4,7 @@ import { object, optional, string } from "valibot";
 
 import { defineCommand } from "~/Commands";
 import { ASSET_DIR, Emoji, SUPPORT_ALLOWED_CHANNELS } from "~/constants";
-import { silently } from "~/util";
-import { run } from "~/util/run";
+import { run, silently } from "~/util/functions";
 import { toInlineCode } from "~/util/text";
 import { mustParse } from "~/util/validation";
 

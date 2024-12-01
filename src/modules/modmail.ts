@@ -3,7 +3,7 @@ import { ActivityTypes, AnyTextableGuildChannel, ApplicationCommandTypes, Button
 import { db } from "~/db";
 import { GUILD_ID, MOD_MAIL_BAN_ROLE_ID, MOD_MAIL_CHANNEL_ID, MOD_MAIL_LOG_CHANNEL_ID, MOD_PERMS_ROLE_ID, MOD_ROLE_ID, SUPPORT_CHANNEL_ID } from "~/env";
 import { handleCommandInteraction, handleComponentInteraction, handleInteraction } from "~/SlashCommands";
-import { sendDm } from "~/util";
+import { sendDm } from "~/util/discord";
 import { stripIndent } from "~/util/text";
 
 import { Vaius } from "../Client";

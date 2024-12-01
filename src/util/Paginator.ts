@@ -3,7 +3,10 @@ import { ButtonStyles, ComponentTypes, CreateMessageOptions, EmbedOptions, Inter
 
 import { Emoji, Millis } from "~/constants";
 import { handleInteraction } from "~/SlashCommands";
-import { Promiseable, reply, silently } from "~/util";
+import { silently } from "~/util/functions";
+
+import { reply } from "./discord";
+import { Promiseable } from "./types";
 
 const paginators = new Map<string, Paginator<any>>();
 

@@ -1,7 +1,8 @@
 import { execSync } from "child_process";
 
 import { defineCommand } from "~/Commands";
-import { codeblock, silently } from "~/util";
+import { silently } from "~/util/functions";
+import { toCodeblock } from "~/util/text";
 
 import { restart } from "./restart";
 
@@ -21,7 +22,7 @@ defineCommand({
             await restart(msg.channelID);
         } catch (e) {
             console.error(e);
-            reply("Failed to update: " + codeblock(String(e), ""));
+            reply("Failed to update: " + toCodeblock(String(e), ""));
         }
     }
 });

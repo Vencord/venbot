@@ -1,5 +1,5 @@
 import { Millis } from "~/constants";
-import { sleep } from "~/util";
+import { sleep } from "~/util/time";
 
 export async function tryWithBackoff(
     fn: () => boolean | Promise<boolean>,

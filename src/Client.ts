@@ -5,7 +5,8 @@ import { Emoji, SUPPORT_ALLOWED_CHANNELS } from "./constants";
 import { BotState } from "./db/botState";
 import { DISCORD_TOKEN, MOD_PERMS_ROLE_ID, PREFIXES } from "./env";
 import { lobotomiseMaybe, moderateMessage } from "./modules/moderate";
-import { reply, silently } from "./util";
+import { reply } from "./util/discord";
+import { silently } from "./util/functions";
 
 export const Vaius = new Client({
     auth: "Bot " + DISCORD_TOKEN,

@@ -2,10 +2,10 @@ import { createHash } from "crypto";
 import { mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "fs";
 import { ApplicationCommandOptions, ApplicationCommandOptionTypes, ApplicationCommandTypes, ApplicationIntegrationTypes, CreateChatInputApplicationCommandOptions, InteractionContextTypes, InteractionTypes, MessageFlags } from "oceanic.js";
 
+import { ZWSP } from "~/constants";
 import { GUILD_ID } from "~/env";
 import { handleInteraction } from "~/SlashCommands";
-import { ZWSP } from "~/util";
-import { run } from "~/util/run";
+import { run } from "~/util/functions";
 
 import { OwnerId, Vaius } from "../../Client";
 import { DONOR_ROLE_ID, PROD } from "../../constants";

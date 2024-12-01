@@ -1,4 +1,4 @@
-import { ZWSP } from "../util";
+import { ZWSP } from "~/constants";
 
 export const makeEmbedSpaces = (amount: number) => ` ${ZWSP}`.repeat(amount);
 
@@ -29,6 +29,9 @@ export function snakeToTitle(s: string) {
         .map(w => w[0].toUpperCase() + w.slice(1).toLowerCase())
         .join(" ");
 }
+
+const BACKTICKS = "```";
+export const toCodeblock = (s: string, lang = "") => `${BACKTICKS}${lang}\n${s.replaceAll("`", "`" + ZWSP)}${BACKTICKS}`;
 
 export function toInlineCode(s: string) {
     return "``" + ZWSP + s.replaceAll("`", ZWSP + "`" + ZWSP) + ZWSP + "``";
@@ -67,4 +70,12 @@ export function msToHumanReadable(ms: number, short = false) {
                 : ([v, u]) => pluralise(v, u)
         )
         .join(", ");
+}
+
+export function formatTable(rows: string[][]) {
+    const highestLengths = Array.from({ length: rows[0].length }, (_, i) => Math.max(...rows.map(r => r[i].length)));
+
+    return ZWSP + rows.map(
+        row => row.map((s, i) => s.padStart(highestLengths[i], " ")).join("    ")
+    ).join("\n");
 }

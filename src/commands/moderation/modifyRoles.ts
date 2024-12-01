@@ -2,8 +2,9 @@ import { AnyTextableGuildChannel, Message } from "oceanic.js";
 
 import { defineCommand } from "~/Commands";
 import { DONOR_ROLE_ID, Emoji } from "~/constants";
-import { codeblock, ID_REGEX } from "~/util";
+import { ID_REGEX } from "~/util/discord";
 import { makeConstants } from "~/util/objects";
+import { toCodeblock } from "~/util/text";
 
 import { hasHigherRoleThan } from "./utils";
 
@@ -68,7 +69,7 @@ defineCommand({
 
         if (!failed.length) return void react(Emoji.CheckMark);
 
-        return reply("Failed to give some users that role:\n" + codeblock(failed.join("\n")));
+        return reply("Failed to give some users that role:\n" + toCodeblock(failed.join("\n")));
     },
 });
 
@@ -92,6 +93,6 @@ defineCommand({
 
         if (!failed.length) return void react(Emoji.CheckMark);
 
-        return reply("Failed to remove that role from some users:\n" + codeblock(failed.join("\n")));
+        return reply("Failed to remove that role from some users:\n" + toCodeblock(failed.join("\n")));
     },
 });

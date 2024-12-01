@@ -3,7 +3,7 @@ import { CreateMessageOptions, Message, TextChannel } from "oceanic.js";
 
 import { Vaius } from "~/Client";
 import { ADVENT_OF_CODE_CHANNEL_ID, ADVENT_OF_CODE_COOKIE } from "~/env";
-import { codeblock, formatTable } from "~/util";
+import { formatTable, toCodeblock } from "~/util/text";
 
 interface Leaderboard {
     members: Record<string, {
@@ -64,7 +64,7 @@ async function postMessage() {
     const content =
         `Last Submission: <t:${lastStarTs}> by ${lastStarUser}\n`
         + `Last Updated: <t:${Math.floor(Date.now() / 1000)}>\n`
-        + codeblock(formatTable(rows));
+        + toCodeblock(formatTable(rows));
 
     const options = {
         embeds: [{

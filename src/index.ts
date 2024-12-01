@@ -15,8 +15,9 @@ import { BotState } from "./db/botState";
 import { DEV_CHANNEL_ID } from "./env";
 import { initModListeners } from "./modules/moderate";
 import { handleCommandInteraction } from "./SlashCommands";
-import { codeblock, silently } from "./util";
+import { silently } from "./util/functions";
 import { inspect } from "./util/inspect";
+import { toCodeblock } from "./util/text";
 
 if (PROD) {
     Vaius.once("ready", () => {
@@ -51,7 +52,7 @@ export async function handleError(title: string, err: unknown) {
     await Vaius.rest.channels.createMessage(DEV_CHANNEL_ID, {
         embeds: [{
             title,
-            description: codeblock(text, stack ? "js" : ""),
+            description: toCodeblock(text, stack ? "js" : ""),
             color: 0xff0000
         }]
     });

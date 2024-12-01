@@ -2,8 +2,10 @@ import parseDuration from "parse-duration";
 
 import { defineCommand } from "~/Commands";
 import { Millis } from "~/constants";
-import { codeblock, ID_REGEX, silently, until } from "~/util";
-import { msToHumanReadable } from "~/util/text";
+import { ID_REGEX } from "~/util/discord";
+import { silently } from "~/util/functions";
+import { msToHumanReadable, toCodeblock } from "~/util/text";
+import { until } from "~/util/time";
 
 import { getHighestRolePosition, parseUserIdsAndReason } from "./utils";
 
@@ -56,7 +58,7 @@ defineCommand({
             silently(
                 member.user.createDM()
                     .then(dm => dm.createMessage({
-                        content: `You have been muted on the Vencord Server for ${durationText} by ${msg.author.tag}.\n## Reason:\n${codeblock(reason)}`
+                        content: `You have been muted on the Vencord Server for ${durationText} by ${msg.author.tag}.\n## Reason:\n${toCodeblock(reason)}`
                     }))
             );
 

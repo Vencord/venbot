@@ -1,6 +1,6 @@
 import { Member } from "oceanic.js";
 
-import { getHighestRole, ID_REGEX } from "~/util";
+import { getHighestRole, ID_REGEX } from "~/util/discord";
 
 export function hasHigherRoleThan(roleId: string, member: Member) {
     const g = member.guild;

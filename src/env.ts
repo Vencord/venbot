@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import { array, minLength, number, object, optional, picklist, pipe, string, transform } from "valibot";
 
-import { mustParse } from "./util/validation";
+import { mustParse } from "~/util/validation";
 
 const { error } = dotenv.config({ override: true });
 if (error)

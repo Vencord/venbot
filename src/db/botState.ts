@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 
 import { DATA_DIR } from "~/constants";
-import { run } from "~/util/run";
+import { run } from "~/util/functions";
 import { stripIndent } from "~/util/text";
 
 const StateFile = join(DATA_DIR, "botState.json");

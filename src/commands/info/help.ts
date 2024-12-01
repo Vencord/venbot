@@ -1,8 +1,8 @@
 import { EmbedOptions } from "oceanic.js";
 
 import { CommandContext, Commands, defineCommand, FullCommand } from "~/Commands";
+import { ZWSP } from "~/constants";
 import { PREFIXES } from "~/env";
-import { ZWSP } from "~/util";
 import { getGitRemote } from "~/util/git";
 import { groupBy } from "~/util/groupBy";
 import { Paginator } from "~/util/Paginator";

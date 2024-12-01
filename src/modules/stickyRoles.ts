@@ -4,7 +4,7 @@ import { Vaius } from "~/Client";
 import { defineCommand } from "~/Commands";
 import { db } from "~/db";
 import { GUILD_ID } from "~/env";
-import { reply } from "~/util";
+import { reply } from "~/util/discord";
 import { isNonNullish } from "~/util/guards";
 
 const ignoreRoles = new Set([

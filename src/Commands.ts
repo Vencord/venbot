@@ -1,10 +1,10 @@
 import CommandsMap from "__commands__";
 import { AnyTextableChannel, AnyTextableGuildChannel, CreateMessageOptions, DiscordRESTError, EditMessageOptions, Message, PermissionName } from "oceanic.js";
 
-import { Millis } from "./constants";
-import { silently } from "./util";
-import { Deduper } from "./util/Deduper";
-import { TTLMap } from "./util/TTLMap";
+import { Millis } from "~/constants";
+import { Deduper } from "~/util/Deduper";
+import { silently } from "~/util/functions";
+import { TTLMap } from "~/util/TTLMap";
 
 
 const PreviousCommandResponses = new TTLMap<string, string>(10 * Millis.MINUTE);

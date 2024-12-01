@@ -1,6 +1,6 @@
 import { defineCommand } from "~/Commands";
 import { BotState } from "~/db/botState";
-import { silently } from "~/util";
+import { silently } from "~/util/functions";
 
 export async function restart(channelId: string) {
     BotState.helloChannelId = channelId;

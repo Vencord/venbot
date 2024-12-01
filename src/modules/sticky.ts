@@ -1,10 +1,9 @@
 import { AnyTextableGuildChannel } from "oceanic.js";
 
+import { Vaius } from "~/Client";
 import { BotState } from "~/db/botState";
-
-import { Vaius } from "../Client";
-import { SUPPORT_CHANNEL_ID } from "../env";
-import { debounce, silently } from "../util";
+import { SUPPORT_CHANNEL_ID } from "~/env";
+import { debounce, silently } from "~/util/functions";
 
 let lastMsgId: string | null = null;
 

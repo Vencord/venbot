@@ -6,11 +6,12 @@ import { tmpdir } from "os";
 import { join } from "path";
 import { pipeline } from "stream/promises";
 
-import { OwnerId, Vaius } from "../Client";
-import { Emoji } from "../constants";
-import { reply, silently } from "../util";
-import { exec, execFile } from "../util/childProcess";
-import { downloadToFile } from "../util/fetch";
+import { OwnerId, Vaius } from "~/Client";
+import { Emoji } from "~/constants";
+import { exec, execFile } from "~/util/childProcess";
+import { reply } from "~/util/discord";
+import { downloadToFile } from "~/util/fetch";
+import { silently } from "~/util/functions";
 
 const CHANNEL_ID = "1076188996465590282";
 // you should clone https://github.com/Vencord/plugin-assets in the same dir you cloned the bot.
@@ -19,7 +20,7 @@ const CHANNEL_ID = "1076188996465590282";
 // change identity:
 // git config user.name shiggybot
 // git config user.email 136832773+shiggybot@users.noreply.github.com
-const FilesDir = "../plugin-assets";
+const FilesDir = "~/plugin-assets";
 
 interface MediaParams {
     directory: string;

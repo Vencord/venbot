@@ -9,8 +9,9 @@ import { db } from "~/db";
 import { CONTRIBUTOR_ROLE_ID, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, GITHUB_PAT, HTTP_DOMAIN } from "~/env";
 import { removeStickyRoles } from "~/modules/stickyRoles";
 import { fastify } from "~/server";
-import { getAsMemberInMainGuild, sendDm, silently } from "~/util";
+import { getAsMemberInMainGuild, sendDm } from "~/util/discord";
 import { fetchJson } from "~/util/fetch";
+import { silently } from "~/util/functions";
 
 export const githubAuthStates = new Map<string, {
     id: string;

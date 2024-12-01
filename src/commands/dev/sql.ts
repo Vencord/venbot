@@ -3,10 +3,9 @@ import { CreateMessageOptions } from "oceanic.js";
 
 import { defineCommand } from "~/Commands";
 import { db } from "~/db";
-import { codeblock } from "~/util";
 import { inspect } from "~/util/inspect";
 import stringWidth from "~/util/stringWidth";
-import { countOccurrences } from "~/util/text";
+import { countOccurrences, toCodeblock } from "~/util/text";
 
 defineCommand({
     name: "sql",
@@ -39,7 +38,7 @@ defineCommand({
 
         const msgData: CreateMessageOptions = sendAsFile
             ? { files: [{ name: "result.txt", contents: Buffer.from(result) }] }
-            : { content: codeblock(result.slice(0, maxLength)) };
+            : { content: toCodeblock(result.slice(0, maxLength)) };
 
         return reply(msgData);
     }

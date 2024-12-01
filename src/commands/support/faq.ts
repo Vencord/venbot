@@ -2,8 +2,8 @@ import { EmbedOptions, User } from "oceanic.js";
 
 import { defineCommand } from "~/Commands";
 import { SUPPORT_ALLOWED_CHANNELS, VENCORD_SITE } from "~/constants";
-import { makeCachedJsonFetch, silently } from "~/util";
-import { run } from "~/util/run";
+import { makeCachedJsonFetch } from "~/util/fetch";
+import { run, silently } from "~/util/functions";
 import { toInlineCode } from "~/util/text";
 
 interface Faq {

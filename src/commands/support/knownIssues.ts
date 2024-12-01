@@ -3,8 +3,7 @@ import { ChannelTypes, EmbedOptions, MessageTypes, PublicThreadChannel, User } f
 import { Vaius } from "~/Client";
 import { defineCommand } from "~/Commands";
 import { KNOWN_ISSUES_CHANNEL_ID } from "~/env";
-import { silently } from "~/util";
-import { run } from "~/util/run";
+import { run, silently } from "~/util/functions";
 import { makeEmbedSpaces } from "~/util/text";
 
 export async function findThreads(): Promise<PublicThreadChannel[]> {
