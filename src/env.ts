@@ -51,6 +51,9 @@ const configSchema = object({
     CONTRIBUTOR_ROLE_ID: string(),
 
     NINA_CHAT_TOKEN: optional(string()),
+
+    ADVENT_OF_CODE_COOKIE: optional(string()),
+    ADVENT_OF_CODE_CHANNEL_ID: optional(string()),
 });
 
 const parsed = mustParse("Invalid environment variables", configSchema, process.env);
@@ -87,4 +90,7 @@ export const {
     CONTRIBUTOR_ROLE_ID,
 
     NINA_CHAT_TOKEN,
+
+    ADVENT_OF_CODE_COOKIE,
+    ADVENT_OF_CODE_CHANNEL_ID
 } = parsed;
