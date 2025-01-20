@@ -45,6 +45,7 @@ const configSchema = object({
     HTTP_DOMAIN: string(),
 
     GITHUB_PAT: string(),
+    GITHUB_WORKFLOW_DISPATCH_PAT: string(),
     GITHUB_CLIENT_ID: string(),
     GITHUB_CLIENT_SECRET: string(),
 
@@ -84,6 +85,7 @@ export const {
     HTTP_DOMAIN,
 
     GITHUB_PAT,
+    GITHUB_WORKFLOW_DISPATCH_PAT,
     GITHUB_CLIENT_ID,
     GITHUB_CLIENT_SECRET,
 
