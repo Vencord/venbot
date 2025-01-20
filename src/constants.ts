@@ -52,6 +52,8 @@ export const Emoji = makeConstants({
     DoubleRight: "⏩",
 
     Claim: "🛄",
+
+    ShipIt: "<:shipit:1330992654602731530>",
 });
 
 export const ChannelEmoji = makeConstants({
