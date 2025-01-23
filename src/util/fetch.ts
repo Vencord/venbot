@@ -2,6 +2,10 @@ import { createWriteStream } from "fs";
 import { Readable } from "stream";
 import { finished } from "stream/promises";
 
+import { Millis } from "~/constants";
+
+import { ttlLazy } from "./lazy";
+
 type Url = string | URL;
 
 export async function doFetch(url: Url, options?: RequestInit) {
@@ -36,17 +40,9 @@ export async function downloadToFile(url: Url, path: string, options?: RequestIn
     await finished(body.pipe(createWriteStream(path)));
 }
 
-export function makeCachedJsonFetch<T>(url: string, msUntilStale = 60_000 * 5) {
-    let cachedValue: unknown;
-    let cacheTimestamp = 0;
-
-    return async () => {
-        if (Date.now() - cacheTimestamp > msUntilStale) {
-            const res = await doFetch(url);
-
-            cachedValue = await res.json();
-            cacheTimestamp = Date.now();
-        }
-        return cachedValue as T;
-    };
+export function makeCachedJsonFetch<T>(url: string, ttl = 5 * Millis.MINUTE) {
+    return ttlLazy(
+        () => doFetch(url).then(res => res.json() as Promise<T>),
+        ttl
+    );
 }

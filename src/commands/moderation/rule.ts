@@ -1,0 +1,59 @@
+import { Embed } from "oceanic.js";
+
+import { Vaius } from "~/Client";
+import { defineCommand } from "~/Commands";
+import { Emoji, Millis } from "~/constants";
+import { RULES_CHANNEL_ID } from "~/env";
+import { reply } from "~/util/discord";
+import { silently } from "~/util/functions";
+import { ttlLazy } from "~/util/lazy";
+
+const fetchRules = ttlLazy(async () => {
+    const [rulesMessage] = await Vaius.rest.channels.getMessages(RULES_CHANNEL_ID, { limit: 1 });
+
+    return rulesMessage.content
+        .slice(rulesMessage.content.indexOf("1."))
+        .split(/\d+\./g)
+        .map(r => r.trim().replace(/^\s+/gm, ""));
+}, 5 * Millis.MINUTE);
+
+defineCommand({
+    name: "rule",
+    aliases: ["r"],
+    description: "Query a rule and send it",
+    usage: "<ruleNumber>",
+    guildOnly: true,
+    async execute({ msg, react }, ruleNumber) {
+        const rules = await fetchRules();
+
+        const rule = rules[Number(ruleNumber)];
+
+        if (!rule)
+            return react(Emoji.QuestionMark);
+
+        const embed: Embed = {
+            title: `Rule ${ruleNumber}`,
+            description: rule,
+            color: 0xdd7878,
+        };
+
+        const isReply = !!msg.referencedMessage;
+        if (isReply) {
+            silently(msg.delete());
+            embed.footer = {
+                text: `Auto-response invoked by ${msg.author.tag}`,
+            };
+            return msg.channel.createMessage({
+                messageReference: {
+                    messageID: msg.referencedMessage?.id ?? msg.id,
+                },
+                allowedMentions: { repliedUser: isReply },
+                embeds: [embed],
+            });
+        }
+
+        reply(msg, {
+            embeds: [embed],
+        });
+    },
+});
