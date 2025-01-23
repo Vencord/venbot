@@ -23,6 +23,9 @@ defineCommand({
     usage: "<ruleNumber>",
     guildOnly: true,
     async execute({ msg, react, reply }, ruleNumber) {
+        if (isNaN(Number(ruleNumber)))
+            return; // likely false positive like "vr chat" (funny v prefix + alias moment)
+
         const rules = await fetchRules();
 
         const rule = rules[Number(ruleNumber)];
