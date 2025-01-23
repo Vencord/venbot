@@ -4,7 +4,6 @@ import { Vaius } from "~/Client";
 import { defineCommand } from "~/Commands";
 import { Emoji, Millis } from "~/constants";
 import { RULES_CHANNEL_ID } from "~/env";
-import { reply } from "~/util/discord";
 import { silently } from "~/util/functions";
 import { ttlLazy } from "~/util/lazy";
 
@@ -23,7 +22,7 @@ defineCommand({
     description: "Query a rule and send it",
     usage: "<ruleNumber>",
     guildOnly: true,
-    async execute({ msg, react }, ruleNumber) {
+    async execute({ msg, react, reply }, ruleNumber) {
         const rules = await fetchRules();
 
         const rule = rules[Number(ruleNumber)];
@@ -52,7 +51,7 @@ defineCommand({
             });
         }
 
-        reply(msg, {
+        reply({
             embeds: [embed],
         });
     },
