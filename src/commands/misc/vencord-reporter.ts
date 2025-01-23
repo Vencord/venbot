@@ -7,7 +7,7 @@ defineCommand({
     name: "reporter",
     description: "Run the Vencord reporter workflow",
     usage: "[ref = dev]",
-    aliases: ["report", "vencord-reporter", "test-patches"],
+    aliases: ["report", "vencord-reporter", "test-patches", "test"],
     modOnly: true,
 
     async execute({ reply }, ref = "dev") {
