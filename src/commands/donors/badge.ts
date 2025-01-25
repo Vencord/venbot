@@ -38,12 +38,18 @@ handleInteraction({
     isMatch: i => i.data.name.startsWith(`${Name}-`),
     handle(i) {
         const user = i.data.options.getUserOption("user")!;
+        const oldBadgeInput = i.data.options.getOptions().find(opt => opt.name === "old-badge")?.value as string;
         const existingBadges = BadgeData[user.value];
 
-        return i.result(existingBadges?.map((b, i) => ({
-            name: `${i} - ${b.tooltip === ZWSP ? "<ZWSP>" : b.tooltip}`,
-            value: String(i)
-        })) ?? []);
+        return i.result(
+            existingBadges
+                ?.map((b, i) => ({
+                    name: `${i} - ${b.tooltip === ZWSP ? "<ZWSP>" : b.tooltip}`,
+                    value: String(i)
+                }))
+                .filter(b => b.name.toLowerCase().includes(oldBadgeInput?.toLowerCase()))
+            ?? []
+        );
     }
 });
 
