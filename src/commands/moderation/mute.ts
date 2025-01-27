@@ -2,7 +2,6 @@ import parseDuration from "parse-duration";
 
 import { defineCommand } from "~/Commands";
 import { Millis } from "~/constants";
-import { ID_REGEX } from "~/util/discord";
 import { silently } from "~/util/functions";
 import { msToHumanReadable, toCodeblock } from "~/util/text";
 import { until } from "~/util/time";
@@ -16,12 +15,7 @@ defineCommand({
     usage: "<duration> <user> [user...] [reason]",
     guildOnly: true,
     modOnly: true,
-    async execute({ msg, reply }, ...args) {
-        let durationString = args.shift()!;
-        while (args.length && !ID_REGEX.test(args[0])) {
-            durationString += " " + args.shift();
-        }
-
+    async execute({ msg, reply }, durationString, ...args) {
         const duration = parseDuration(durationString);
         if (duration == null || duration < 1 || duration > 28 * Millis.DAY) {
             return reply("Duration must be a valid time span not longer than 28 days");
@@ -30,9 +24,10 @@ defineCommand({
 
         // eslint-disable-next-line prefer-const
         let { ids, reason, hasCustomReason } = parseUserIdsAndReason(args);
-        if (!hasCustomReason && !ids.length && msg.referencedMessage) {
-            reason = `Muted for message: "${msg.referencedMessage.content.slice(0, 400)}"`;
+        if (!ids.length && msg.referencedMessage) {
             ids.push(msg.referencedMessage.author.id);
+            if (!hasCustomReason)
+                reason = `Muted for message: "${msg.referencedMessage.content.slice(0, 400)}"`;
         }
 
         if (!ids.length)
