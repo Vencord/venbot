@@ -34,3 +34,11 @@ export function debounce<T extends Function>(func: T, delay = 300): T {
         timeout = setTimeout(() => { func(...args); }, delay);
     } as any;
 }
+
+export function isTruthy<T>(item: T): item is Exclude<T, 0 | "" | false | null | undefined> {
+    return Boolean(item);
+}
+
+export function isNonNullish<T>(item: T): item is Exclude<T, null | undefined> {
+    return item != null;
+}
