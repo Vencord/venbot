@@ -41,17 +41,17 @@ Vaius.once("ready", async () => {
 const whitespaceRe = /\s+/;
 const GEN_AI_ID = "974297735559806986";
 
-Vaius.on("messageCreate", handleMessage);
+Vaius.on("messageCreate", msg => handleMessage(msg, false));
 Vaius.on("messageUpdate", (msg, oldMsg) => {
-    if (oldMsg && msg.content === oldMsg?.content) return;
+    if (oldMsg && msg.content === oldMsg.content) return;
 
-    handleMessage(msg);
+    handleMessage(msg, true);
 });
 
-async function handleMessage(msg: Message) {
+async function handleMessage(msg: Message, isEdit: boolean) {
     if (msg.inCachedGuildChannel() && await lobotomiseMaybe(msg)) return;
     if (msg.author.bot && msg.author.id !== GEN_AI_ID) return;
-    moderateMessage(msg);
+    moderateMessage(msg, isEdit);
 
     const lowerContent = msg.content.toLowerCase();
 

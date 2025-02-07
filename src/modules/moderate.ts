@@ -5,7 +5,7 @@ import { join } from "path";
 
 import { GUILD_ID, MOD_LOG_CHANNEL_ID } from "~/env";
 import { reply, sendDm } from "~/util/discord";
-import { silently } from "~/util/functions";
+import { isTruthy, silently } from "~/util/functions";
 import { until } from "~/util/time";
 
 import { Vaius } from "../Client";
@@ -105,7 +105,7 @@ async function moderateMultiChannelSpam(msg: Message<AnyTextableGuildChannel>) {
     return true;
 }
 
-export async function moderateMessage(msg: Message) {
+export async function moderateMessage(msg: Message, isEdit: boolean) {
     if (!msg.inCachedGuildChannel()) return;
     if (!msg.channel.permissionsOf(Vaius.user.id).has("MANAGE_MESSAGES")) return;
 
@@ -121,8 +121,14 @@ export async function moderateMessage(msg: Message) {
 
     if (msg.member?.permissions.has("MANAGE_MESSAGES")) return;
 
-    for (const mod of [moderateMultiChannelSpam, moderateInvites, moderateImageHosts]) {
-        if (await mod(msg)) return;
+    const moderationFunctions = [
+        !isEdit && moderateMultiChannelSpam,
+        moderateInvites,
+        moderateImageHosts
+    ].filter(isTruthy);
+
+    for (const moderate of moderationFunctions) {
+        if (await moderate(msg)) return;
     }
 }
 
