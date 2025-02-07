@@ -56,6 +56,8 @@ const configSchema = object({
 
     ADVENT_OF_CODE_COOKIE: optional(string()),
     ADVENT_OF_CODE_CHANNEL_ID: optional(string()),
+
+    REPORTER_WEBHOOK_SECRET: string(),
 });
 
 const parsed = mustParse("Invalid environment variables", configSchema, process.env);
@@ -96,5 +98,7 @@ export const {
     NINA_CHAT_TOKEN,
 
     ADVENT_OF_CODE_COOKIE,
-    ADVENT_OF_CODE_CHANNEL_ID
+    ADVENT_OF_CODE_CHANNEL_ID,
+
+    REPORTER_WEBHOOK_SECRET,
 } = parsed;

@@ -1,12 +1,15 @@
 export class TTLMap<K, V> extends Map<K, V> {
     private readonly _timers = new Map<K, NodeJS.Timeout>();
 
-    public constructor(public readonly expiryMs: number) {
+    public constructor(public readonly expiryMs: number, private readonly onExpire?: (key: K, value: V) => void) {
         super();
     }
 
     public set(key: K, value: V) {
-        const timeoutId = setTimeout(() => this.delete(key), this.expiryMs);
+        const timeoutId = setTimeout(() => {
+            this.delete(key);
+            this.onExpire?.(key, value);
+        }, this.expiryMs);
         this._timers.set(key, timeoutId);
 
         return super.set(key, value);

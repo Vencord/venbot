@@ -14,9 +14,12 @@ fastify.get("/", (req, res) => {
         .send(createReadStream("assets/index.html"));
 });
 
-fastify.listen({ port: HTTP_SERVER_LISTEN_PORT }, err => {
-    if (err) {
-        fastify.log.error(err);
-        process.exit(1);
-    }
+// defer listen to allow for fastify plugins to be registered before starting the server
+setImmediate(() => {
+    fastify.listen({ port: HTTP_SERVER_LISTEN_PORT }, err => {
+        if (err) {
+            fastify.log.error(err);
+            process.exit(1);
+        }
+    });
 });
