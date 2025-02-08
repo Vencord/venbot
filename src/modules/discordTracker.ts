@@ -98,13 +98,14 @@ async function handleReportSubmit(report: ReportData, data: any) {
         allowedMentions: { parse: [] }
     };
     // trolley
-    data.embeds[0].author.iconURL = data.embeds[0].author?.icon_url;
+    data.embeds[0].author.iconURL = data.embeds[0].author.icon_url;
 
     Vaius.rest.channels.createMessage(LogChannelId, data);
 
     const latestHash = report.branch === "canary"
         ? BotState.discordTracker!.canaryHash
         : BotState.discordTracker!.stableHash;
+
     if (latestHash !== report.hash) {
         return;
     }
