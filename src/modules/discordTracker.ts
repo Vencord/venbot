@@ -99,6 +99,8 @@ async function handleReportSubmit(report: ReportData, data: any) {
         ...data,
         allowedMentions: { parse: [] }
     };
+    // trolley
+    data.embeds[0].author.iconURL = data.embeds[0].author?.icon_url;
 
     Vaius.rest.channels.createMessage(LogChannelId, data);
 
