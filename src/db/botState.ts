@@ -14,6 +14,11 @@ interface BotState {
         message: string;
         delayMs: number;
         enabled: boolean;
+    },
+
+    discordTracker?: {
+        stableHash?: string;
+        canaryHash?: string;
     }
 }
 

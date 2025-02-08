@@ -2,6 +2,7 @@ import { createHmac, randomUUID, timingSafeEqual } from "crypto";
 
 import { Vaius } from "~/Client";
 import { Millis } from "~/constants";
+import { BotState } from "~/db/botState";
 import { GITHUB_WORKFLOW_DISPATCH_PAT, HTTP_DOMAIN, REPORTER_WEBHOOK_SECRET } from "~/env";
 import { fastify } from "~/server";
 import { doFetch } from "~/util/fetch";
@@ -23,9 +24,6 @@ const LogChannelId = "1337479880849362994";
 const StatusChannelId = "1337479816240431115";
 const StableMessageId = "1337500395311992954";
 const CanaryMessageId = "1337500381923774544";
-
-let canaryHash: string;
-let stableHash: string;
 
 const pendingReports = new TTLMap<string, ReportData>(
     10 * Millis.MINUTE,
@@ -62,18 +60,18 @@ async function checkVersions() {
         fetchHash("https://canary.discord.com/assets/version.canary.json"),
     ]);
 
-    stableHash ??= stable;
-    canaryHash ??= canary;
+    const versions = BotState.discordTracker ??= {
+        stableHash: stable,
+        canaryHash: canary
+    };
 
-    if (stableHash !== stable) {
-        console.log("Stable version updated:", stableHash, "->", stable);
-        stableHash = stable;
+    if (versions.stableHash !== stable) {
+        versions.stableHash = stable;
         testVersion("stable", stable);
     }
 
-    if (canaryHash !== canary) {
-        console.log("Canary version updated:", canaryHash, "->", canary);
-        canaryHash = canary;
+    if (versions.canaryHash !== canary) {
+        versions.canaryHash = canary;
         testVersion("canary", canary);
     }
 }
@@ -104,7 +102,9 @@ async function handleReportSubmit(report: ReportData, data: any) {
 
     Vaius.rest.channels.createMessage(LogChannelId, data);
 
-    const latestHash = report.branch === "canary" ? canaryHash : stableHash;
+    const latestHash = report.branch === "canary"
+        ? BotState.discordTracker!.canaryHash
+        : BotState.discordTracker!.stableHash;
     if (latestHash !== report.hash) {
         return;
     }
