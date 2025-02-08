@@ -11,7 +11,7 @@ defineCommand({
     aliases: ["report", "vencord-reporter", "test-patches", "test"],
     modOnly: true,
 
-    async execute({ msg }, ref = "dev", branch = "both") {
+    async execute({ msg }, ref = DefaultReporterBranch, branch = "both") {
         testDiscordVersion(
             branch as any,
             {
@@ -27,6 +27,7 @@ defineCommand({
                 }
             }
         );
+
         reply(msg, "Now testing! " + Emoji.ShipIt);
     },
 });
