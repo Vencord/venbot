@@ -1,6 +1,8 @@
 import { defineCommand } from "~/Commands";
 import { Emoji } from "~/constants";
-import { triggerReportWorkflow } from "~/modules/discordTracker";
+import { BotState } from "~/db/botState";
+import { DefaultReporterBranch, testDiscordVersion } from "~/modules/discordTracker";
+import { reply } from "~/util/discord";
 
 defineCommand({
     name: "reporter",
@@ -9,9 +11,22 @@ defineCommand({
     aliases: ["report", "vencord-reporter", "test-patches", "test"],
     modOnly: true,
 
-    async execute({ reply }, ref = "dev", branch = "both") {
-        await triggerReportWorkflow({ ref, inputs: { discord_branch: branch as any } });
-
-        reply("Now testing! " + Emoji.ShipIt);
+    async execute({ msg }, ref = "dev", branch = "both") {
+        testDiscordVersion(
+            branch as any,
+            {
+                stable: BotState.discordTracker?.stableHash!,
+                canary: BotState.discordTracker?.canaryHash!
+            },
+            {
+                ref,
+                shouldLog: false,
+                shouldUpdateStatus: ref === DefaultReporterBranch,
+                onSubmit: (_report, data) => {
+                    reply(msg, data);
+                }
+            }
+        );
+        reply(msg, "Now testing! " + Emoji.ShipIt);
     },
 });

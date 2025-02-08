@@ -8,7 +8,7 @@ import { fastify } from "~/server";
 import { doFetch } from "~/util/fetch";
 import { TTLMap } from "~/util/TTLMap";
 
-type Branch = "stable" | "canary";
+type Branch = "both" | "stable" | "canary";
 
 interface VersionData {
     hash: string;
@@ -16,9 +16,16 @@ interface VersionData {
 }
 
 interface ReportData {
+    runId: string;
     branch: Branch;
-    hash: string;
+    hash: Partial<Record<"stable" | "canary", string>>;
+    shouldLog: boolean;
+    shouldUpdateStatus: boolean;
+    onSubmit?(report: ReportData, data: any): void;
+    submitCount: number;
 }
+
+export const DefaultReporterBranch = "reporter-webhook-option";
 
 const LogChannelId = "1337479880849362994";
 const StatusChannelId = "1337479816240431115";
@@ -35,7 +42,7 @@ const pendingReports = new TTLMap<string, ReportData>(
 setInterval(checkVersions, 30 * Millis.SECOND);
 checkVersions();
 
-export async function triggerReportWorkflow({ ref, inputs }: { ref: string, inputs: { discord_branch: "both" | Branch; webhook_url?: string; } }) {
+export async function triggerReportWorkflow({ ref, inputs }: { ref: string, inputs: { discord_branch: Branch; webhook_url?: string; } }) {
     return await doFetch("https://api.github.com/repos/Vendicated/Vencord/actions/workflows/reportBrokenPlugins.yml/dispatches", {
         method: "POST",
         headers: {
@@ -67,32 +74,55 @@ async function checkVersions() {
 
     if (versions.stableHash !== stable) {
         versions.stableHash = stable;
-        testVersion("stable", stable);
+        testDiscordVersion("stable", { stable });
     }
 
     if (versions.canaryHash !== canary) {
         versions.canaryHash = canary;
-        testVersion("canary", canary);
+        testDiscordVersion("canary", { canary });
     }
 }
 
-async function testVersion(branch: "stable" | "canary", hash: string) {
-    const id = randomUUID();
-    pendingReports.set(id, {
+type Options = Partial<Pick<ReportData, "shouldLog" | "shouldUpdateStatus" | "onSubmit">> & { ref?: string; };
+
+export async function testDiscordVersion<B extends Branch>(branch: B, hash: Record<B extends "both" ? "stable" | "canary" : B, string>, options: Options = {}) {
+    const {
+        shouldLog = true,
+        shouldUpdateStatus = true,
+        ref = DefaultReporterBranch,
+        onSubmit
+    } = options;
+
+    const runId = randomUUID();
+    pendingReports.set(runId, {
+        runId,
         branch,
-        hash
+        hash,
+        shouldLog,
+        shouldUpdateStatus,
+        onSubmit,
+        submitCount: 0
     });
 
     await triggerReportWorkflow({
-        ref: "reporter-webhook-option",
+        ref,
         inputs: {
             discord_branch: branch,
-            webhook_url: `${HTTP_DOMAIN}/reporter/webhook?runId=${id}`
+            webhook_url: `${HTTP_DOMAIN}/reporter/webhook?runId=${runId}`
         }
     });
 }
 
 async function handleReportSubmit(report: ReportData, data: any) {
+    const shouldRemoveFromPending = report.branch !== "both" || ++report.submitCount === 2;
+    if (shouldRemoveFromPending) {
+        pendingReports.delete(report.runId);
+    }
+
+    if (report.branch === "both") {
+        report.branch = data.embeds[0].author.name.includes("Canary") ? "canary" : "stable";
+    }
+
     data = {
         ...data,
         allowedMentions: { parse: [] }
@@ -100,18 +130,23 @@ async function handleReportSubmit(report: ReportData, data: any) {
     // trolley
     data.embeds[0].author.iconURL = data.embeds[0].author.icon_url;
 
-    Vaius.rest.channels.createMessage(LogChannelId, data);
+    report.onSubmit?.(report, data);
+
+    if (report.shouldLog) {
+        Vaius.rest.channels.createMessage(LogChannelId, data);
+    }
 
     const latestHash = report.branch === "canary"
         ? BotState.discordTracker!.canaryHash
         : BotState.discordTracker!.stableHash;
 
-    if (latestHash !== report.hash) {
+    if (!report.shouldUpdateStatus || latestHash !== report.hash[report.branch]) {
         return;
     }
 
-    const messageId = report.branch === "canary" ? CanaryMessageId : StableMessageId;
+    data.embeds[0].description = `Last updated: <t:${Math.round(Date.now() / 1000)}>`;
 
+    const messageId = report.branch === "canary" ? CanaryMessageId : StableMessageId;
     Vaius.rest.channels.editMessage(StatusChannelId, messageId, data);
 }
 
@@ -156,7 +191,6 @@ fastify.register(async fastify => {
             return;
         }
 
-        pendingReports.delete(runId);
         await handleReportSubmit(report, JSON.parse(data));
 
         res.status(200).send();
