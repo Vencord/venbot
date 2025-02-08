@@ -119,6 +119,10 @@ async function handleReportSubmit(report: ReportData, data: any) {
         pendingReports.delete(report.runId);
     }
 
+    report = {
+        ...report
+    };
+
     if (report.branch === "both") {
         report.branch = data.embeds[0].author.name.includes("Canary") ? "canary" : "stable";
     }
