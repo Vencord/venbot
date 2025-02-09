@@ -25,7 +25,7 @@ interface ReportData {
     submitCount: number;
 }
 
-export const DefaultReporterBranch = "reporter-webhook-option";
+export const DefaultReporterBranch = "dev";
 
 const LogChannelId = "1337479880849362994";
 const StatusChannelId = "1337479816240431115";
