@@ -35,7 +35,7 @@ const CanaryMessageId = "1337500381923774544";
 const pendingReports = new TTLMap<string, ReportData>(
     10 * Millis.MINUTE,
     (_id, report) => Vaius.rest.channels.createMessage(LogChannelId, {
-        content: `Timed out while testing ${report.branch} ${report.hash}`,
+        content: `Timed out while testing ${report.branch} ${report.hash[report.branch] || "with unknown hash"}`,
     })
 );
 
