@@ -91,10 +91,10 @@ handleInteraction({
         }
 
         const user = data.options.getUser("user", true);
-        const oldBadgeIndex = data.options.getInteger("old-badge");
+        const existingBadgeIndex = data.options.getInteger("badge");
 
         if (data.name === NameRemove) {
-            const existingBadge = BadgeData[user.id][oldBadgeIndex!];
+            const existingBadge = BadgeData[user.id][existingBadgeIndex!];
             if (!existingBadge) return i.createMessage({
                 content: "Badge not found",
                 flags: MessageFlags.EPHEMERAL
@@ -103,7 +103,7 @@ handleInteraction({
             const fileName = new URL(existingBadge.badge).pathname.split("/").pop()!;
             rmSync(`${badgesForUser(user.id)}/${fileName}`, { force: true });
 
-            BadgeData[user.id].splice(oldBadgeIndex!, 1);
+            BadgeData[user.id].splice(existingBadgeIndex!, 1);
             if (BadgeData[user.id].length === 0)
                 delete BadgeData[user.id];
 
@@ -122,7 +122,7 @@ handleInteraction({
         let url = image?.url ?? imageUrl;
 
         if (!url || !tooltip) {
-            const existing = oldBadgeIndex != null && BadgeData[user.id]?.[oldBadgeIndex];
+            const existing = existingBadgeIndex != null && BadgeData[user.id]?.[existingBadgeIndex];
             if (!existing || (!url && !tooltip))
                 return i.createMessage({
                     content: "bruh",
@@ -141,7 +141,7 @@ handleInteraction({
         const hash = createHash("sha1").update(imgData).digest("hex");
 
         BadgeData[user.id] ??= [];
-        const index = oldBadgeIndex ?? BadgeData[user.id].length;
+        const index = existingBadgeIndex ?? BadgeData[user.id].length;
         const fileName = `${index + 1}-${hash}.${ext}`;
 
         const newBadgeData = {
