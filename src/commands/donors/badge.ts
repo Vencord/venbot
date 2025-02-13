@@ -38,7 +38,7 @@ handleInteraction({
     isMatch: i => i.data.name.startsWith(`${Name}-`),
     handle(i) {
         const user = i.data.options.getUserOption("user")!;
-        const oldBadgeInput = i.data.options.getOptions().find(opt => opt.name === "old-badge")?.value as string;
+        const oldBadgeInput = i.data.options.getOptions().find(opt => opt.name === "badge" || opt.name === "before")!.value as string;
         const existingBadges = BadgeData[user.value];
 
         return i.result(
@@ -47,7 +47,7 @@ handleInteraction({
                     name: `${i} - ${b.tooltip === ZWSP ? "<ZWSP>" : b.tooltip}`,
                     value: String(i)
                 }))
-                .filter(b => b.name.toLowerCase().includes(oldBadgeInput?.toLowerCase()))
+                .filter(b => b.name.toLowerCase().includes(oldBadgeInput.toLowerCase()))
             ?? []
         );
     }
@@ -142,21 +142,28 @@ handleInteraction({
 
         BadgeData[user.id] ??= [];
         const index = oldBadgeIndex ?? BadgeData[user.id].length;
-
-        const existingBadge = BadgeData[user.id][index];
-        if (existingBadge) {
-            const fileName = new URL(existingBadge.badge).pathname.split("/").pop()!;
-            rmSync(`${badgesForUser(user.id)}/${fileName}`, { force: true });
-        }
-
         const fileName = `${index + 1}-${hash}.${ext}`;
-        mkdirSync(badgesForUser(user.id), { recursive: true });
-        writeFileSync(`${badgesForUser(user.id)}/${fileName}`, imgData);
 
-        BadgeData[user.id][index] = {
+        const newBadgeData = {
             tooltip: tooltip,
             badge: `https://badges.vencord.dev/badges/${user.id}/${fileName}`
         };
+
+        const before = data.options.getInteger("before");
+        if (before) {
+            BadgeData[user.id].splice(before, 0, newBadgeData);
+        } else {
+            const existingBadge = BadgeData[user.id][index];
+            if (existingBadge) {
+                const fileName = new URL(existingBadge.badge).pathname.split("/").pop()!;
+                rmSync(`${badgesForUser(user.id)}/${fileName}`, { force: true });
+            }
+
+            BadgeData[user.id][index] = newBadgeData;
+        }
+
+        mkdirSync(badgesForUser(user.id), { recursive: true });
+        writeFileSync(`${badgesForUser(user.id)}/${fileName}`, imgData);
 
         saveBadges();
 
@@ -200,6 +207,13 @@ Vaius.once("ready", () => {
         description,
         required
     } as ApplicationCommandOptions);
+    const ExistingBadge = (name: string, required = true) => ({
+        name,
+        description,
+        type: ApplicationCommandOptionTypes.INTEGER,
+        autocomplete: true,
+        required
+    } as ApplicationCommandOptions);
     const Image: ApplicationCommandOptions = {
         name: "image",
         type: ApplicationCommandOptionTypes.ATTACHMENT,
@@ -220,6 +234,7 @@ Vaius.once("ready", () => {
             Tooltip(true),
             ImageUrl,
             Image,
+            ExistingBadge("before", false)
         ]
     });
 
@@ -229,13 +244,7 @@ Vaius.once("ready", () => {
         description,
         options: [
             RequiredUser,
-            {
-                name: "old-badge",
-                description,
-                type: ApplicationCommandOptionTypes.INTEGER,
-                autocomplete: true,
-                required: true
-            },
+            ExistingBadge("badge"),
             Tooltip(false),
             ImageUrl,
             Image,
@@ -248,13 +257,7 @@ Vaius.once("ready", () => {
         description,
         options: [
             RequiredUser,
-            {
-                name: "old-badge",
-                description,
-                type: ApplicationCommandOptionTypes.INTEGER,
-                autocomplete: true,
-                required: true
-            }
+            ExistingBadge("badge")
         ]
     });
 
