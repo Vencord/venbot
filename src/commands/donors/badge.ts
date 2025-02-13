@@ -150,7 +150,7 @@ handleInteraction({
         };
 
         const before = data.options.getInteger("before");
-        if (before) {
+        if (before != null) {
             BadgeData[user.id].splice(before, 0, newBadgeData);
         } else {
             const existingBadge = BadgeData[user.id][index];
