@@ -19,7 +19,9 @@ interface BotState {
     discordTracker?: {
         stableHash?: string;
         canaryHash?: string;
-    }
+    },
+
+    stickyThreads: string[];
 }
 
 const defaultState: BotState = {
@@ -31,7 +33,9 @@ const defaultState: BotState = {
         `,
         delayMs: 10_000,
         enabled: true
-    }
+    },
+
+    stickyThreads: []
 };
 
 const savedState = run(() => {

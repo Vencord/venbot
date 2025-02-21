@@ -53,6 +53,9 @@ export const Emoji = makeConstants({
 
     Claim: "🛄",
 
+    SeeNoEvil: "🙈",
+    Owl: "🦉",
+
     ShipIt: "<:shipit:1330992654602731530>",
 });
 
