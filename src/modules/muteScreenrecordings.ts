@@ -8,7 +8,6 @@ import { reply } from "~/util/discord";
 import { downloadToFile } from "~/util/fetch";
 
 const UsersToMute = ["521819891141967883"];
-const CategoryToMuteIn = "1216095839848501338";
 
 async function hasAudio(file: string) {
     const res = await execFile("ffprobe", ["-i", file, "-show_streams", "-select_streams", "a", "-loglevel", "error"]);
@@ -22,7 +21,6 @@ async function muteVideo(file: string, outFile: string) {
 
 Vaius.on("messageCreate", async msg => {
     if (!msg.inCachedGuildChannel()) return;
-    if (msg.channel.parentID !== CategoryToMuteIn) return;
 
     const attachment = msg.attachments.first()!;
     if (msg.attachments.size !== 1) return;
