@@ -1,4 +1,4 @@
-import { ActivityTypes, AnyTextableGuildChannel, ApplicationCommandTypes, ButtonStyles, ChannelTypes, CommandInteraction, ComponentInteraction, ComponentTypes, InteractionTypes, MessageFlags, SelectMenuTypes, TextButton, TextChannel } from "oceanic.js";
+import { ActivityTypes, AnyTextableGuildChannel, ApplicationCommandTypes, ButtonStyles, ChannelTypes, CommandInteraction, ComponentInteraction, ComponentTypes, InteractionTypes, MessageFlags, SelectMenuTypes, TextButton, TextChannel, TextInputStyles } from "oceanic.js";
 
 import { db } from "~/db";
 import { GUILD_ID, MOD_MAIL_BAN_ROLE_ID, MOD_MAIL_CHANNEL_ID, MOD_MAIL_LOG_CHANNEL_ID, MOD_PERMS_ROLE_ID, MOD_ROLE_ID, SUPPORT_CHANNEL_ID } from "~/env";
@@ -13,6 +13,7 @@ import { Emoji, PROD } from "../constants";
 const enum Ids {
     OPEN_TICKET = "modmail:open_ticket",
     OPEN_CONFIRM = "modmail:open_confirm",
+    OPEN_SUBMIT = "modmail:open_submit",
 
     REASON_MONKEY = "modmail:iamamonkey",
     REASON_MOD = "modmail:mod",
@@ -23,7 +24,7 @@ const enum Ids {
 }
 
 const ChannelNameAndPrompt: Record<string, [string, string]> = {
-    [Ids.REASON_MOD]: ["ticket", "Please describe your issue with as much detail as possible."],
+    [Ids.REASON_MOD]: ["ticket", "Please post any supporting media or information that you have."],
     [Ids.REASON_PLUGIN]: ["plugin-submission", "Please post the full message + image(s) that you would like to post in the plugin channel."],
     [Ids.REASON_CSS]: ["css-submission", "Please post the full message + image(s) that you would like to post in the css snippet channel."],
     [Ids.REASON_JS]: ["js-submission", "Please post the full message + image(s) that you would like to post in the js snippet channel."]
@@ -88,7 +89,7 @@ async function createModmailConfirm(interaction: GuildInteraction) {
             type: ComponentTypes.ACTION_ROW,
             components: [{
                 type: ComponentTypes.STRING_SELECT,
-                customID: "modmail:open_confirm",
+                customID: Ids.OPEN_CONFIRM,
                 options: [
                     {
                         label: "I want to submit my plugin",
@@ -174,6 +175,34 @@ handleComponentInteraction({
             });
         }
 
+        await interaction.createModal({
+            title: "Open a Ticket",
+            customID: `${Ids.OPEN_SUBMIT}:${reason}`,
+            components: [{
+                type: ComponentTypes.ACTION_ROW,
+                components: [{
+                    type: ComponentTypes.TEXT_INPUT,
+                    label: "Why are you creating this ticket?",
+                    customID: "message",
+                    placeholder: "You will be able to attach media & more info after submitting this form",
+                    style: TextInputStyles.PARAGRAPH,
+                    required: true,
+                    minLength: 20,
+                    maxLength: 1000
+                }]
+            }]
+        });
+    }
+});
+
+handleInteraction({
+    type: InteractionTypes.MODAL_SUBMIT,
+    isMatch: i => i.data.customID.startsWith(Ids.OPEN_SUBMIT + ":"),
+    async handle(interaction) {
+        const message = interaction.data.components.getTextInput("message");
+
+        const reason = interaction.data.customID.slice(Ids.OPEN_SUBMIT.length + 1);
+
         await interaction.defer(MessageFlags.EPHEMERAL);
 
         const [channelName, prompt] = ChannelNameAndPrompt[reason];
@@ -217,7 +246,7 @@ handleComponentInteraction({
         if (!thread) return;
 
         const msg = await thread.createMessage({
-            content: `👋 ${interaction.user.mention}\n\n${prompt}. A moderator will be with you shortly!`,
+            content: `👋 ${interaction.user.mention}\n\n${prompt}. A moderator will be with you shortly!\n### Message\n${message}`,
             components: [{
                 type: ComponentTypes.ACTION_ROW,
                 components: [
@@ -267,8 +296,6 @@ handleComponentInteraction({
             content: `📩 👉 ${thread.mention}`,
             flags: MessageFlags.EPHEMERAL
         });
-
-        await interaction.deleteFollowup(interaction.message.id);
 
         await log(`${interaction.user.mention} opened ${channelName.replace("-", " ")} ${thread.mention}`);
     }

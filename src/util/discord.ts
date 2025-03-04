@@ -1,4 +1,4 @@
-import { CreateMessageOptions, Member, Message, Role, User } from "oceanic.js";
+import { Client, CreateMessageOptions, Member, Message, PossiblyUncachedMessage, Role, User } from "oceanic.js";
 
 import { Vaius } from "~/Client";
 import { GUILD_ID } from "~/env";
@@ -7,13 +7,15 @@ import { silently } from "./functions";
 
 export const ID_REGEX = /^(?:<@!?)?(\d{17,20})>?$/;
 
-export function reply(msg: Message, opts: CreateMessageOptions | string): Promise<Message> {
+export function reply(msg: Message, opts: CreateMessageOptions | string): Promise<Message>;
+export function reply(msg: PossiblyUncachedMessage, opts: CreateMessageOptions | string, client: Client): Promise<Message>;
+export function reply(msg: Message | PossiblyUncachedMessage, opts: CreateMessageOptions | string, client = (msg as any).client): Promise<Message> {
     if (typeof opts === "string")
         opts = {
             content: opts
         };
 
-    return msg.client.rest.channels.createMessage(msg.channelID, {
+    return client.rest.channels.createMessage(msg.channelID, {
         ...opts,
         messageReference: {
             messageID: msg.id,
