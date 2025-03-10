@@ -15,7 +15,8 @@ export const PROD = NODE_ENV === "production";
 export const SUPPORT_ALLOWED_CHANNELS = [
     SUPPORT_CHANNEL_ID,
     BOT_CHANNEL_ID,
-    DEV_CHANNEL_ID
+    DEV_CHANNEL_ID,
+    "1345457031426871417" // Vesktop support
 ];
 
 export const DONOR_ROLE_ID = "1042507929485586532";
