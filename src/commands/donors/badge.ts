@@ -55,7 +55,7 @@ handleInteraction({
 
 function normaliseCdnUrl(rawUrl: string) {
     const url = new URL(rawUrl);
-    if (url.host !== "cdn.discordapp.com") return rawUrl;
+    if (url.host !== "cdn.discordapp.com" || url.pathname.includes("/attachments/")) return rawUrl;
 
     url.searchParams.set("size", "128");
 
