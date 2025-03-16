@@ -53,6 +53,21 @@ handleInteraction({
     }
 });
 
+function normaliseCdnUrl(rawUrl: string) {
+    const url = new URL(rawUrl);
+    if (url.host !== "cdn.discordapp.com") return rawUrl;
+
+    url.searchParams.set("size", "128");
+
+    const isAnimated = url.searchParams.get("animated") === "true";
+    if (url.pathname.endsWith(".webp")) {
+        const newExt = isAnimated ? "gif" : "png";
+        url.pathname = url.pathname.slice(0, -4) + newExt;
+    }
+
+    return url.toString();
+}
+
 handleInteraction({
     type: InteractionTypes.APPLICATION_COMMAND,
     isMatch: i => i.data.name.startsWith(`${Name}-`),
@@ -120,6 +135,7 @@ handleInteraction({
         const imageUrl = data.options.getString("image-url");
 
         let url = image?.url ?? imageUrl;
+        url &&= normaliseCdnUrl(url);
 
         if (!url || !tooltip) {
             const existing = existingBadgeIndex != null && BadgeData[user.id]?.[existingBadgeIndex];
