@@ -64,5 +64,6 @@ Vaius.on("threadUpdate", async (thread, oldThread) => {
 
     if (wasManualArchive) return;
 
+    // @ts-expect-error "reason" is not in type
     await thread.edit({ archived: false, reason: "Automatically unarchived watched thread" });
 });
