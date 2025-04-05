@@ -163,7 +163,10 @@ const schema = {
         required: ["x-signature"]
     },
     querystring: {
-        runId: { type: "string" }
+        type: "object",
+        properties: {
+            runId: { type: "string" }
+        }
     }
 };
 
