@@ -1,4 +1,4 @@
-import { createCanvas, Image, loadImage, registerFont } from "canvas";
+import { createCanvas, GlobalFonts, Image, loadImage } from "@napi-rs/canvas";
 import { AnyGuildChannelWithoutThreads } from "oceanic.js";
 import { join } from "path";
 
@@ -96,7 +96,6 @@ function draw(channels: Channels) {
 
     ctx.drawImage(img, 0, 0, WIDTH, HEIGHT);
     ctx.fillStyle = "#949ba4";
-    ctx.textDrawingMode = "glyph";
 
     function fitString(str: string, maxWidth: number) {
         let { width } = ctx.measureText(str);
@@ -151,7 +150,7 @@ function draw(channels: Channels) {
     drawText("lime", channels.destCaption.slice(0, 100), 120, 20);
     drawText("red", channels.currentCaption.slice(0, 100), 220, 180);
 
-    return canvas.toBuffer();
+    return canvas.toBuffer("image/png");
 }
 
 
@@ -160,15 +159,9 @@ async function drawNotSupportImage(channels: Channels) {
         const base = join(ASSET_DIR, "image-gen/not-support");
         img = await loadImage(join(base, "not-support-template.png"));
 
-        registerFont(join(base, "twemoji.ttf"), {
-            family: "Twemoji Mozilla"
-        });
-
+        GlobalFonts.registerFromPath(join(base, "twemoji.ttf"), "Twemoji Mozilla");
         for (const weight of ["500", "600"]) {
-            registerFont(join(base, `gg-sans-${weight}.ttf`), {
-                family: "gg sans",
-                weight
-            });
+            GlobalFonts.registerFromPath(join(base, `gg-sans-${weight}.woff2`), "gg sans");
         }
     }
 

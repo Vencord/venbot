@@ -18,8 +18,8 @@
     "keywords": [],
     "author": "Vendicated <vendicated+npm@riseup.net>",
     "dependencies": {
+        "@napi-rs/canvas": "^0.1.69",
         "better-sqlite3": "^11.9.1",
-        "canvas": "^2.11.2",
         "dotenv": "^16.4.5",
         "fastify": "^5.2.2",
         "kysely": "^0.27.6",
