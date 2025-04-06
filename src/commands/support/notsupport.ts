@@ -161,7 +161,7 @@ async function drawNotSupportImage(channels: Channels) {
 
         GlobalFonts.registerFromPath(join(base, "twemoji.ttf"), "Twemoji Mozilla");
         for (const weight of ["500", "600"]) {
-            GlobalFonts.registerFromPath(join(base, `gg-sans-${weight}.woff2`), "gg sans");
+            GlobalFonts.registerFromPath(join(base, `gg-sans-${weight}.ttf`));
         }
     }
 
