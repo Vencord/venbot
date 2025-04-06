@@ -5,7 +5,11 @@ import { PROD } from "./constants";
 import { HTTP_SERVER_LISTEN_PORT } from "./env";
 
 export const fastify = Fastify({
-    logger: !PROD
+    logger: !PROD && {
+        transport: {
+            target: "pino-pretty",
+        }
+    }
 });
 
 fastify.get("/", (req, res) => {
