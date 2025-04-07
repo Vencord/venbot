@@ -54,8 +54,9 @@ defineCommand({
     aliases: ["e", "$"],
     rawContent: true,
     async execute({ msg, reply, commandName }, code) {
-        if (msg.author.id !== OwnerId && commandName === "eval") {
-            silently(sendVoiceMessage(msg));
+        if (msg.author.id !== OwnerId) {
+            if (commandName === "eval")
+                silently(sendVoiceMessage(msg));
 
             return;
         }
