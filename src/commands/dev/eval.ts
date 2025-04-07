@@ -2,11 +2,9 @@ import { readFileSync } from "fs";
 import { AnyTextableChannel, Message, Uncached } from "oceanic.js";
 import { join } from "path";
 
-import { OwnerId } from "~/Client";
 import { defineCommand } from "~/Commands";
 import { ASSET_DIR } from "~/constants";
 import { DISCORD_TOKEN } from "~/env";
-import { silently } from "~/util/functions";
 import { inspect } from "~/util/inspect";
 import { countOccurrences, toCodeblock } from "~/util/text";
 
@@ -53,14 +51,8 @@ defineCommand({
     usage: "<code>",
     aliases: ["e", "$"],
     rawContent: true,
+    ownerOnly: true,
     async execute({ msg, reply, commandName }, code) {
-        if (msg.author.id !== OwnerId) {
-            if (commandName === "eval")
-                silently(sendVoiceMessage(msg));
-
-            return;
-        }
-
         const console: any = {
             _lines: [] as string[],
             _log(...things: string[]) {
