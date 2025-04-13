@@ -7,7 +7,7 @@ defineCommand({
     description: "Roll a die",
     aliases: ["dice", "die", "d", ...dieNames],
     usage: "[number of sides]",
-    execute({ reply, commandName }, sides) {
+    execute({ reply, commandName }, sides = "6") {
         if (dieNames.includes(commandName)) {
             sides = commandName.slice(1);
         }
