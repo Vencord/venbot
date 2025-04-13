@@ -57,6 +57,9 @@ export const Emoji = makeConstants({
     SeeNoEvil: "🙈",
     Owl: "🦉",
 
+    Die: "🎲",
+    Coin: "🪙",
+
     ShipIt: "<:shipit:1330992654602731530>",
 });
 
