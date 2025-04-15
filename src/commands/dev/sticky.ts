@@ -21,7 +21,7 @@ defineCommand({
                 .map(([channelId, state]) =>
                     `${state.enabled ? Emoji.GreenDot : Emoji.RedDot} <#${channelId}>: ${state.message}`
                 )
-                .join("\n");
+                .join("\n\n");
 
             return reply(mapping);
         }
