@@ -9,7 +9,7 @@ defineCommand({
     description: "Set the sticky message",
     modOnly: true,
     guildOnly: true,
-    usage: "<off | on | set | delay | list> [value]",
+    usage: "<create/set | delete/remove | on | off | delay | list> [value]",
     rawContent: true,
     execute({ reply, react, msg, prefix, commandName }, content) {
         let response: string | undefined;
@@ -68,6 +68,7 @@ defineCommand({
                 }
                 break;
 
+            case "create":
             case "set":
                 const message = [value, ...extra].join(" ");
                 if (!state) {
@@ -83,6 +84,13 @@ defineCommand({
                 response = "Sticky message set!";
                 sticky.createDebouncer();
                 sticky.createMessage();
+                break;
+
+            case "delete":
+            case "remove":
+                delete BotState.stickies[msg.channelID];
+                sticky.destroy();
+                response = "Sticky message deleted!";
                 break;
 
             default:
