@@ -70,17 +70,8 @@ defineCommand({
 
             case "create":
             case "set":
-                const message = [value, ...extra].join(" ");
-                if (!state) {
-                    BotState.stickies[msg.channelID] = {
-                        message,
-                        delayMs: 5_000,
-                        enabled: true
-                    };
-                } else {
-                    state.message = message;
-                    state.enabled = true;
-                }
+                state.message = [value, ...extra].join(" ");
+                state.enabled = true;
                 response = "Sticky message set!";
                 sticky.createDebouncer();
                 sticky.createMessage();
