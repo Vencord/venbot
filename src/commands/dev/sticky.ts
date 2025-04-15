@@ -7,7 +7,8 @@ import { toCodeblock } from "~/util/text";
 defineCommand({
     name: "sticky",
     description: "Set the sticky message",
-    ownerOnly: true,
+    modOnly: true,
+    guildOnly: true,
     usage: "<off | on | set | delay | list> [value]",
     rawContent: true,
     execute({ reply, react, msg, prefix, commandName }, content) {
