@@ -1,30 +1,58 @@
 import { defineCommand } from "~/Commands";
 import { Emoji } from "~/constants";
 import { BotState } from "~/db/botState";
-import { createStickyMessage, deleteStickyMessage, initStickyDebouncer } from "~/modules/sticky";
+import { StickyState } from "~/modules/sticky";
+import { toCodeblock } from "~/util/text";
 
 defineCommand({
     name: "sticky",
     description: "Set the sticky message",
     ownerOnly: true,
-    usage: "<off | on | set | delay> [value]",
+    usage: "<off | on | set | delay | list> [value]",
     rawContent: true,
-    execute({ reply, react }, content) {
+    execute({ reply, react, msg, prefix, commandName }, content) {
         let response: string | undefined;
 
         const [operation, value, ...extra] = content.split(" ");
 
+        if (operation?.toLowerCase() === "list") {
+            const mapping = Object.entries(BotState.stickies)
+                .map(([channelId, state]) =>
+                    `${state.enabled ? Emoji.GreenDot : Emoji.RedDot} <#${channelId}>: ${state.message}`
+                )
+                .join("\n");
+
+            return reply(mapping);
+        }
+
+        let state = BotState.stickies[msg.channelID];
+        if (!state) {
+            if (operation?.toLowerCase() !== "set") {
+                return reply(`No sticky found. Use ${toCodeblock(`${prefix}${commandName} set [message]`)} to create one`);
+            }
+
+            state = BotState.stickies[msg.channelID] = {
+                message: "",
+                delayMs: 5_000,
+                enabled: true
+            };
+        }
+
+        const sticky = StickyState.getOrCreate(msg.channelID);
+        if (!sticky) throw new Error("Sticky state not found");
+
         switch (operation?.toLowerCase()) {
             case "on":
-                BotState.sticky.enabled = true;
+                state.enabled = true;
                 response = "Sticky message enabled!";
-                createStickyMessage();
+                sticky.createDebouncer();
+                sticky.createMessage();
                 break;
 
             case "off":
-                BotState.sticky.enabled = false;
+                state.enabled = false;
                 response = "Sticky message disabled!";
-                deleteStickyMessage();
+                sticky.destroy();
                 break;
 
             case "delay":
@@ -32,17 +60,28 @@ defineCommand({
                 if (isNaN(delay)) {
                     response = "Invalid delay value!";
                 } else {
-                    BotState.sticky.delayMs = delay;
-                    BotState.sticky.enabled = true;
+                    state.delayMs = delay;
+                    state.enabled = true;
                     response = `Sticky message delay set to ${delay}ms`;
-                    initStickyDebouncer();
+                    sticky.createDebouncer();
                 }
                 break;
 
             case "set":
-                BotState.sticky.message = [value, ...extra].join(" ");
-                BotState.sticky.enabled = true;
+                const message = [value, ...extra].join(" ");
+                if (!state) {
+                    BotState.stickies[msg.channelID] = {
+                        message,
+                        delayMs: 5_000,
+                        enabled: true
+                    };
+                } else {
+                    state.message = message;
+                    state.enabled = true;
+                }
                 response = "Sticky message set!";
+                sticky.createDebouncer();
+                sticky.createMessage();
                 break;
 
             default:

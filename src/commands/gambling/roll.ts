@@ -2,6 +2,7 @@ import { defineCommand } from "~/Commands";
 import { Emoji } from "~/constants";
 
 const dieNames = ["d4", "d6", "d8", "d10", "d12", "d20"];
+
 defineCommand({
     name: "roll",
     description: "Roll a die",
@@ -22,3 +23,7 @@ defineCommand({
         return reply(`${Emoji.Die} ${choice}`);
     }
 });
+
+// Droll - https://github.com/thebinarypenguin/droll
+// Copyright (c) 2013 Ethan Zimmerman
+// SPDX-License-Identifier: MIT

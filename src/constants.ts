@@ -46,6 +46,9 @@ export const Emoji = makeConstants({
     TrashCan: "🗑️",
     Hammer: "🔨",
 
+    GreenDot: "🟢",
+    RedDot: "🔴",
+
     DoubleLeft: "⏪",
     Left: "◀️",
     InputNumbers: "🔢",

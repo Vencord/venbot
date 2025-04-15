@@ -2,19 +2,19 @@ import { readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 
 import { DATA_DIR } from "~/constants";
+import { SUPPORT_CHANNEL_ID } from "~/env";
 import { run } from "~/util/functions";
-import { stripIndent } from "~/util/text";
 
 const StateFile = join(DATA_DIR, "botState.json");
 
 interface BotState {
     helloChannelId?: string;
 
-    sticky: {
+    stickies: Record<string, {
         message: string;
         delayMs: number;
         enabled: boolean;
-    },
+    }>,
 
     discordTracker?: {
         stableHash?: string;
@@ -25,16 +25,13 @@ interface BotState {
 }
 
 const defaultState: BotState = {
-    sticky: {
-        message: stripIndent`
-            ## Read <#1222936386626129920> before asking for help
-            ## Read <#1222936386626129920> before asking for help
-            You will be **BANNED** with no chance of appeal if you ignore this.
-        `,
-        delayMs: 10_000,
-        enabled: true
+    stickies: {
+        [SUPPORT_CHANNEL_ID]: {
+            message: "# Read <#1257025907625951423> before asking for help!",
+            delayMs: 5_000,
+            enabled: true
+        }
     },
-
     stickyThreads: []
 };
 
