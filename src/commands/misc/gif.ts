@@ -42,7 +42,9 @@ async function loadTemplate(name: string) {
 type AvatarFrameProvider = (index: number) => Image | Canvas;
 
 async function makeAvatarProvider(user: User | Member): Promise<AvatarFrameProvider> {
-    const isGif = user.avatar?.startsWith("a_");
+    const avatarHash = user.avatar || (user instanceof Member ? user.user.avatar : null);
+
+    const isGif = avatarHash?.startsWith("a_");
     const avatarUrl = user.avatarURL(isGif ? "gif" : "png", 256);
     const buf = await fetch(avatarUrl).then(res => res.arrayBuffer());
 
