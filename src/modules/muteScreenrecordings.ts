@@ -11,7 +11,25 @@ const UsersToMute = ["521819891141967883"];
 
 async function hasAudio(file: string) {
     const res = await execFile("ffprobe", ["-i", file, "-show_streams", "-select_streams", "a", "-loglevel", "error"]);
-    return res.stdout.trim().length > 0;
+
+    const stdout = res.stdout.trim();
+    if (!stdout.length) return false;
+
+    const durationString = stdout.split("\n").find(line => line.startsWith("duration="))?.split("=")[1];
+    if (!durationString) return false;
+
+    const silenceRes = await execFile("ffmpeg", ["-hide_banner", "-i", file, "-af", "silencedetect=n=-50dB:d=0.5", "-f", "null", "/dev/null"]);
+    const silenceStderr = silenceRes.stderr.trim();
+
+    const silenceDurationString = silenceStderr.match(/silence_duration: (\d+(?:\.\d+)?)/);
+    if (!silenceDurationString) return false;
+
+    const silenceDuration = parseFloat(silenceDurationString[1]);
+    const duration = parseFloat(durationString);
+
+    if (isNaN(silenceDuration) || isNaN(duration)) return false;
+
+    return Math.floor(duration - silenceDuration) > 1;
 }
 
 async function muteVideo(file: string, outFile: string) {
@@ -24,7 +42,7 @@ Vaius.on("messageCreate", async msg => {
 
     const attachment = msg.attachments.first()!;
     if (msg.attachments.size !== 1) return;
-    if (!["video/webm", "video/mp4"].includes(attachment?.contentType || "")) return;
+    if (!attachment?.contentType?.includes("video")) return;
 
     if (!UsersToMute.includes(msg.author.id)) return;
 
