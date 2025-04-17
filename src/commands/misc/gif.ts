@@ -3,7 +3,7 @@ import { readdirSync } from "fs";
 import { readFile } from "fs/promises";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 import { decompressFrames, parseGIF } from "gifuct-js";
-import { User } from "oceanic.js";
+import { Member, User } from "oceanic.js";
 import { join } from "path";
 import { format } from "util";
 
@@ -41,7 +41,7 @@ async function loadTemplate(name: string) {
 
 type AvatarFrameProvider = (index: number) => Image | Canvas;
 
-async function makeAvatarProvider(user: User): Promise<AvatarFrameProvider> {
+async function makeAvatarProvider(user: User | Member): Promise<AvatarFrameProvider> {
     const isGif = user.avatar?.startsWith("a_");
     const avatarUrl = user.avatarURL(isGif ? "gif" : "png", 256);
     const buf = await fetch(avatarUrl).then(res => res.arrayBuffer());
@@ -93,7 +93,11 @@ defineCommand({
         const user = await resolveUser(userResolvable);
         if (!user) return reply("Unknown user");
 
-        const getAvatarFrame = await makeAvatarProvider(user);
+        const memberOrUser = msg.guild
+            ? await msg.guild.getMember(user.id).catch(() => user)
+            : user;
+
+        const getAvatarFrame = await makeAvatarProvider(memberOrUser);
 
         if (templateName === "jumpscare") {
             return reply({
