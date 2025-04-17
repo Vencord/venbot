@@ -134,9 +134,9 @@ defineCommand({
         const canvas = createCanvas(width, height);
         const ctx = canvas.getContext("2d");
 
-        function processFrame(img: Image, idx: number) {
+        function processFrame(img: Image, avatarIdx: number) {
             ctx.drawImage(img, 0, 0, width, height);
-            ctx.drawImage(getAvatarFrame(idx), avatarLocation.x, avatarLocation.y, avatarLocation.width, avatarLocation.height);
+            ctx.drawImage(getAvatarFrame(avatarIdx), avatarLocation.x, avatarLocation.y, avatarLocation.width, avatarLocation.height);
 
             const { data } = ctx.getImageData(0, 0, width, height);
 
@@ -148,7 +148,7 @@ defineCommand({
 
         if (reverse) {
             for (let i = frames.length - 1; i >= 0; i--) {
-                processFrame(frames[i], i);
+                processFrame(frames[i], frames.length - i - 1);
             }
         } else {
             for (let i = 0; i < frames.length; i++) {
