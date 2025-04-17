@@ -54,9 +54,17 @@ async function makeAvatarProvider(user: User | Member): Promise<AvatarFrameProvi
     const gif = parseGIF(buf);
     const frames = decompressFrames(gif, true);
 
+    // we need to use two contexts to correctly support gif disposal types.
+    // with disposal type 1, the frame is drawn over the previous frame.
+    // it's easier to do stacking here than do it in the specific functions
+
+    const tempCanvas = createCanvas(frames[0].dims.width, frames[0].dims.height);
     const canvas = createCanvas(frames[0].dims.width, frames[0].dims.height);
+    const tempCtx = tempCanvas.getContext("2d");
     const ctx = canvas.getContext("2d");
+
     let imageData: ImageData;
+    let needsDisposal = false;
 
     return (index: number) => {
         const frame = frames[index % frames.length];
@@ -65,11 +73,23 @@ async function makeAvatarProvider(user: User | Member): Promise<AvatarFrameProvi
         if (!imageData || imageData.width !== width || imageData.height !== height) {
             canvas.width = width;
             canvas.height = height;
-            imageData = ctx.createImageData(width, height);
+            imageData = tempCtx.createImageData(width, height);
+        }
+
+        if (needsDisposal) {
+            ctx.clearRect(0, 0, width, height);
+            needsDisposal = false;
         }
 
         imageData.data.set(frame.patch);
-        ctx.putImageData(imageData, 0, 0);
+        tempCtx.putImageData(imageData, 0, 0);
+
+        if (frame.disposalType === 2) {
+            needsDisposal = true;
+        }
+
+        ctx.drawImage(tempCanvas, 0, 0, width, height);
+
         return canvas;
     };
 }
