@@ -1,0 +1,13 @@
+{
+    "delay": 50,
+    "frames": 41,
+    "width": 498,
+    "height": 269,
+    "avatarLocation": {
+        "x": 100,
+        "y": 10,
+        "width": 75,
+        "height": 75
+    },
+    "filename": "%s is talking"
+}
