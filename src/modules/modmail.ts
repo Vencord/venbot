@@ -159,6 +159,13 @@ handleComponentInteraction({
     customID: Ids.OPEN_CONFIRM,
     guildOnly: true,
     async handle(interaction: ComponentInteraction<SelectMenuTypes, AnyTextableGuildChannel>) {
+        if (interaction.member.roles.includes(MOD_MAIL_BAN_ROLE_ID)) {
+            return interaction.createMessage({
+                content: "You are banned from using modmail.",
+                flags: MessageFlags.EPHEMERAL
+            });
+        }
+
         const reason = interaction.data.values.getStrings()[0];
 
         if (reason.startsWith(Ids.REASON_MONKEY)) {
