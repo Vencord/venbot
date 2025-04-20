@@ -101,7 +101,7 @@ defineCommand({
     description: "Insert a user's avatar into a gif template",
     usage: `<template (one of: ${templates.join(" | ")})> [-reverse] <@user>`,
 
-    async execute({ reply, msg }, templateName, reverseFlagOrUserResolvable, userResolvable = msg.author.id) {
+    async execute({ reply, msg }, templateName, reverseFlagOrUserResolvable, userResolvable) {
         let reverse = ["-reverse", "--reverse", "-r"].includes(reverseFlagOrUserResolvable);
 
         if (!reverse && reverseFlagOrUserResolvable) {
@@ -109,8 +109,8 @@ defineCommand({
             userResolvable = reverseFlagOrUserResolvable;
         }
 
-        if (!userResolvable && msg.referencedMessage) {
-            userResolvable = msg.referencedMessage.author.id;
+        if (!userResolvable) {
+            userResolvable = msg.referencedMessage?.author.id ?? msg.author.id;
         }
 
         if (!templates.includes(templateName)) {
