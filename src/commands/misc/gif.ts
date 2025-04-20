@@ -103,9 +103,14 @@ defineCommand({
 
     async execute({ reply, msg }, templateName, reverseFlagOrUserResolvable, userResolvable = msg.author.id) {
         let reverse = ["-reverse", "--reverse", "-r"].includes(reverseFlagOrUserResolvable);
+
         if (!reverse && reverseFlagOrUserResolvable) {
             reverse = ["-reverse", "--reverse", "-r"].includes(userResolvable);
             userResolvable = reverseFlagOrUserResolvable;
+        }
+
+        if (!userResolvable && msg.referencedMessage) {
+            userResolvable = msg.referencedMessage.author.id;
         }
 
         if (!templates.includes(templateName)) {
