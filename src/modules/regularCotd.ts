@@ -60,6 +60,8 @@ export async function rerollCotd(inputHex?: string) {
         icon,
         reason: "Rerolled cozy of the day"
     });
+
+    return hexColor;
 }
 
 daily(rerollCotd);

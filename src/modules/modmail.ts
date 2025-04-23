@@ -1,4 +1,4 @@
-import { ActivityTypes, AnyTextableGuildChannel, ApplicationCommandTypes, ButtonStyles, ChannelTypes, CommandInteraction, ComponentInteraction, ComponentTypes, InteractionTypes, MessageFlags, SelectMenuTypes, TextButton, TextChannel, TextInputStyles } from "oceanic.js";
+import { ActivityTypes, AnyTextableGuildChannel, ApplicationCommandTypes, ButtonStyles, ChannelTypes, CommandInteraction, ComponentInteraction, ComponentTypes, InteractionTypes, MessageActionRow, MessageFlags, SelectMenuTypes, TextButton, TextChannel, TextInputStyles } from "oceanic.js";
 
 import { db } from "~/db";
 import { GUILD_ID, MOD_MAIL_BAN_ROLE_ID, MOD_MAIL_CHANNEL_ID, MOD_MAIL_LOG_CHANNEL_ID, MOD_PERMS_ROLE_ID, MOD_ROLE_ID, SUPPORT_CHANNEL_ID } from "~/env";
@@ -387,7 +387,7 @@ handleInteraction({
 
         // replace the Claim ticket button with a disabled one
         const { components } = interaction.message;
-        components[0].components.find(
+        (components[0] as MessageActionRow).components.find(
             component =>
                 component.type === ComponentTypes.BUTTON
                 && (component as TextButton).customID.startsWith("modmail:claim-ticket:")

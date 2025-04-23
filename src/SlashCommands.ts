@@ -1,10 +1,14 @@
 import { AnyInteractionChannel, AnyInteractionGateway, AnyTextableGuildChannel, AutocompleteInteraction, CommandInteraction, ComponentInteraction, ComponentTypes, InteractionTypes, ModalSubmitInteraction, SelectMenuTypes } from "oceanic.js";
 
 import { OwnerId, Vaius } from "./Client";
+import { MOD_PERMS_ROLE_ID } from "./env";
 
 interface BaseInteractionHandler {
     ownerOnly?: boolean;
     guildOnly?: boolean;
+    modOnly?: boolean;
+}
+interface AnyInteractionHandler extends BaseInteractionHandler {
     handle(interaction: AnyInteractionGateway): any;
 }
 
@@ -16,7 +20,7 @@ type CommandHandler = {
     handle(interaction: CommandInteraction<AnyTextableGuildChannel>): any;
 };
 
-export type CommandInteractionHandler = CommandHandler & {
+export type CommandInteractionHandler = BaseInteractionHandler & CommandHandler & {
     name: string;
     ownerOnly?: boolean;
 }
@@ -29,7 +33,7 @@ type ComponentHandler = {
     handle(interaction: ComponentInteraction<ComponentTypes.BUTTON | SelectMenuTypes, AnyTextableGuildChannel>): any;
 };
 
-export type ComponentInteractionHandler = ComponentHandler & {
+export type ComponentInteractionHandler = BaseInteractionHandler & ComponentHandler & {
     customID: string;
     ownerOnly?: boolean;
 }
@@ -66,7 +70,7 @@ export function handleInteraction<T extends InteractionTypes, GuildOnly extends 
     CustomHandlers[handler.type]!.push(handler);
 }
 
-function resolveHandler(interaction: AnyInteractionGateway): BaseInteractionHandler | undefined {
+function resolveHandler(interaction: AnyInteractionGateway): AnyInteractionHandler | undefined {
     return (
         (interaction.type === InteractionTypes.APPLICATION_COMMAND && CommandHandlers[interaction.data.name]) ||
         (interaction.type === InteractionTypes.MESSAGE_COMPONENT && ComponentHandlers[interaction.data.customID]) ||
@@ -79,6 +83,12 @@ Vaius.on("interactionCreate", async interaction => {
     if (!handler) return;
     if (handler.ownerOnly && interaction.user.id !== OwnerId) return;
     if (handler.guildOnly && !interaction.inCachedGuildChannel()) return;
+    if (handler.modOnly) {
+        if (!interaction.inCachedGuildChannel()) return;
+
+        if (!interaction.member.roles.includes(MOD_PERMS_ROLE_ID))
+            return;
+    }
 
     try {
         await handler.handle(interaction);
