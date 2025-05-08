@@ -5,7 +5,7 @@ let unicodeNameMap: Record<number, string> | undefined;
 
 async function requireMap() {
     if (!unicodeNameMap) {
-        const data = await fetch("https://raw.githubusercontent.com/node-unicode/node-unicode-data/main/data/16.0.0-database.txt")
+        const data = await fetch("https://www.unicode.org/Public/UCD/latest/ucd/UnicodeData.txt")
             .then(res => res.text());
 
         unicodeNameMap = Object.fromEntries(
