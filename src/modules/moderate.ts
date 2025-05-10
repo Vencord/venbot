@@ -240,19 +240,24 @@ export async function moderateInvites(msg: Message) {
     return false;
 }
 
+// for some reason, the scam bots LOVE posting to this channel
+const GERMAN_CHANNEL_ID = "1121201005456011366";
+
 export function initModListeners() {
     Vaius.on("guildMemberUpdate", moderateNick);
     Vaius.on("guildMemberAdd", moderateNick);
 
-    Vaius.on("autoModerationActionExecution", async (guild, _channel, user, data) => {
+    Vaius.on("autoModerationActionExecution", async (guild, channel, user, data) => {
         if (data.action.type !== AutoModerationActionTypes.SEND_ALERT_MESSAGE) return;
 
         const includesPing = ["@everyone", "@here"].some(s => data.content.includes(s));
         const includesInvite = ["discord.gg/", "discord.com/invite"].some(s => data.content.includes(s));
 
-        const isSteamScam = data.content.includes("[steamcommunity.com") &&
-            ["https://u.to", "https://sc.link", "$"].some(s => data.content.includes(s));
+        const isSteamScam = (["[steamcommunity.com", "$ gift"].some(s => data.content.includes(s)) || channel?.id === GERMAN_CHANNEL_ID) &&
+            ["https://u.to", "https://sc.link", "https://e.vg", "https://is.gd"].some(s => data.content.includes(s));
+
         const isMediaFireScam = data.content.includes("bro") && data.content.includes("mediafire") && data.content.includes("found");
+
         const isRobloxScam = data.content.includes("executor") && (
             includesInvite ||
             ["roblox", "free"].some(s => data.content.includes(s))
@@ -262,7 +267,7 @@ export function initModListeners() {
 
         if (isScam) {
             await Vaius.rest.guilds.createBan(guild.id, user.id, {
-                reason: "scams (hacked account)",
+                reason: `scams (hacked account): ${data.content}`,
                 deleteMessageDays: 1
             });
             logModerationAction(`Banned <@${user.id}> for posting a scam message.`);
