@@ -3,12 +3,12 @@ import { ComponentTypes, TextDisplayComponent } from "oceanic.js";
 import { childrenToString } from "./utils";
 
 export interface TextDisplayProps {
-    children?: any;
+    children: string;
     id?: number;
 }
 
 export function TextDisplay({ children, id }: TextDisplayProps): TextDisplayComponent {
-    children = childrenToString("TextDisplay", children);
+    children = childrenToString("TextDisplay", children)!;
     if (!children) {
         throw new Error("TextDisplay requires at least one child");
     }

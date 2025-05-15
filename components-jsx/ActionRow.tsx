@@ -2,7 +2,7 @@ import { ComponentTypes, MessageActionRow, MessageActionRowComponent } from "oce
 
 import { childrenToArray } from "./utils";
 
-export type ActionRowProps = Omit<MessageActionRow, "type" | "components"> & { children?: MessageActionRowComponent | MessageActionRowComponent[] };
+export type ActionRowProps = Omit<MessageActionRow, "type" | "components"> & { children: MessageActionRowComponent | MessageActionRowComponent[]; };
 
 export function ActionRow(props: ActionRowProps): MessageActionRow {
     return {

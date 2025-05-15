@@ -5,7 +5,7 @@ import { childrenToString } from "./utils";
 export { ButtonStyles } from "oceanic.js";
 
 type Button = Omit<TextButton, "type" | "label"> | Omit<URLButton, "type" | "label">;
-export type ButtonProps = Button & { children?: any; };
+export type ButtonProps = Button & { children?: string; };
 
 export function Button({ children, ...props }: ButtonProps): ButtonComponent {
     return {
