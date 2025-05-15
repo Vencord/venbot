@@ -3,14 +3,14 @@ import { ButtonComponent, ComponentTypes, SectionComponent, TextDisplayComponent
 import { childrenToArray } from "./utils";
 
 export interface SectionProps {
-    children: TextDisplayComponent[]
+    children: TextDisplayComponent[];
     accessory: ThumbnailComponent | ButtonComponent;
 }
 
-export function Section(props: SectionProps): SectionComponent {
+export function Section({ children, ...props }: SectionProps): SectionComponent {
     return {
         type: ComponentTypes.SECTION,
-        components: childrenToArray(props.children),
+        components: childrenToArray(children),
         ...props
     };
 }
