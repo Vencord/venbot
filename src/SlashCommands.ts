@@ -23,7 +23,7 @@ type CommandHandler = {
 export type CommandInteractionHandler = BaseInteractionHandler & CommandHandler & {
     name: string;
     ownerOnly?: boolean;
-}
+};
 
 type ComponentHandler = {
     guildOnly?: false;
@@ -36,7 +36,7 @@ type ComponentHandler = {
 export type ComponentInteractionHandler = BaseInteractionHandler & ComponentHandler & {
     customID: string;
     ownerOnly?: boolean;
-}
+};
 
 export interface InteractionTypeMap<GuildOnly extends Boolean> {
     [InteractionTypes.APPLICATION_COMMAND]: CommandInteraction<GuildOnly extends true ? AnyTextableGuildChannel : AnyInteractionChannel>;
@@ -49,7 +49,7 @@ export interface InteractionTypeMap<GuildOnly extends Boolean> {
 export type CustomHandler<T extends AnyInteractionGateway> = {
     isMatch(interaction: T): boolean;
     handle(interaction: T): any;
-}
+};
 
 type AnyCustomHandler = CustomHandler<AnyInteractionGateway>;
 

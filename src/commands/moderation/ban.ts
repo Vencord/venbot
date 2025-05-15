@@ -14,7 +14,7 @@ function parseCrap(msg: Message<AnyTextableGuildChannel>, args: string[]) {
     else
         possibleDays = 0;
 
-    // eslint-disable-next-line prefer-const
+
     let { ids, reason, hasCustomReason } = parseUserIdsAndReason(args);
 
     if (!hasCustomReason && !ids.length && msg.referencedMessage) {

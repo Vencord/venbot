@@ -22,7 +22,7 @@ defineCommand({
         }
         const durationText = msToHumanReadable(duration);
 
-        // eslint-disable-next-line prefer-const
+
         let { ids, reason, hasCustomReason } = parseUserIdsAndReason(args);
         if (!ids.length && msg.referencedMessage) {
             ids.push(msg.referencedMessage.author.id);
