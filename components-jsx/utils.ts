@@ -7,7 +7,7 @@ export function filterChildren(children: any[]) {
 
 export function childrenToString(name: string, children: any) {
     if (Array.isArray(children)) {
-        return filterChildren(children).join("\n");
+        return filterChildren(children).join("");
     }
     if (typeof children === "string") {
         return children;

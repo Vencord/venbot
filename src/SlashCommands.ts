@@ -1,4 +1,4 @@
-import { AnyInteractionChannel, AnyInteractionGateway, AnyTextableGuildChannel, AutocompleteInteraction, CommandInteraction, ComponentInteraction, ComponentTypes, InteractionTypes, ModalSubmitInteraction, SelectMenuTypes } from "oceanic.js";
+import { AnyInteractionChannel, AnyInteractionGateway, AnyTextableGuildChannel, AutocompleteInteraction, CommandInteraction, ComponentInteraction, ComponentTypes, InteractionTypes, MessageFlags, ModalSubmitInteraction, SelectMenuTypes } from "oceanic.js";
 
 import { OwnerId, Vaius } from "./Client";
 import { MOD_PERMS_ROLE_ID } from "./env";
@@ -65,7 +65,7 @@ export function handleComponentInteraction(handler: ComponentInteractionHandler)
     ComponentHandlers[handler.customID] = handler;
 }
 
-export function handleInteraction<T extends InteractionTypes, GuildOnly extends boolean>(handler: { type: T, guildOnly?: GuildOnly } & CustomHandler<InteractionTypeMap<GuildOnly>[T]>) {
+export function handleInteraction<T extends InteractionTypes, GuildOnly extends boolean>(handler: { type: T, guildOnly?: GuildOnly; } & CustomHandler<InteractionTypeMap<GuildOnly>[T]>) {
     CustomHandlers[handler.type] ??= [];
     CustomHandlers[handler.type]!.push(handler);
 }
@@ -94,5 +94,21 @@ Vaius.on("interactionCreate", async interaction => {
         await handler.handle(interaction);
     } catch (e) {
         console.error("Error handling interaction", e);
+
+        if (interaction.type === InteractionTypes.APPLICATION_COMMAND) {
+            const message = `An error occurred: ${e}`;
+
+            if (interaction.acknowledged) {
+                await interaction.createFollowup({
+                    content: message,
+                    flags: MessageFlags.EPHEMERAL
+                });
+            } else {
+                await interaction.createMessage({
+                    content: message,
+                    flags: MessageFlags.EPHEMERAL
+                });
+            }
+        }
     }
 });

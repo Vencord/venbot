@@ -9,9 +9,9 @@ defineCommand({
     description: "you wouldn't generate a cozy blobcat",
     usage: "[color]",
     async execute({ reply }, color) {
-        if (!color)
+        if (!color) {
             color = randomHexColor();
-        else {
+        } else {
             const parsed = Number(color.replace(/^#/, "0x"));
             if (parsed)
                 color = toHexColorString(parsed);

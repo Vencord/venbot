@@ -3,7 +3,7 @@ import { ComponentTypes, TextDisplayComponent } from "oceanic.js";
 import { childrenToString } from "./utils";
 
 export interface TextDisplayProps {
-    children: string;
+    children: any;
     id?: number;
 }
 
