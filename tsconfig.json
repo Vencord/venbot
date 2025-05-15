@@ -11,9 +11,13 @@
     "baseUrl": ".",
     "paths": {
         "~/*": ["src/*"],
+        "~/components": ["components-jsx/index.ts"],
     },
     "skipLibCheck": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "jsx": "preserve",
+    "allowJs": true,
+    "outDir": "whofuckingcaresdude"
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "components-jsx/**/*", "eslint.config.mjs"]
 }

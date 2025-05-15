@@ -33,7 +33,7 @@ async function readDirRecursive(dir, base = "") {
 /**
  * @type {(files: string[], baseDir?: string) => string}
  */
-const makeImportAllCode = (files, baseDir = "") => files.map(f => `require("./${baseDir}${f.replace(".ts", "")}")`).join("\n");
+const makeImportAllCode = (files, baseDir = "") => files.map(f => `require("./${baseDir}${f.replace(/\.[cm]?[tj]sx?$/, "")}")`).join("\n");
 
 /**
  * @type {(dir: string, baseDir?: string) => Promise<string>}
@@ -87,5 +87,9 @@ await esbuild.build({
     target: "esnext",
     platform: "node",
     sourcemap: "linked",
-    logLevel: "info"
+    logLevel: "info",
+    jsx: "transform",
+    inject: ["components-jsx/runtime.ts"],
+    jsxFactory: "createElement",
+    jsxFragment: "Fragment",
 });
