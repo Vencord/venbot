@@ -29,6 +29,7 @@ const Name = PROD ? "badge" : "devbadge";
 const NameAdd = Name + "-add";
 const NameEdit = Name + "-edit";
 const NameRemove = Name + "-remove";
+const NameRemoveAll = Name + "-remove-all";
 const NameMove = Name + "-move";
 
 const description = "kiss you discord";
@@ -107,6 +108,25 @@ handleInteraction({
 
         const user = data.options.getUser("user", true);
         const existingBadgeIndex = data.options.getInteger("badge");
+
+        if (data.name === NameRemoveAll) {
+            if (!BadgeData[user.id]?.length)
+                return i.createMessage({
+                    content: "No badges found",
+                    flags: MessageFlags.EPHEMERAL
+                });
+
+            rmSync(badgesForUser(user.id), { recursive: true, force: true });
+
+            delete BadgeData[user.id];
+
+            saveBadges();
+
+            return i.createMessage({
+                content: "Done!",
+                flags: MessageFlags.EPHEMERAL
+            });
+        }
 
         if (data.name === NameRemove) {
             const existingBadge = BadgeData[user.id][existingBadgeIndex!];
@@ -275,6 +295,13 @@ Vaius.once("ready", () => {
             RequiredUser,
             ExistingBadge("badge")
         ]
+    });
+
+    registerCommand({
+        type: ApplicationCommandTypes.CHAT_INPUT,
+        name: NameRemoveAll,
+        description,
+        options: [RequiredUser]
     });
 
     registerCommand({
