@@ -1,11 +1,11 @@
 import { ComponentTypes, ThumbnailComponent } from "oceanic.js";
 
-export type ThumbnailProps = Omit<ThumbnailComponent, "type" | "media"> & { children: ThumbnailComponent["media"]; };
+export type ThumbnailProps = Omit<ThumbnailComponent, "type" | "media"> & { url: string; };
 
-export function Thumbnail({ children, ...props }: ThumbnailProps): ThumbnailComponent {
+export function Thumbnail({ url, ...props }: ThumbnailProps): ThumbnailComponent {
     return {
         type: ComponentTypes.THUMBNAIL,
-        media: children,
+        media: { url },
         ...props
     };
 }

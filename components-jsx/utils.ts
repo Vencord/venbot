@@ -1,13 +1,13 @@
 const isFalseOrNullish = (value: any) => value === false || value == null;
 const isNotFalseOrNullish = (value: any) => !isFalseOrNullish(value);
 
-export function filterChildren(children: any[]) {
-    return children.filter(isNotFalseOrNullish);
+export function transformChildrenArray(children: any[]) {
+    return children.flat(Infinity).filter(isNotFalseOrNullish);
 }
 
 export function childrenToString(name: string, children: any) {
     if (Array.isArray(children)) {
-        return filterChildren(children).join("");
+        return transformChildrenArray(children).join("");
     }
     if (typeof children === "string") {
         return children;
@@ -20,7 +20,7 @@ export function childrenToString(name: string, children: any) {
 
 export function childrenToArray(children: any) {
     if (Array.isArray(children)) {
-        return filterChildren(children);
+        return transformChildrenArray(children);
     }
     if (isFalseOrNullish(children)) {
         return [];
