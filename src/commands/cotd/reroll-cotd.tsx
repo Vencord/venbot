@@ -12,7 +12,9 @@ async function reroll(hex?: string, interactionUser?: User): Promise<CreateMessa
     const image = await drawBlobCatCozy(color);
 
     return (
-        <ComponentMessage files={[{
+        // Passing empty attachments is a workaround for https://github.com/discord/discord-api-docs/issues/7529
+        // FIXME: remove this when Discord fixes the issue
+        <ComponentMessage attachments={[]} files={[{
             name: "blobcatcozy.png",
             contents: image
         }]}>
