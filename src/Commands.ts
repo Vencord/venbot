@@ -57,7 +57,7 @@ export class CommandContext<GuildOnly extends boolean = false> {
             return this._createMessage(opts);
 
         try {
-            // oceanic's editMessage function mutates your input options, so freeze it to prevent that
+            // oceanic's editMessage function mutates your input options, so clone it to prevent that from affecting the original options
             // FIXME: remove this spread when oceanic fixes this awful design
 
             return await msg.client.rest.channels.editMessage(msg.channelID, responseId, { ...opts });
@@ -117,7 +117,7 @@ function addCommand(name: string, cmd: FullCommand) {
     Commands[name] = cmd;
 }
 
-export function defineCommand<C extends Command<true>>(c: C & { guildOnly: true }): void;
+export function defineCommand<C extends Command<true>>(c: C & { guildOnly: true; }): void;
 export function defineCommand<C extends Command<false>>(c: C): void;
 export function defineCommand<C extends Command<boolean>>(c: C): void {
     const cmd = c as any as FullCommand;
