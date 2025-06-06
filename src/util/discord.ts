@@ -35,8 +35,10 @@ export function getHighestRole({ guild, roles }: Member, filter?: (r: Role) => b
     return resolvedRoles.reduce((a, b) => a.position > b.position ? a : b);
 }
 
+export const getMainGuild = () => Vaius.guilds.get(GUILD_ID);
+
 export async function getAsMemberInMainGuild(userId: string) {
-    const guild = Vaius.guilds.get(GUILD_ID);
+    const guild = getMainGuild();
     if (!guild) return null;
 
     return guild.members.get(userId) ?? guild.getMember(userId).catch(() => null);
