@@ -8,9 +8,17 @@ import { silently } from "~/util/functions";
 import { reply } from "./discord";
 import { Promiseable } from "./types";
 
-const paginators = new Map<string, Paginator<any>>();
+export interface BasePaginator {
+    userId: string;
+    totalPages: number;
+    navigateTo(page: number): Promise<void>;
+    nextPage(): Promise<void>;
+    previousPage(): Promise<void>;
+}
 
-export class Paginator<T> {
+export const paginators = new Map<string, BasePaginator>();
+
+export class Paginator<T> implements BasePaginator {
     private _timeout: NodeJS.Timeout | undefined = undefined;
 
     public readonly id = nanoid();

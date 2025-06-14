@@ -1,9 +1,11 @@
 import { EmbedOptions, User } from "oceanic.js";
+import { TextDisplay } from "~/components";
 
 import { defineCommand } from "~/Commands";
 import { SUPPORT_ALLOWED_CHANNELS, VENCORD_SITE } from "~/constants";
 import { makeCachedJsonFetch } from "~/util/fetch";
 import { run, silently } from "~/util/functions";
+import { PaginatorCv2 } from "~/util/PaginatorCv2";
 import { toInlineCode } from "~/util/text";
 
 interface Faq {
@@ -34,7 +36,7 @@ defineCommand({
     aliases: ["f"],
     description: "Get an answer from the [FAQ](<https://vencord.dev/faq>)",
     usage: "[tag | query]",
-    async execute({ msg, createMessage, reply }, query) {
+    async execute({ msg, createMessage }, query) {
         if (!msg.inCachedGuildChannel()) return;
         if (!SUPPORT_ALLOWED_CHANNELS.includes(msg.channel.id)) return;
 
@@ -64,12 +66,25 @@ defineCommand({
             });
         }
 
-        return reply(
-            faq
-                .map(({ question, tags }, i) =>
-                    `**${i + 1}**. ${question} (${tags.map(toInlineCode).join(", ")})`
-                )
-                .join("\n")
+        const paginator = new PaginatorCv2<Faq>(
+            "FAQ Tags",
+            faq,
+            1,
+            async ([data], page) => {
+                return (
+                    <TextDisplay>
+                        {data.answer}
+                        <br />
+                        -# Tags: {data.tags.map(toInlineCode).join(", ")}
+                    </TextDisplay>
+                );
+            }
         );
+        paginator.getTitle = page => faq[page].question;
+        paginator.renderTableOfContents = async pageCount => {
+            return faq.map((faq, i) => `${i + 1}. ${faq.question}`).join("\n");
+        };
+
+        await paginator.create(msg);
     },
 });
