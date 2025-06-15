@@ -69,24 +69,40 @@ export class PaginatorCv2<T> implements BasePaginator {
         clearTimeout(this._timeout);
     }
 
-    async navigateTo(page: number) {
-        if (this.renderTableOfContents)
-            page++;
-
+    async _navigateTo(page: number) {
         await this.message!.edit(await this.buildMessageData(page));
         this.startTimeout();
         this.currentPage = page;
     }
 
+    async navigateTo(page: number) {
+        if (this.renderTableOfContents)
+            page++;
+
+        return this._navigateTo(page);
+    }
+
     async nextPage() {
         if (!this.isLastPage) {
-            await this.navigateTo(this.currentPage + 1);
+            await this._navigateTo(this.currentPage + 1);
         }
     }
 
     async previousPage() {
         if (!this.isFirstPage) {
-            await this.navigateTo(this.currentPage - 1);
+            await this._navigateTo(this.currentPage - 1);
+        }
+    }
+
+    async firstPage() {
+        if (!this.isFirstPage) {
+            await this._navigateTo(0);
+        }
+    }
+
+    async lastPage() {
+        if (!this.isLastPage) {
+            await this._navigateTo(this.totalPagesWithTableOfContents - 1);
         }
     }
 

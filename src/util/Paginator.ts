@@ -12,8 +12,10 @@ export interface BasePaginator {
     userId: string;
     totalPages: number;
     navigateTo(page: number): Promise<void>;
+    firstPage(): Promise<void>;
     nextPage(): Promise<void>;
     previousPage(): Promise<void>;
+    lastPage(): Promise<void>;
 }
 
 export const paginators = new Map<string, BasePaginator>();
@@ -88,6 +90,18 @@ export class Paginator<T> implements BasePaginator {
     async previousPage() {
         if (!this.isFirstPage) {
             await this.navigateTo(this.currentPage - 1);
+        }
+    }
+
+    async firstPage() {
+        if (!this.isFirstPage) {
+            await this.navigateTo(0);
+        }
+    }
+
+    async lastPage() {
+        if (!this.isLastPage) {
+            await this.navigateTo(this.totalPages - 1);
         }
     }
 
@@ -196,7 +210,7 @@ handleInteraction({
 
         switch (action) {
             case "first":
-                await paginator.navigateTo(0);
+                await paginator.firstPage();
                 break;
             case "prev":
                 await paginator.previousPage();
@@ -205,7 +219,7 @@ handleInteraction({
                 await paginator.nextPage();
                 break;
             case "last":
-                await paginator.navigateTo(paginator.totalPages - 1);
+                await paginator.lastPage();
                 break;
             case "go-to":
                 await interaction.createModal({
