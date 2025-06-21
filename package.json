@@ -4,7 +4,7 @@
     "description": "Discord Bot for the Vencord server",
     "main": "dist/index.js",
     "scripts": {
-        "start": "pnpm sql:up & pnpm build && node . VENBOT",
+        "start": "pnpm sql:up & pnpm build && node --enable-source-maps . VENBOT",
         "build": "node build.mjs",
         "test": "pnpm lint && pnpm testTypes",
         "testTypes": "tsc --noEmit",
@@ -31,7 +31,6 @@
         "oceanic.js": "1.12.0",
         "pako": "^2.1.0",
         "parse-duration": "^2.1.4",
-        "source-map-support": "^0.5.21",
         "valibot": "^1.1.0",
         "ws": "^8.18.2"
     },

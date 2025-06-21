@@ -1,6 +1,7 @@
-import "source-map-support/register";
 import "./env";
+
 import "./Commands";
+
 import "__modules__";
 
 import {
