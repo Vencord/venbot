@@ -60,7 +60,7 @@ async function banExecutor({ msg, reply }: CommandContext<true>, args: string[],
             bannedUsers.push(`**<@${id}>**`);
 
             if (isSoft)
-                await msg.guild.removeBan(id)
+                await msg.guild.removeBan(id, "soft-ban")
                     .catch(e => fails.push(`Failed to unban **<@${id}>**: \`${String(e)}\``));
         } catch (e) {
             fails.push(`Failed to ${banName} **<@${id}>**: \`${String(e)}\``);

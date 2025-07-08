@@ -251,7 +251,7 @@ export function initModListeners() {
         if (data.action.type !== AutoModerationActionTypes.SEND_ALERT_MESSAGE) return;
 
         const includesPing = ["@everyone", "@here"].some(s => data.content.includes(s));
-        const includesInvite = ["discord.gg/", "discord.com/invite"].some(s => data.content.includes(s));
+        const includesInvite = ["discord.gg/", "discord.com/invite", "discordapp.com/invite"].some(s => data.content.includes(s));
 
         const isSteamScam = (["[steamcommunity.com", "$ gift"].some(s => data.content.includes(s)) || channel?.id === GERMAN_CHANNEL_ID) &&
             ["https://u.to", "https://sc.link", "https://e.vg", "https://is.gd"].some(s => data.content.includes(s));
@@ -270,7 +270,9 @@ export function initModListeners() {
                 reason: `scams (hacked account): ${data.content}`,
                 deleteMessageDays: 1
             });
-            logModerationAction(`Banned <@${user.id}> for posting a scam message.`);
+            await Vaius.rest.guilds.removeBan(guild.id, user.id, "soft-ban");
+
+            logModerationAction(`Soft-banned <@${user.id}> for posting a scam message.`);
             return;
         }
 
@@ -279,8 +281,9 @@ export function initModListeners() {
                 reason: "tried to ping everyone with an invite (spam bot)",
                 deleteMessageDays: 1
             });
+            await Vaius.rest.guilds.removeBan(guild.id, user.id, "soft-ban");
 
-            logModerationAction(`Banned <@${user.id}> for trying to ping everyone with an invite.`);
+            logModerationAction(`Soft-banned <@${user.id}> for trying to ping everyone with an invite.`);
             return;
         }
     });
