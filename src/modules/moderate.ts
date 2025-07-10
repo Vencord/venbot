@@ -263,7 +263,9 @@ export function initModListeners() {
             ["roblox", "free"].some(s => data.content.includes(s))
         );
 
-        const isScam = isSteamScam || isMediaFireScam || isRobloxScam;
+        const isMrBeastScam = data.content.match(/\/[1-4]\.(jpe?g|gif|png|webp)/g)?.length! >= 2;
+
+        const isScam = isSteamScam || isMediaFireScam || isRobloxScam || isMrBeastScam;
 
         if (isScam) {
             await Vaius.rest.guilds.createBan(guild.id, user.id, {
