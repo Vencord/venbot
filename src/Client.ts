@@ -1,7 +1,7 @@
 import { AnyTextableChannel, Client, Message } from "oceanic.js";
 
 import { CommandContext, Commands } from "./Commands";
-import { Emoji, SUPPORT_ALLOWED_CHANNELS } from "./constants";
+import { Emoji, Millis, SUPPORT_ALLOWED_CHANNELS } from "./constants";
 import { BotState } from "./db/botState";
 import { DISCORD_TOKEN, MOD_PERMS_ROLE_ID, PREFIXES } from "./env";
 import { lobotomiseMaybe, moderateMessage } from "./modules/moderate";
@@ -44,6 +44,11 @@ const GEN_AI_ID = "974297735559806986";
 Vaius.on("messageCreate", msg => handleMessage(msg, false));
 Vaius.on("messageUpdate", (msg, oldMsg) => {
     if (oldMsg && msg.content === oldMsg.content) return;
+    if (!msg.editedTimestamp) return;
+
+    // Ignore old updates - If a very old message is loaded by a user, discord may rebuild its embeds
+    // and dispatch a message update
+    if (msg.editedTimestamp.getTime() < Date.now() - 5 * Millis.MINUTE) return;
 
     handleMessage(msg, true);
 });
