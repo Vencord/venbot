@@ -1,5 +1,5 @@
 import { createHash } from "crypto";
-import { mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "fs";
+import { cpSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "fs";
 import { ApplicationCommandOptions, ApplicationCommandOptionTypes, ApplicationCommandTypes, ApplicationIntegrationTypes, CreateChatInputApplicationCommandOptions, InteractionContextTypes, InteractionTypes, MessageFlags } from "oceanic.js";
 
 import { ZWSP } from "~/constants";
@@ -31,6 +31,7 @@ const NameEdit = Name + "-edit";
 const NameRemove = Name + "-remove";
 const NameRemoveAll = Name + "-remove-all";
 const NameMove = Name + "-move";
+const NameCopy = Name + "-copy";
 
 const description = "kiss you discord";
 
@@ -82,6 +83,29 @@ handleInteraction({
 
         const { data } = i;
         const guild = i.guild ?? i.client.guilds.get(GUILD_ID);
+
+        if (data.name === NameCopy) {
+            const oldUser = data.options.getUser("old-user", true);
+            const newUser = data.options.getUser("new-user", true);
+
+            if (!BadgeData[oldUser.id]?.length)
+                return i.createMessage({
+                    content: "Badge not found",
+                    flags: MessageFlags.EPHEMERAL
+                });
+
+            cpSync(badgesForUser(oldUser.id), badgesForUser(newUser.id));
+            BadgeData[newUser.id] = BadgeData[oldUser.id].map(b => ({
+                ...b,
+                badge: b.badge.replace(oldUser.id, newUser.id)
+            }));
+            saveBadges();
+
+            return i.createMessage({
+                content: "Done!",
+                flags: MessageFlags.EPHEMERAL
+            });
+        }
 
         if (data.name === NameMove) {
             const oldUser = data.options.getUser("old-user", true);
@@ -260,6 +284,18 @@ Vaius.once("ready", () => {
         type: ApplicationCommandOptionTypes.STRING,
         description
     };
+    const OldUser: ApplicationCommandOptions = {
+        name: "old-user",
+        type: ApplicationCommandOptionTypes.USER,
+        description,
+        required: true
+    };
+    const NewUser: ApplicationCommandOptions = {
+        name: "new-user",
+        type: ApplicationCommandOptionTypes.USER,
+        description,
+        required: true
+    };
 
     registerCommand({
         type: ApplicationCommandTypes.CHAT_INPUT,
@@ -309,18 +345,18 @@ Vaius.once("ready", () => {
         name: NameMove,
         description,
         options: [
-            {
-                name: "old-user",
-                type: ApplicationCommandOptionTypes.USER,
-                description,
-                required: true
-            },
-            {
-                name: "new-user",
-                type: ApplicationCommandOptionTypes.USER,
-                description,
-                required: true
-            },
+            OldUser,
+            NewUser
+        ]
+    });
+
+    registerCommand({
+        type: ApplicationCommandTypes.CHAT_INPUT,
+        name: NameCopy,
+        description,
+        options: [
+            OldUser,
+            NewUser
         ]
     });
 });
