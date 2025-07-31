@@ -94,7 +94,8 @@ handleInteraction({
                     flags: MessageFlags.EPHEMERAL
                 });
 
-            cpSync(badgesForUser(oldUser.id), badgesForUser(newUser.id));
+            cpSync(badgesForUser(oldUser.id), badgesForUser(newUser.id), { recursive: true });
+
             BadgeData[newUser.id] = BadgeData[oldUser.id].map(b => ({
                 ...b,
                 badge: b.badge.replace(oldUser.id, newUser.id)
