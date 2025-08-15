@@ -35,6 +35,7 @@ const ManageableRoles = [
     "1061276426478813245", // no support
     "1205614728148422716", // no programming
     "1241355250129178775", // angelsachse (no german)
+    "1136184488498561035", // snippet dev
 ];
 
 function parseArgs(msg: Message<AnyTextableGuildChannel>, args: string[]) {
