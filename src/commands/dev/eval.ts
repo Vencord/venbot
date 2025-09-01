@@ -45,6 +45,8 @@ defineCommand({
             var result = e;
         }
 
+        if (typeof result === "function") result = result.toString();
+
         let res = inspect(result, { getters: true });
         res = res.slice(0, 2000 - 10 - countOccurrences(res, "`"));
 

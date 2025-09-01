@@ -16,6 +16,11 @@ export function stripIndent(strings: TemplateStringsArray, ...values: any[]) {
     return string.replace(new RegExp(`^[ \\t]{${minIndent}}`, "gm"), "").trim();
 }
 
+export function indent(s: string, indent: string | number = 4) {
+    const indentStr = typeof indent === "number" ? " ".repeat(indent) : indent;
+    return s.split("\n").map(l => indentStr + l).join("\n");
+}
+
 export function toTitle(s: string, separator: string | RegExp = " ") {
     return s
         .split(separator)

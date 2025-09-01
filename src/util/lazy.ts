@@ -1,3 +1,5 @@
+import { indent, stripIndent } from "./text";
+
 export function makeLazy<T>(factory: () => T): () => T {
     let value: T | null = null;
     let initialized = false;
@@ -16,7 +18,7 @@ export function ttlLazy<Args extends unknown[], Res>(factory: (...args: Args) =>
     let cachedValue: Res | null = null;
     let cacheTimestamp = 0;
 
-    return (...args: Args) => {
+    const wrapper = (...args: Args) => {
         if (Date.now() - cacheTimestamp > ttl) {
             cachedValue = factory(...args);
             cacheTimestamp = Date.now();
@@ -24,4 +26,27 @@ export function ttlLazy<Args extends unknown[], Res>(factory: (...args: Args) =>
 
         return cachedValue!;
     };
+
+    return Object.assign(
+        wrapper,
+        {
+            wrappedFunction: factory,
+            toString() {
+                const format = stripIndent`
+                    ttlLazy(
+                        %s,
+                        ${ttl}
+                    )
+                `;
+
+                const twelveSpaces = " ".repeat(12);
+                // hack: some functions might have indentation, but the first line won't.
+                // adding 12 spaces at the start and removing it again ensures it will strip indentation
+                // correctly even if the first line is not indented
+                const trimmedFactory = stripIndent`${twelveSpaces}${factory}`.replace(new RegExp(`^${twelveSpaces}`), "");
+
+                return format.replace("%s", indent(trimmedFactory, 4).trimStart());
+            }
+        }
+    );
 }
