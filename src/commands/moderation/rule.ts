@@ -4,14 +4,14 @@ import { Vaius } from "~/Client";
 import { defineCommand } from "~/Commands";
 import { Emoji, Millis } from "~/constants";
 import { RULES_CHANNEL_ID } from "~/env";
-import { silently } from "~/util/functions";
+import { run, silently } from "~/util/functions";
 import { ttlLazy } from "~/util/lazy";
 
 const fetchRules = ttlLazy(async () => {
     const [rulesMessage] = await Vaius.rest.channels.getMessages(RULES_CHANNEL_ID, { limit: 1 });
 
     return rulesMessage.content
-        .matchAll(/\*\*((\d+)\\\. .+?)\*\*(.+?)(?=\*\*|$)/gs)
+        .matchAll(/\*\*((\d+)\\\. .+?)\*\*(.+?)(?=\*\*|$|\n# )/gs)
         .map(([_, title, number, description]) => ({
             number: Number(number),
             title,
@@ -26,12 +26,20 @@ defineCommand({
     description: "Query a rule and send it",
     usage: "<ruleNumber>",
     guildOnly: true,
-    async execute({ msg, react, reply }, ruleNumber) {
-        if (isNaN(Number(ruleNumber)))
-            return; // likely false positive like "vr chat" (funny v prefix + alias moment)
-
+    async execute({ msg, react, reply }, search, ...rest) {
         const rules = await fetchRules();
-        const rule = rules[Number(ruleNumber) - 1];
+
+        const rule = run(() => {
+            const maybeRuleNumber = Number(search);
+            if (!isNaN(maybeRuleNumber) && (rules[maybeRuleNumber - 1] || !rest.length)) {
+                return rules[maybeRuleNumber - 1];
+            }
+
+            const fullSearch = [search, ...rest].join(" ").toLowerCase();
+
+            return rules.find(r => r.title.toLowerCase().includes(fullSearch)) ??
+                rules.find(r => r.description.toLowerCase().includes(fullSearch));
+        });
 
         if (!rule)
             return react(Emoji.QuestionMark);
