@@ -11,9 +11,13 @@ const fetchRules = ttlLazy(async () => {
     const [rulesMessage] = await Vaius.rest.channels.getMessages(RULES_CHANNEL_ID, { limit: 1 });
 
     return rulesMessage.content
-        .slice(rulesMessage.content.indexOf("1."))
-        .split(/\d+\./g)
-        .map(r => r.trim().replace(/^\s+/gm, ""));
+        .matchAll(/\*\*((\d+)\\\. .+?)\*\*(.+?)(?=\*\*|$)/gs)
+        .map(([_, title, number, description]) => ({
+            number: Number(number),
+            title,
+            description: description.trim()
+        }))
+        .toArray();
 }, 5 * Millis.MINUTE);
 
 defineCommand({
@@ -27,15 +31,14 @@ defineCommand({
             return; // likely false positive like "vr chat" (funny v prefix + alias moment)
 
         const rules = await fetchRules();
-
-        const rule = rules[Number(ruleNumber)];
+        const rule = rules[Number(ruleNumber) - 1];
 
         if (!rule)
             return react(Emoji.QuestionMark);
 
         const embed: Embed = {
-            title: `Rule ${ruleNumber}`,
-            description: rule,
+            title: rule.title,
+            description: rule.description,
             color: 0xdd7878,
         };
 
