@@ -10,7 +10,7 @@ defineCommand({
     aliases: ["e", "$"],
     rawContent: true,
     ownerOnly: true,
-    async execute({ msg, reply, commandName }, code) {
+    async execute(ctx, code) {
         const console: any = {
             _lines: [] as string[],
             _log(...things: string[]) {
@@ -24,6 +24,7 @@ defineCommand({
         };
         console.log = console.error = console.warn = console.info = console._log.bind(console);
 
+        const { msg, reply, commandName, createMessage, prefix, react } = ctx;
         const { client, channel, author, content, guild, member } = msg;
         const fs = require("fs");
         const http = require("http");
