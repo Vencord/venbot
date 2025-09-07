@@ -1,5 +1,5 @@
 import { EmbedOptions, User } from "oceanic.js";
-import { TextDisplay } from "~/components";
+import { TextDisplay } from "~components";
 
 import { defineCommand } from "~/Commands";
 import { SUPPORT_ALLOWED_CHANNELS, VENCORD_SITE } from "~/constants";

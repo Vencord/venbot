@@ -1,5 +1,5 @@
 import leven from "leven";
-import { ActionRow, Button, ButtonStyles, ComponentMessage, Container, MediaGallery, MediaGalleryItem, Separator, TextDisplay } from "~/components";
+import { ActionRow, Button, ButtonStyles, ComponentMessage, Container, MediaGallery, MediaGalleryItem, Separator, TextDisplay } from "~components";
 
 import { SeparatorSpacingSize } from "oceanic.js";
 import { CommandContext, defineCommand } from "~/Commands";

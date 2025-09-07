@@ -4,7 +4,7 @@ import { ButtonStyles, CreateMessageOptions, Message, MessageComponent, MessageF
 import { Emoji, Millis } from "~/constants";
 import { silently } from "~/util/functions";
 
-import { ActionRow, Button, Container, TextDisplay } from "~/components";
+import { ActionRow, Button, Container, TextDisplay } from "~components";
 import { reply } from "./discord";
 import { BasePaginator, paginators } from "./Paginator";
 import { Promiseable } from "./types";

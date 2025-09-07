@@ -1,11 +1,11 @@
 import { ButtonStyles, CreateMessageOptions, EditMessageOptions, User } from "oceanic.js";
 
 import { defineCommand } from "~/Commands";
-import { ActionRow, Button, ComponentMessage, Container, MediaGallery, MediaGalleryItem, TextDisplay } from "~/components";
 import { Emoji } from "~/constants";
 import { drawBlobCatCozy, rerollCotd } from "~/modules/regularCotd";
 import { handleComponentInteraction } from "~/SlashCommands";
 import { toHexColorString } from "~/util/colors";
+import { ActionRow, Button, ComponentMessage, Container, MediaGallery, MediaGalleryItem, TextDisplay } from "~components";
 
 async function reroll(hex?: string, interactionUser?: User): Promise<CreateMessageOptions & EditMessageOptions> {
     const color = await rerollCotd(hex);

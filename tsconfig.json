@@ -1,23 +1,36 @@
 {
-  "compilerOptions": {
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "lib": ["esnext", "esnext.array", "esnext.asynciterable", "esnext.symbol"],
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "strict": true,
-    "noImplicitAny": false,
-    "target": "ESNEXT",
-    "baseUrl": ".",
-    "paths": {
-        "~/*": ["src/*"],
-        "~/components": ["components-jsx/index.ts"],
+    "compilerOptions": {
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true,
+        "lib": [
+            "esnext",
+            "esnext.array",
+            "esnext.asynciterable",
+            "esnext.symbol"
+        ],
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "strict": true,
+        "noImplicitAny": false,
+        "target": "ESNEXT",
+        "baseUrl": ".",
+        "paths": {
+            "~components": [
+                "components-jsx/index.ts"
+            ],
+            "~/*": [
+                "src/*"
+            ],
+        },
+        "skipLibCheck": true,
+        "resolveJsonModule": true,
+        "jsx": "preserve",
+        "allowJs": true,
+        "outDir": "whofuckingcaresdude"
     },
-    "skipLibCheck": true,
-    "resolveJsonModule": true,
-    "jsx": "preserve",
-    "allowJs": true,
-    "outDir": "whofuckingcaresdude"
-  },
-  "include": ["src/**/*", "components-jsx/**/*", "eslint.config.mjs"]
+    "include": [
+        "src/**/*",
+        "components-jsx/**/*",
+        "eslint.config.mjs"
+    ]
 }

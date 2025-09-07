@@ -2,7 +2,7 @@
 import { ButtonStyles, SeparatorSpacingSize } from "oceanic.js";
 
 import { defineCommand } from "~/Commands";
-import { ActionRow, Button, ComponentMessage, Container, Separator, TextDisplay } from "~/components";
+import { ActionRow, Button, ComponentMessage, Container, Separator, TextDisplay } from "~components";
 
 defineCommand({
     name: "testm",
