@@ -1,16 +1,16 @@
 import { AnyTextableChannel, Client, Message } from "oceanic.js";
 
 import { CommandContext, Commands } from "./Commands";
+import Config from "./config";
 import { Emoji, Millis, SUPPORT_ALLOWED_CHANNELS } from "./constants";
 import { BotState } from "./db/botState";
-import { DISCORD_TOKEN, MOD_PERMS_ROLE_ID, PREFIXES } from "./env";
 import { emojiCacheReady, ensureEmojis, getEmojiForReaction } from "./modules/emojiManager";
 import { lobotomiseMaybe, moderateMessage } from "./modules/moderate";
 import { reply } from "./util/discord";
 import { silently } from "./util/functions";
 
 export const Vaius = new Client({
-    auth: "Bot " + DISCORD_TOKEN,
+    auth: "Bot " + Config.token,
     gateway: { intents: ["ALL"] },
     allowedMentions: {
         everyone: false,
@@ -65,7 +65,7 @@ async function handleMessage(msg: Message, isEdit: boolean) {
 
     const lowerContent = msg.content.toLowerCase();
 
-    const prefix = PREFIXES.find(p => lowerContent.startsWith(p));
+    const prefix = Config.prefixes.find(p => lowerContent.startsWith(p));
     if (!prefix) return;
 
     const content = msg.content.slice(prefix.length).trim();
@@ -92,7 +92,7 @@ async function handleMessage(msg: Message, isEdit: boolean) {
     if (cmd.modOnly) {
         if (!msg.inCachedGuildChannel()) return;
 
-        if (!msg.member.roles.includes(MOD_PERMS_ROLE_ID))
+        if (!msg.member.roles.includes(Config.roles.mod))
             return silently(msg.createReaction(Emoji.Anger));
     }
 

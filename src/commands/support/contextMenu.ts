@@ -1,9 +1,9 @@
 import { AnyTextableChannel, ApplicationCommandTypes, ComponentInteraction, ComponentTypes, InteractionTypes, MessageFlags, SelectMenuTypes } from "oceanic.js";
 
 import { Vaius } from "~/Client";
-import { GUILD_ID } from "~/env";
 import { handleCommandInteraction, handleInteraction } from "~/SlashCommands";
 
+import Config from "~/config";
 import { buildFaqEmbed, fetchFaq } from "./faq";
 import { buildIssueEmbed, findThreads } from "./knownIssues";
 import { SupportInstructions, SupportTagList } from "./support";
@@ -15,17 +15,17 @@ const enum Commands {
 }
 
 Vaius.once("ready", () => {
-    Vaius.application.createGuildCommand(GUILD_ID, {
+    Vaius.application.createGuildCommand(Config.homeGuildId, {
         type: ApplicationCommandTypes.MESSAGE,
         name: Commands.Support
     });
 
-    Vaius.application.createGuildCommand(GUILD_ID, {
+    Vaius.application.createGuildCommand(Config.homeGuildId, {
         type: ApplicationCommandTypes.MESSAGE,
         name: Commands.Faq
     });
 
-    Vaius.application.createGuildCommand(GUILD_ID, {
+    Vaius.application.createGuildCommand(Config.homeGuildId, {
         type: ApplicationCommandTypes.MESSAGE,
         name: Commands.Issue
     });

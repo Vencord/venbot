@@ -1,11 +1,11 @@
 import { ActivityTypes, AnyTextableGuildChannel, ApplicationCommandTypes, ButtonStyles, ChannelTypes, CommandInteraction, ComponentInteraction, ComponentTypes, InteractionTypes, MessageActionRow, MessageFlags, SelectMenuTypes, TextButton, TextChannel, TextInputStyles } from "oceanic.js";
 
 import { db } from "~/db";
-import { GUILD_ID, MOD_MAIL_BAN_ROLE_ID, MOD_MAIL_CHANNEL_ID, MOD_MAIL_LOG_CHANNEL_ID, MOD_PERMS_ROLE_ID, MOD_ROLE_ID, SUPPORT_CHANNEL_ID } from "~/env";
 import { handleCommandInteraction, handleComponentInteraction, handleInteraction } from "~/SlashCommands";
 import { sendDm } from "~/util/discord";
 import { stripIndent } from "~/util/text";
 
+import Config from "~/config";
 import { Vaius } from "../Client";
 import { defineCommand } from "../Commands";
 import { Emoji, PROD } from "../constants";
@@ -40,7 +40,7 @@ defineCommand({
     description: "Post the modmail message",
     usage: null,
     execute() {
-        return Vaius.rest.channels.createMessage(MOD_MAIL_CHANNEL_ID, {
+        return Vaius.rest.channels.createMessage(Config.modmail.channelId, {
             embeds: [{
                 title: "Get in touch",
                 description: "Got a question or problem regarding this server? Get in touch with our moderators by opening a ticket!\n\n# WARNING\nThis form is NOT FOR VENCORD SUPPORT. To get Vencord support, use <#1026515880080842772>.",
@@ -62,20 +62,20 @@ defineCommand({
 });
 
 async function log(content: string) {
-    return Vaius.rest.channels.createMessage(MOD_MAIL_LOG_CHANNEL_ID, {
+    return Vaius.rest.channels.createMessage(Config.modmail.channelId, {
         content
     });
 }
 
 function getThreadParent() {
-    const c = Vaius.getChannel(MOD_MAIL_CHANNEL_ID);
+    const c = Vaius.getChannel(Config.modmail.channelId);
     if (!c) throw new Error("Modmail category not found");
 
     return c as TextChannel;
 }
 
 async function createModmailConfirm(interaction: GuildInteraction) {
-    if (interaction.member.roles.includes(MOD_MAIL_BAN_ROLE_ID)) {
+    if (interaction.member.roles.includes(Config.modmail.banRoleId)) {
         return interaction.createMessage({
             content: "You are banned from using modmail.",
             flags: MessageFlags.EPHEMERAL
@@ -159,7 +159,7 @@ handleComponentInteraction({
     customID: Ids.OPEN_CONFIRM,
     guildOnly: true,
     async handle(interaction: ComponentInteraction<SelectMenuTypes, AnyTextableGuildChannel>) {
-        if (interaction.member.roles.includes(MOD_MAIL_BAN_ROLE_ID)) {
+        if (interaction.member.roles.includes(Config.modmail.banRoleId)) {
             return interaction.createMessage({
                 content: "You are banned from using modmail.",
                 flags: MessageFlags.EPHEMERAL
@@ -170,7 +170,7 @@ handleComponentInteraction({
 
         if (reason.startsWith(Ids.REASON_MONKEY)) {
             return await interaction.createMessage({
-                content: `This form is NOT FOR VENCORD SUPPORT OR TESTING. To get Vencord support, use <#${SUPPORT_CHANNEL_ID}>`,
+                content: `This form is NOT FOR VENCORD SUPPORT OR TESTING. To get Vencord support, use <#${Config.channels.support}>`,
                 flags: MessageFlags.EPHEMERAL
             });
         }
@@ -294,9 +294,9 @@ handleInteraction({
 
         await msg.edit({
             allowedMentions: {
-                roles: [MOD_ROLE_ID],
+                roles: [Config.modmail.modRoleId],
             },
-            content: msg.content.replace("moderator", `<@&${MOD_ROLE_ID}>`)
+            content: msg.content.replace("moderator", `<@&${Config.modmail.modRoleId}>`)
         });
 
         await interaction.createFollowup({
@@ -319,7 +319,7 @@ handleInteraction({
 
         const isBan = interaction.data.customID.startsWith("modmail:close-ban:");
 
-        const isModAction = interaction.member.roles.includes(MOD_PERMS_ROLE_ID);
+        const isModAction = interaction.member.roles.includes(Config.modmail.modRoleId);
 
         if (isBan && !isModAction) return;
 
@@ -350,12 +350,12 @@ handleInteraction({
         if (!member) return;
 
         if (isBan) {
-            member.addRole(MOD_MAIL_BAN_ROLE_ID);
+            member.addRole(Config.modmail.banRoleId);
             sendDm(member.user, {
                 content: stripIndent`
                     Your modmail ticket has been closed and you have been banned from creating tickets.
 
-                    This is most likely because you didn't follow the modmail rules. See <#${MOD_MAIL_CHANNEL_ID}> for more information.
+                    This is most likely because you didn't follow the modmail rules. See <#${Config.modmail.channelId}> for more information.
                 `
             });
         } else {
@@ -375,7 +375,7 @@ handleInteraction({
     guildOnly: true,
     isMatch: i => i.data.customID.startsWith("modmail:claim-ticket:"),
     async handle(interaction) {
-        const isModAction = interaction.member.roles.includes(MOD_PERMS_ROLE_ID);
+        const isModAction = interaction.member.roles.includes(Config.modmail.modRoleId);
 
         if (!isModAction) return;
 
@@ -412,7 +412,7 @@ Vaius.once("ready", () => {
         }]);
     }
 
-    Vaius.application.createGuildCommand(GUILD_ID, {
+    Vaius.application.createGuildCommand(Config.homeGuildId, {
         type: ApplicationCommandTypes.CHAT_INPUT,
         name: COMMAND_NAME,
         description: "Open a modmail ticket",

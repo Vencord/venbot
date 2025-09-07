@@ -2,7 +2,7 @@ import { readFile } from "fs/promises";
 import { CreateMessageOptions, Message, TextChannel } from "oceanic.js";
 
 import { Vaius } from "~/Client";
-import { ADVENT_OF_CODE_CHANNEL_ID, ADVENT_OF_CODE_COOKIE } from "~/env";
+import Config from "~/config";
 import { formatTable, toCodeblock } from "~/util/text";
 
 interface Leaderboard {
@@ -16,16 +16,14 @@ interface Leaderboard {
     }>;
 }
 
-const LEADERBOARD_URL = "https://adventofcode.com/2024/leaderboard/private/view/1776680";
-
 let lastMessage: Message;
 
 async function fetchLeaderboard() {
     const data = process.env.NODE_ENV === "production"
-        ? await fetch(LEADERBOARD_URL + ".json", {
+        ? await fetch(Config.adventOfCode.leaderboardUrl + ".json", {
             method: "GET",
             headers: new Headers({
-                cookie: ADVENT_OF_CODE_COOKIE!,
+                cookie: Config.adventOfCode.cookie!,
                 "User-Agent": "Venbot Discord Bot (https://github.com/Vencord/venbot) <vendicated+aoc@riseup.net>",
                 "Accept": "application/json"
             })
@@ -71,14 +69,14 @@ async function postMessage() {
             author: {
                 name: "Advent of Code Leaderboard",
                 iconURL: "https://adventofcode.com/favicon.png",
-                url: LEADERBOARD_URL
+                url: Config.adventOfCode.leaderboardUrl
             },
             description: content
         }]
     } satisfies CreateMessageOptions;
 
     if (!lastMessage) {
-        lastMessage = await (Vaius.getChannel(ADVENT_OF_CODE_CHANNEL_ID!) as TextChannel).createMessage(options);
+        lastMessage = await (Vaius.getChannel(Config.adventOfCode.channelId) as TextChannel).createMessage(options);
         return;
     }
 
@@ -86,9 +84,9 @@ async function postMessage() {
         lastMessage = await lastMessage.edit(options);
 }
 
-if (ADVENT_OF_CODE_CHANNEL_ID && ADVENT_OF_CODE_COOKIE) {
+if (Config.adventOfCode.enabled) {
     Vaius.once("ready", async () => {
-        const chan = Vaius.getChannel(ADVENT_OF_CODE_CHANNEL_ID!) as TextChannel;
+        const chan = Vaius.getChannel(Config.adventOfCode.channelId) as TextChannel;
         const messages = await chan.getMessages({ limit: 1 });
         lastMessage = messages[0];
 

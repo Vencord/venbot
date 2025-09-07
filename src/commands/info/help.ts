@@ -1,8 +1,8 @@
 import { EmbedOptions } from "oceanic.js";
 
 import { CommandContext, Commands, defineCommand, FullCommand } from "~/Commands";
+import Config from "~/config";
 import { ZWSP } from "~/constants";
-import { PREFIXES } from "~/env";
 import { getGitRemote } from "~/util/git";
 import { groupBy } from "~/util/groupBy";
 import { Paginator } from "~/util/Paginator";
@@ -35,7 +35,7 @@ const formatCategory = (category: string) => toTitle(category, /[ -]/);
 
 async function renderTableOfContents(pages: string[], { prefix, commandName }: CommandContext): Promise<EmbedOptions> {
     const description = stripIndent`
-        My ${PREFIXES.length === 1 ? "prefix is" : "prefixes are"} ${PREFIXES.map(toInlineCode).join(", ")}.
+        My ${Config.prefixes.length === 1 ? "prefix is" : "prefixes are"} ${Config.prefixes.map(toInlineCode).join(", ")}.
         Use \`${prefix}${commandName} <command>\` for more information on a specific command!
 
         You can find my source code [here](${await getGitRemote()}).

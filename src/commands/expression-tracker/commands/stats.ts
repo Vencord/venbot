@@ -1,13 +1,12 @@
 import { User } from "oceanic.js";
 
-import { Vaius } from "~/Client";
 import { CommandContext, defineCommand } from "~/Commands";
 import { db, ExpressionFormatType, ExpressionType, ExpressionUsageType } from "~/db";
-import { GUILD_ID } from "~/env";
 import { Paginator } from "~/util/Paginator";
 import { resolveUser } from "~/util/resolvers";
 import { toInlineCode, toTitle } from "~/util/text";
 
+import { getHomeGuild } from "~/util/discord";
 import { formatCountAndName } from "./shared";
 
 const ExpressionTypes = [ExpressionType.EMOJI, ExpressionType.STICKER];
@@ -20,7 +19,7 @@ interface Expression {
 }
 
 function renderEmojis(emojis: Expression[]) {
-    const guildEmojis = Vaius.guilds.get(GUILD_ID)!.emojis;
+    const guildEmojis = getHomeGuild()!.emojis;
 
     const data = emojis
         .map(e => {

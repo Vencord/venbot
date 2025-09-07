@@ -3,12 +3,13 @@ import { cpSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } fr
 import { ApplicationCommandOptions, ApplicationCommandOptionTypes, ApplicationCommandTypes, ApplicationIntegrationTypes, CreateChatInputApplicationCommandOptions, InteractionContextTypes, InteractionTypes, MessageFlags } from "oceanic.js";
 
 import { ZWSP } from "~/constants";
-import { GUILD_ID } from "~/env";
 import { handleInteraction } from "~/SlashCommands";
 import { run } from "~/util/functions";
 
+import Config from "~/config";
+import { getHomeGuild } from "~/util/discord";
 import { OwnerId, Vaius } from "../../Client";
-import { DONOR_ROLE_ID, PROD } from "../../constants";
+import { PROD } from "../../constants";
 import { fetchBuffer } from "../../util/fetch";
 
 const BasePath = "/var/www/badges.vencord.dev";
@@ -82,7 +83,7 @@ handleInteraction({
         // }
 
         const { data } = i;
-        const guild = i.guild ?? i.client.guilds.get(GUILD_ID);
+        const guild = i.guild ?? getHomeGuild();
 
         if (data.name === NameCopy) {
             const oldUser = data.options.getUser("old-user", true);
@@ -230,8 +231,8 @@ handleInteraction({
 
         if (guild) {
             const member = await guild.getMember(user.id).catch(() => null);
-            if (member && !member.roles.includes(DONOR_ROLE_ID))
-                await member.addRole(DONOR_ROLE_ID); {
+            if (member && !member.roles.includes(Config.roles.donor))
+                await member.addRole(Config.roles.donor); {
             }
         }
 
@@ -243,7 +244,7 @@ handleInteraction({
 });
 
 function registerCommand(data: CreateChatInputApplicationCommandOptions) {
-    Vaius.application.createGuildCommand(GUILD_ID, {
+    Vaius.application.createGuildCommand(Config.homeGuildId, {
         ...data,
         defaultMemberPermissions: "0",
     });

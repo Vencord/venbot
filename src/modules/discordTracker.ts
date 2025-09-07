@@ -1,9 +1,9 @@
 import { createHmac, randomUUID, timingSafeEqual } from "crypto";
 
 import { Vaius } from "~/Client";
+import Config from "~/config";
 import { Millis } from "~/constants";
 import { BotState } from "~/db/botState";
-import { GITHUB_WORKFLOW_DISPATCH_PAT, HTTP_DOMAIN, REPORTER_WEBHOOK_SECRET } from "~/env";
 import { fastify } from "~/server";
 import { doFetch } from "~/util/fetch";
 import { TTLMap } from "~/util/TTLMap";
@@ -42,11 +42,11 @@ const pendingReports = new TTLMap<string, ReportData>(
 setInterval(checkVersions, 30 * Millis.SECOND);
 checkVersions();
 
-export async function triggerReportWorkflow({ ref, inputs }: { ref: string, inputs: { discord_branch: Branch; webhook_url?: string; } }) {
+export async function triggerReportWorkflow({ ref, inputs }: { ref: string, inputs: { discord_branch: Branch; webhook_url?: string; }; }) {
     return await doFetch("https://api.github.com/repos/Vendicated/Vencord/actions/workflows/reportBrokenPlugins.yml/dispatches", {
         method: "POST",
         headers: {
-            Authorization: `Bearer ${GITHUB_WORKFLOW_DISPATCH_PAT}`,
+            Authorization: `Bearer ${Config.reporter.pat}`,
         },
         body: JSON.stringify({
             ref,
@@ -108,7 +108,7 @@ export async function testDiscordVersion<B extends Branch>(branch: B, hash: Reco
         ref,
         inputs: {
             discord_branch: branch,
-            webhook_url: `${HTTP_DOMAIN}/reporter/webhook?runId=${runId}`
+            webhook_url: `${Config.httpServer.domain}/reporter/webhook?runId=${runId}`
         }
     });
 }
@@ -188,7 +188,7 @@ fastify.register(async fastify => {
         const data = req.body as string;
         const signature = req.headers["x-signature"] as string;
 
-        const mac = createHmac("sha256", REPORTER_WEBHOOK_SECRET)
+        const mac = createHmac("sha256", Config.reporter.webhookSecret)
             .update(data)
             .digest();
         const expected = Buffer.from(signature.replace("sha256=", ""), "hex");

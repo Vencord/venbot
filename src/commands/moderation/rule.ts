@@ -2,13 +2,13 @@ import { Embed } from "oceanic.js";
 
 import { Vaius } from "~/Client";
 import { defineCommand } from "~/Commands";
+import Config from "~/config";
 import { Emoji, Millis } from "~/constants";
-import { RULES_CHANNEL_ID } from "~/env";
 import { run, silently } from "~/util/functions";
 import { ttlLazy } from "~/util/lazy";
 
 const fetchRules = ttlLazy(async () => {
-    const [rulesMessage] = await Vaius.rest.channels.getMessages(RULES_CHANNEL_ID, { limit: 1 });
+    const [rulesMessage] = await Vaius.rest.channels.getMessages(Config.rules.rulesChannelId, { limit: 1 });
 
     return rulesMessage.content
         .matchAll(/\*\*((\d+)\\\. .+?)\*\*(.+?)(?=\*\*|$|\n# )/gs)

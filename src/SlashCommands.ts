@@ -1,7 +1,7 @@
 import { AnyInteractionChannel, AnyInteractionGateway, AnyTextableGuildChannel, AutocompleteInteraction, CommandInteraction, ComponentInteraction, ComponentTypes, InteractionTypes, MessageFlags, ModalSubmitInteraction, SelectMenuTypes } from "oceanic.js";
 
 import { OwnerId, Vaius } from "./Client";
-import { MOD_PERMS_ROLE_ID } from "./env";
+import Config from "./config";
 
 interface BaseInteractionHandler {
     ownerOnly?: boolean;
@@ -86,7 +86,7 @@ Vaius.on("interactionCreate", async interaction => {
     if (handler.modOnly) {
         if (!interaction.inCachedGuildChannel()) return;
 
-        if (!interaction.member.roles.includes(MOD_PERMS_ROLE_ID))
+        if (!interaction.member.roles.includes(Config.roles.mod))
             return;
     }
 

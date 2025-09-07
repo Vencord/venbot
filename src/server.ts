@@ -1,8 +1,8 @@
 import Fastify from "fastify";
 import { createReadStream } from "fs";
 
+import Config from "./config";
 import { PROD } from "./constants";
-import { HTTP_SERVER_LISTEN_PORT } from "./env";
 
 export const fastify = Fastify({
     logger: !PROD && {
@@ -20,7 +20,7 @@ fastify.get("/", (req, res) => {
 
 // defer listen to allow for fastify plugins to be registered before starting the server
 setImmediate(() => {
-    fastify.listen({ port: HTTP_SERVER_LISTEN_PORT }, err => {
+    fastify.listen({ port: Config.httpServer.port }, err => {
         if (err) {
             fastify.log.error(err);
             process.exit(1);

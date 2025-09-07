@@ -4,12 +4,12 @@ import { AnyTextableChannel, Message } from "oceanic.js";
 import { InferOutput, nullable, number, object, parse, safeParse, string, union } from "valibot";
 
 import { defineCommand } from "~/Commands";
-import { DONOR_ROLE_ID, Millis } from "~/constants";
+import Config from "~/config";
+import { Millis } from "~/constants";
 import { db } from "~/db";
-import { CONTRIBUTOR_ROLE_ID, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, GITHUB_PAT, HTTP_DOMAIN } from "~/env";
 import { removeStickyRoles } from "~/modules/stickyRoles";
 import { fastify } from "~/server";
-import { getAsMemberInMainGuild, sendDm } from "~/util/discord";
+import { getAsMemberInHomeGuild, sendDm } from "~/util/discord";
 import { fetchJson } from "~/util/fetch";
 import { silently } from "~/util/functions";
 
@@ -50,7 +50,7 @@ const LinkedRoles: Array<{
 }> = [
         {
             name: "Donor",
-            id: DONOR_ROLE_ID,
+            id: Config.roles.donor,
             async check(user, accessToken) {
                 const query = `
                     {
@@ -67,7 +67,7 @@ const LinkedRoles: Array<{
                 const res = await fetchJson("https://api.github.com/graphql", {
                     method: "POST",
                     headers: {
-                        Authorization: `Bearer ${GITHUB_PAT}`
+                        Authorization: `Bearer ${Config.githubLinking.pat}`
                     },
                     body: JSON.stringify({ query })
                 }).catch(() => null);
@@ -88,7 +88,7 @@ const LinkedRoles: Array<{
         },
         {
             name: "Contributor",
-            id: CONTRIBUTOR_ROLE_ID,
+            id: Config.roles.contributor,
             async check(user, accessToken) {
                 const res = await fetchJson(`https://api.github.com/search/commits?q=author:${user.login}+org:Vencord+repo:Vendicated%2FVencord&per_page=1`, {
                     headers: {
@@ -120,7 +120,7 @@ fastify.register(
             extraKeys: Keys,
             handler: (request: FastifyRequest & { query: Record<Keys[number] | "userId" | "state", string>; }, response: FastifyReply) => unknown
         ) {
-            fastify.get<{ Querystring: Record<Keys[number], string> }>(
+            fastify.get<{ Querystring: Record<Keys[number], string>; }>(
                 route,
                 {
                     schema: {
@@ -143,14 +143,14 @@ fastify.register(
             );
         }
 
-        const getRedirectUri = (userId: string) => `${HTTP_DOMAIN}/github/callback?userId=${userId}`;
+        const getRedirectUri = (userId: string) => `${Config.httpServer.domain}/github/callback?userId=${userId}`;
 
         get(
             "/authorize",
             [],
             (req, res) => {
                 const params = new URLSearchParams({
-                    client_id: GITHUB_CLIENT_ID,
+                    client_id: Config.githubLinking.clientId,
                     redirect_uri: getRedirectUri(req.query.userId),
                     state: req.query.state,
                     allow_signup: "false"
@@ -175,8 +175,8 @@ fastify.register(
                         Accept: "application/json"
                     },
                     body: JSON.stringify({
-                        client_id: GITHUB_CLIENT_ID,
-                        client_secret: GITHUB_CLIENT_SECRET,
+                        client_id: Config.githubLinking.clientId,
+                        client_secret: Config.githubLinking.clientSecret,
                         code: req.query.code,
                         redirect_uri: getRedirectUri(req.query.userId)
                     })
@@ -198,7 +198,7 @@ fastify.register(
                 if (!githubUser)
                     return res.status(400).send("Failed to fetch user data from GitHub");
 
-                const userAsMember = await getAsMemberInMainGuild(req.query.userId);
+                const userAsMember = await getAsMemberInHomeGuild(req.query.userId);
                 if (!userAsMember)
                     return res.status(400).send("You must be in the Vencord server to link your GitHub");
 
@@ -274,7 +274,7 @@ fastify.register(
                 }).catch(() => null);
 
                 if (existingLink) {
-                    const previousMember = await getAsMemberInMainGuild(existingLink.discordId);
+                    const previousMember = await getAsMemberInHomeGuild(existingLink.discordId);
                     if (previousMember) {
                         silently(previousMember.edit({
                             roles: previousMember.roles.filter(role => !rolesToAdd.some(r => r.id === role)),
@@ -315,12 +315,12 @@ defineCommand({
         if (githubAuthStates.has(msg.author.id))
             return reply("You already have a pending GitHub link prompt. Check in our DMs!");
 
-        const member = await getAsMemberInMainGuild(msg.author.id);
+        const member = await getAsMemberInHomeGuild(msg.author.id);
         if (!member)
             return reply("You must be in the Vencord server to link your GitHub.");
 
         const id = randomUUID();
-        const oauthLink = `${HTTP_DOMAIN}/github/authorize?userId=${msg.author.id}&state=${id}`;
+        const oauthLink = `${Config.httpServer.domain}/github/authorize?userId=${msg.author.id}&state=${id}`;
 
         const sentMessage = await sendDm(msg.author, {
             content: `To link your GitHub account, please authorise [here](<${oauthLink}>)\n\nThis link will expire in 5 minutes.`
