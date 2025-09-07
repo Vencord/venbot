@@ -4,6 +4,7 @@ import { CommandContext, Commands } from "./Commands";
 import { Emoji, Millis, SUPPORT_ALLOWED_CHANNELS } from "./constants";
 import { BotState } from "./db/botState";
 import { DISCORD_TOKEN, MOD_PERMS_ROLE_ID, PREFIXES } from "./env";
+import { emojiCacheReady, ensureEmojis, getEmojiForReaction } from "./modules/emojiManager";
 import { lobotomiseMaybe, moderateMessage } from "./modules/moderate";
 import { reply } from "./util/discord";
 import { silently } from "./util/functions";
@@ -21,6 +22,8 @@ export const Vaius = new Client({
 
 export let OwnerId: string;
 Vaius.once("ready", async () => {
+    ensureEmojis();
+
     Vaius.rest.oauth.getApplication().then(app => {
         OwnerId = app.ownerID;
     });
@@ -57,6 +60,8 @@ async function handleMessage(msg: Message, isEdit: boolean) {
     if (msg.inCachedGuildChannel() && await lobotomiseMaybe(msg)) return;
     if (msg.author.bot && msg.author.id !== GEN_AI_ID) return;
     moderateMessage(msg, isEdit);
+
+    await emojiCacheReady;
 
     const lowerContent = msg.content.toLowerCase();
 
@@ -95,7 +100,7 @@ async function handleMessage(msg: Message, isEdit: boolean) {
 
     if (!noRateLimit && cmd.rateLimits.getOrAdd(msg.author.id)) {
         silently(msg.createReaction("🛑"));
-        silently(msg.createReaction("snailcat:1217891976108576839"));
+        silently(msg.createReaction(getEmojiForReaction("snailcat")));
         return;
     }
 

@@ -4,6 +4,7 @@ import { ActionRow, Button, ButtonStyles, ComponentMessage, Container, MediaGall
 import { SeparatorSpacingSize } from "oceanic.js";
 import { CommandContext, defineCommand } from "~/Commands";
 import { VENCORD_SITE } from "~/constants";
+import { getEmoji } from "~/modules/emojiManager";
 import { makeCachedJsonFetch } from "~/util/fetch";
 import { run } from "~/util/functions";
 
@@ -34,17 +35,6 @@ const fetchPluginReadmes = makeCachedJsonFetch<PluginReadmes>(
     VENCORD_SITE + "/plugin-readmes.json",
 );
 
-const Emojis = {
-    Required: "<:required:1240029454701563925>",
-    EnabledByDefault: "<:enabledByDefault:1240029457218015332>",
-    HasCommands: "<:hasCommands:1240029456157114460>",
-    Desktop: "<:desktop:1240029460762464276>",
-    DiscordDesktop: "<:discordDesktop:1240029458266591283>",
-    Vesktop: "<:vesktop1240029451690184728>",
-    Web: "<:web:1240029453665570887>",
-    Dev: "<:dev:1240029459449512029>",
-};
-
 async function sendPluginInfo({ reply }: CommandContext, plugin: Plugin) {
     const {
         name,
@@ -62,37 +52,37 @@ async function sendPluginInfo({ reply }: CommandContext, plugin: Plugin) {
 
     const traits = [
         {
-            emoji: Emojis.Required,
+            emoji: "plugin_required",
             name: "This plugin is required",
             shouldShow: required,
         },
         {
-            emoji: Emojis.EnabledByDefault,
+            emoji: "plugin_default_enabled",
             name: "This plugin is enabled by default",
             shouldShow: enabledByDefault,
         },
         {
-            emoji: Emojis.HasCommands,
+            emoji: "plugin_commands",
             name: "This plugin has chat commands",
             shouldShow: hasCommands,
         },
         {
-            emoji: Emojis.Desktop,
+            emoji: "plugin_desktop",
             name: "This plugin is desktop only",
             shouldShow: target === "desktop",
         },
         {
-            emoji: Emojis.DiscordDesktop,
+            emoji: "plugin_discord_desktop",
             name: "This plugin is discord desktop only",
             shouldShow: target === "discordDesktop",
         },
         {
-            emoji: Emojis.Web,
+            emoji: "plugin_web",
             name: "This plugin is web only",
             shouldShow: target === "web",
         },
         {
-            emoji: Emojis.Dev,
+            emoji: "plugin_dev",
             name: "This plugin is development build only",
             shouldShow: target === "dev",
         },
@@ -116,7 +106,7 @@ async function sendPluginInfo({ reply }: CommandContext, plugin: Plugin) {
                 }
 
                 {traits.filter(t => t.shouldShow).map(t => (
-                    <TextDisplay>{t.emoji} {t.name}</TextDisplay>
+                    <TextDisplay>{getEmoji(t.emoji)} {t.name}</TextDisplay>
                 ))}
 
                 <TextDisplay>-# Made by {plugin.authors.map(a => a.name).join(", ")}</TextDisplay>

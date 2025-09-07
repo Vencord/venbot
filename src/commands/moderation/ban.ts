@@ -5,6 +5,7 @@ import { Millis } from "~/constants";
 import { silently } from "~/util/functions";
 import { pluralise, stripIndent, toCodeblock } from "~/util/text";
 
+import { getEmoji } from "~/modules/emojiManager";
 import { getHighestRolePosition, parseUserIdsAndReason } from "./utils";
 
 function parseCrap(msg: Message<AnyTextableGuildChannel>, args: string[], isSoft: boolean) {
@@ -89,7 +90,7 @@ async function banExecutor({ msg, reply }: CommandContext<true>, args: string[],
         }),
     ]);
 
-    let content = fails.join("\n") || "Done! <:BAN:1112433028917121114>";
+    let content = fails.join("\n") || `Done! ${getEmoji("BAN")}`;
     if (bannedUsers.length) {
         content += `\n\n${banName}ned ${bannedUsers.join(", ")}`;
     }
