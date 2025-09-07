@@ -26,7 +26,7 @@ async function fetchLeaderboard() {
             method: "GET",
             headers: new Headers({
                 cookie: ADVENT_OF_CODE_COOKIE!,
-                "User-Agent": "Venbot Discord Bot (https://codeberg.org/vee/bot) <vendicated+aoc@riseup.net>",
+                "User-Agent": "Venbot Discord Bot (https://github.com/Vencord/venbot) <vendicated+aoc@riseup.net>",
                 "Accept": "application/json"
             })
         }).then(res => {
