@@ -4,7 +4,7 @@ import { ActionRow, Button, ButtonStyles, ComponentMessage, Container, MediaGall
 import { SeparatorSpacingSize } from "oceanic.js";
 import { CommandContext, defineCommand } from "~/Commands";
 import { VENCORD_SITE } from "~/constants";
-import { getEmoji } from "~/modules/emojiManager";
+import { EmojiName, getEmoji } from "~/modules/emojiManager";
 import { makeCachedJsonFetch } from "~/util/fetch";
 import { run } from "~/util/functions";
 
@@ -23,6 +23,12 @@ interface Plugin {
     hasCommands: boolean;
 
     filePath: string;
+}
+
+interface Trait {
+    emoji: EmojiName;
+    name: string;
+    shouldShow: boolean;
 }
 
 type PluginReadmes = Record<string, string>;
@@ -50,7 +56,7 @@ async function sendPluginInfo({ reply }: CommandContext, plugin: Plugin) {
     const readme = readmes[name];
     const [, imageDescription, image] = readme?.match(/!\[([^\]]*?)\]\((https:[^)]+?)\)/) ?? [];
 
-    const traits = [
+    const traits: Trait[] = [
         {
             emoji: "plugin_required",
             name: "This plugin is required",

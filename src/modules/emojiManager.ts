@@ -1,3 +1,8 @@
+// generate with pnpm genTypes
+import { EmojiName } from "dist/types/emojis";
+
+export { EmojiName };
+
 import { readdir, readFile } from "fs/promises";
 import { ApplicationEmoji } from "oceanic.js";
 import { join } from "path";
@@ -43,20 +48,20 @@ export async function ensureEmojis() {
     resolveEmojiCacheReady();
 }
 
-export function getEmojiData(name: string) {
+export function getEmojiData(name: EmojiName) {
     const e = emojiCache.get(name);
     if (!e) throw new Error(`Emoji with name "${name}" not found in cache.`);
 
     return e;
 }
 
-export function getEmoji(name: string) {
+export function getEmoji(name: EmojiName) {
     const e = getEmojiData(name);
 
     return e.animated ? `<a:${e.name}:${e.id}>` : `<:${e.name}:${e.id}>`;
 }
 
-export function getEmojiForReaction(name: string) {
+export function getEmojiForReaction(name: EmojiName) {
     const { id } = getEmojiData(name);
 
     return `${name}:${id}`;

@@ -1,7 +1,7 @@
 import { defineCommand } from "~/Commands";
-import { Emoji } from "~/constants";
 import { BotState } from "~/db/botState";
 import { DefaultReporterBranch, testDiscordVersion } from "~/modules/discordTracker";
+import { getEmoji } from "~/modules/emojiManager";
 import { reply } from "~/util/discord";
 
 defineCommand({
@@ -28,6 +28,6 @@ defineCommand({
             }
         );
 
-        reply(msg, "Now testing! " + Emoji.ShipIt);
+        reply(msg, "Now testing! " + getEmoji("shipit"));
     },
 });
