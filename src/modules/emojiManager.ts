@@ -1,5 +1,5 @@
 // generate with pnpm genTypes
-import { EmojiName } from "dist/types/emojis";
+import type { EmojiName } from "dist/types/emojis";
 
 export { EmojiName };
 
