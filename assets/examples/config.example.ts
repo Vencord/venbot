@@ -1,8 +1,8 @@
-export default {
+const Config = {
     "token": "",
     "prefixes": ["v!", "v?", "v.", "v"],
     // id of the home guild of the bot. used for registering commands, etc
-    "homeGuildId": "",
+    "homeGuildId": "1015060230222131221",
     // "development" | "production"
     "mode": "development",
 
@@ -116,3 +116,5 @@ export default {
         "webhookSecret": ""
     }
 };
+
+export default Config;

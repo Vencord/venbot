@@ -16,14 +16,16 @@ interface Leaderboard {
     }>;
 }
 
+const { channelId, cookie, enabled, leaderboardUrl } = Config.adventOfCode;
+
 let lastMessage: Message;
 
 async function fetchLeaderboard() {
     const data = process.env.NODE_ENV === "production"
-        ? await fetch(Config.adventOfCode.leaderboardUrl + ".json", {
+        ? await fetch(leaderboardUrl + ".json", {
             method: "GET",
             headers: new Headers({
-                cookie: Config.adventOfCode.cookie!,
+                cookie: cookie,
                 "User-Agent": "Venbot Discord Bot (https://github.com/Vencord/venbot) <vendicated+aoc@riseup.net>",
                 "Accept": "application/json"
             })
@@ -69,14 +71,14 @@ async function postMessage() {
             author: {
                 name: "Advent of Code Leaderboard",
                 iconURL: "https://adventofcode.com/favicon.png",
-                url: Config.adventOfCode.leaderboardUrl
+                url: leaderboardUrl
             },
             description: content
         }]
     } satisfies CreateMessageOptions;
 
     if (!lastMessage) {
-        lastMessage = await (Vaius.getChannel(Config.adventOfCode.channelId) as TextChannel).createMessage(options);
+        lastMessage = await (Vaius.getChannel(channelId) as TextChannel).createMessage(options);
         return;
     }
 
@@ -84,9 +86,9 @@ async function postMessage() {
         lastMessage = await lastMessage.edit(options);
 }
 
-if (Config.adventOfCode.enabled) {
+if (enabled) {
     Vaius.once("ready", async () => {
-        const chan = Vaius.getChannel(Config.adventOfCode.channelId) as TextChannel;
+        const chan = Vaius.getChannel(channelId) as TextChannel;
         const messages = await chan.getMessages({ limit: 1 });
         lastMessage = messages[0];
 

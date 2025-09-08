@@ -11,7 +11,7 @@ Nevertheless it is still available under a free software license so you can easi
 Prequisites: git, nodejs, pnpm
 
 1. Clone the repository
-2. Copy `assets/examples/config.example.ts` to `config.ts` (in the root folder) and fill in all values
+2. Copy `assets/examples/config.example.ts` to `src/config.ts` and fill in all values
 
 ## Running
 

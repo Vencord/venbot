@@ -4,6 +4,8 @@ import { createReadStream } from "fs";
 import Config from "./config";
 import { PROD } from "./constants";
 
+const { enabled, port } = Config.httpServer;
+
 export const fastify = Fastify({
     logger: !PROD && {
         transport: {
@@ -12,18 +14,20 @@ export const fastify = Fastify({
     }
 });
 
-fastify.get("/", (req, res) => {
-    res
-        .type("text/html")
-        .send(createReadStream("assets/index.html"));
-});
-
-// defer listen to allow for fastify plugins to be registered before starting the server
-setImmediate(() => {
-    fastify.listen({ port: Config.httpServer.port }, err => {
-        if (err) {
-            fastify.log.error(err);
-            process.exit(1);
-        }
+if (enabled) {
+    fastify.get("/", (req, res) => {
+        res
+            .type("text/html")
+            .send(createReadStream("assets/index.html"));
     });
-});
+
+    // defer listen to allow for fastify plugins to be registered before starting the server
+    setImmediate(() => {
+        fastify.listen({ port: port }, err => {
+            if (err) {
+                fastify.log.error(err);
+                process.exit(1);
+            }
+        });
+    });
+}

@@ -7,8 +7,10 @@ import { Emoji, Millis } from "~/constants";
 import { run, silently } from "~/util/functions";
 import { ttlLazy } from "~/util/lazy";
 
+const { enabled, rulesChannelId } = Config.rules;
+
 const fetchRules = ttlLazy(async () => {
-    const [rulesMessage] = await Vaius.rest.channels.getMessages(Config.rules.rulesChannelId, { limit: 1 });
+    const [rulesMessage] = await Vaius.rest.channels.getMessages(rulesChannelId, { limit: 1 });
 
     return rulesMessage.content
         .matchAll(/\*\*((\d+)\\\. .+?)\*\*(.+?)(?=\*\*|$|\n# )/gs)
@@ -21,6 +23,8 @@ const fetchRules = ttlLazy(async () => {
 }, 5 * Millis.MINUTE);
 
 defineCommand({
+    enabled,
+
     name: "rule",
     aliases: ["r"],
     description: "Query a rule and send it",
