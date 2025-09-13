@@ -1,4 +1,4 @@
-import { createHash } from "crypto";
+import { createHash, randomUUID } from "crypto";
 import { cpSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "fs";
 import { ApplicationCommandOptions, ApplicationCommandOptionTypes, ApplicationCommandTypes, ApplicationIntegrationTypes, CreateChatInputApplicationCommandOptions, InteractionContextTypes, InteractionTypes, MessageFlags } from "oceanic.js";
 
@@ -7,6 +7,8 @@ import { GUILD_ID } from "~/env";
 import { handleInteraction } from "~/SlashCommands";
 import { run } from "~/util/functions";
 
+import { readFile, rm } from "fs/promises";
+import { execFile } from "~/util/childProcess";
 import { OwnerId, Vaius } from "../../Client";
 import { DONOR_ROLE_ID, PROD } from "../../constants";
 import { fetchBuffer } from "../../util/fetch";
@@ -34,6 +36,24 @@ const NameMove = Name + "-move";
 const NameCopy = Name + "-copy";
 
 const description = "kiss you discord";
+
+async function optimizeImage(imgData: Buffer, ext: string) {
+    const newExtension = ext === "gif" ? "gif" : "webp";
+    const tmpFile = `/tmp/venbot-${randomUUID()}.${newExtension}`;
+
+    const promise = ext === "gif"
+        ? execFile("gifsicle", ["-O3", "--colors", "256", "--resize", "64x64", "-o", tmpFile, "--no-warnings"])
+        : execFile("magick", ["-", "-resize", "64x64", "-quality", "75", tmpFile]);
+
+    promise.child.stdin?.end(imgData);
+    await promise;
+
+    const data = await readFile(tmpFile);
+
+    rm(tmpFile, { force: true });
+
+    return [data, newExtension] as const;
+}
 
 handleInteraction({
     type: InteractionTypes.APPLICATION_COMMAND_AUTOCOMPLETE,
@@ -178,6 +198,7 @@ handleInteraction({
         let tooltip = data.options.getString("tooltip");
         const image = data.options.getAttachment("image");
         const imageUrl = data.options.getString("image-url");
+        const optimize = data.options.getBoolean("optimize") ?? false;
 
         let url = image?.url ?? imageUrl;
         url &&= normaliseCdnUrl(url);
@@ -196,9 +217,13 @@ handleInteraction({
 
         i.defer(MessageFlags.EPHEMERAL);
 
-        const imgData = await fetchBuffer(url);
+        let imgData: Buffer = await fetchBuffer(url);
+        let ext = new URL(url).pathname.split(".").pop()!;
 
-        const ext = new URL(url).pathname.split(".").pop()!;
+        if (optimize) {
+            ([imgData, ext] = await optimizeImage(imgData, ext));
+        }
+
         const hash = createHash("sha1").update(imgData).digest("hex");
 
         BadgeData[user.id] ??= [];
@@ -297,6 +322,12 @@ Vaius.once("ready", () => {
         description,
         required: true
     };
+    const Optimize: ApplicationCommandOptions = {
+        name: "optimize",
+        type: ApplicationCommandOptionTypes.BOOLEAN,
+        description: "optimize images",
+        required: false
+    };
 
     registerCommand({
         type: ApplicationCommandTypes.CHAT_INPUT,
@@ -307,7 +338,8 @@ Vaius.once("ready", () => {
             Tooltip(true),
             ImageUrl,
             Image,
-            ExistingBadge("before", false)
+            ExistingBadge("before", false),
+            Optimize
         ]
     });
 
@@ -321,6 +353,7 @@ Vaius.once("ready", () => {
             Tooltip(false),
             ImageUrl,
             Image,
+            Optimize
         ]
     });
 
