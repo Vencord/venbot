@@ -1,4 +1,4 @@
-import { createHash, randomUUID } from "crypto";
+import { createHash } from "crypto";
 import { cpSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "fs";
 import { ApplicationCommandOptions, ApplicationCommandOptionTypes, ApplicationCommandTypes, ApplicationIntegrationTypes, CreateChatInputApplicationCommandOptions, InteractionContextTypes, InteractionTypes, MessageFlags } from "oceanic.js";
 
@@ -7,13 +7,13 @@ import { GUILD_ID } from "~/env";
 import { handleInteraction } from "~/SlashCommands";
 import { run } from "~/util/functions";
 
-import { readFile, rm } from "fs/promises";
-import { execFile } from "~/util/childProcess";
+import { buffer } from "stream/consumers";
+import { spawnP } from "~/util/childProcess";
 import { OwnerId, Vaius } from "../../Client";
 import { DONOR_ROLE_ID, PROD } from "../../constants";
 import { fetchBuffer } from "../../util/fetch";
 
-const BasePath = "/var/www/badges.vencord.dev";
+const BasePath = "/tmp/badges.vencord.dev";
 const BadgeJson = `${BasePath}/badges.json`;
 const badgesForUser = (userId: string) => `${BasePath}/badges/${userId}`;
 
@@ -38,21 +38,16 @@ const NameCopy = Name + "-copy";
 const description = "kiss you discord";
 
 async function optimizeImage(imgData: Buffer, ext: string) {
-    const newExtension = ext === "gif" ? "gif" : "webp";
-    const tmpFile = `/tmp/venbot-${randomUUID()}.${newExtension}`;
+    const { child } = ext === "gif"
+        ? spawnP("gifsicle", ["-O3", "--colors", "256", "--resize", "64x64"], {})
+        : spawnP("convert", ["-", "-resize", "64x64", "-quality", "75", "WEBP:-"], {});
 
-    const promise = ext === "gif"
-        ? execFile("gifsicle", ["-O3", "--colors", "256", "--resize", "64x64", "-o", tmpFile, "--no-warnings"])
-        : execFile("convert", ["-", "-resize", "64x64", "-quality", "75", tmpFile]);
+    child.stdin!.end(imgData);
 
-    promise.child.stdin?.end(imgData);
-    await promise;
-
-    const data = await readFile(tmpFile);
-
-    rm(tmpFile, { force: true });
-
-    return [data, newExtension] as const;
+    return [
+        await buffer(child.stdout!),
+        ext === "gif" ? "gif" : "webp"
+    ] as const;
 }
 
 handleInteraction({

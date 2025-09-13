@@ -8,7 +8,7 @@ import { pipeline } from "stream/promises";
 
 import { OwnerId, Vaius } from "~/Client";
 import { Emoji } from "~/constants";
-import { exec, execFile } from "~/util/childProcess";
+import { execFileP, execP } from "~/util/childProcess";
 import { reply } from "~/util/discord";
 import { downloadToFile } from "~/util/fetch";
 import { silently } from "~/util/functions";
@@ -67,7 +67,7 @@ async function optimiseImage(d: MediaParams) {
     const filename = formatFileName(d.filename);
 
     const binary = d.mime.startsWith("image/gif") ? "gif2webp" : "cwebp";
-    await execFile(binary, [filename, "-o", "output.webp"], {
+    await execFileP(binary, [filename, "-o", "output.webp"], {
         cwd: d.directory
     });
 
@@ -81,7 +81,7 @@ async function optimiseVideo(d: MediaParams) {
         `ffmpeg -i ${filename} -b:v 0 -crf 30 -pass 1 -an -f webm -y /dev/null`
         + `&& ffmpeg  -i ${filename} -b:v 0 -crf 30 -pass 2 output.webm`;
 
-    await exec(cmd, {
+    await execP(cmd, {
         cwd: d.directory
     });
 
@@ -133,7 +133,7 @@ async function writeAsset(pluginName: string, file: string, author: string) {
     const name = join(FilesDir, newFileName);
     await copyFile(file, name);
 
-    const git = (...args: string[]) => execFile("git", args, { cwd: FilesDir });
+    const git = (...args: string[]) => execFileP("git", args, { cwd: FilesDir });
     await git("add", newFileName);
     await git("commit", "--no-gpg-sign", "-m", `Add ${pluginName} assets ~ ${author}`);
     await git("push");
