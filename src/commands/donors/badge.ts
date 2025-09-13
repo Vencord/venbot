@@ -43,7 +43,7 @@ async function optimizeImage(imgData: Buffer, ext: string) {
 
     const promise = ext === "gif"
         ? execFile("gifsicle", ["-O3", "--colors", "256", "--resize", "64x64", "-o", tmpFile, "--no-warnings"])
-        : execFile("magick", ["-", "-resize", "64x64", "-quality", "75", tmpFile]);
+        : execFile("convert", ["-", "-resize", "64x64", "-quality", "75", tmpFile]);
 
     promise.child.stdin?.end(imgData);
     await promise;
