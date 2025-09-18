@@ -1,7 +1,30 @@
 
 import { defineCommand } from "~/Commands";
+import { AnsiBackgroundColor, ansiFormatText, AnsiTextColor } from "~/util/ansiFormat";
 import { inspect } from "~/util/inspect";
 import { countOccurrences, toCodeblock } from "~/util/text";
+
+function makeFakeConsole() {
+    const lines = [] as string[];
+    const makeLog = (color?: AnsiBackgroundColor | AnsiTextColor) => (...things: string[]) => {
+        lines.push(
+            ...things
+                .map(x => inspect(x, { getters: true }))
+                .join(" ")
+                .split("\n")
+                .map(line => color ? ansiFormatText(line, color) : line)
+        );
+    };
+
+    return {
+        _lines: lines,
+        log: makeLog(),
+        info: makeLog(AnsiTextColor.Cyan),
+        warn: makeLog(AnsiTextColor.Yellow),
+        error: makeLog(AnsiTextColor.Red),
+        debug: makeLog(AnsiTextColor.Gray),
+    };
+}
 
 defineCommand({
     name: "eval",
@@ -11,18 +34,7 @@ defineCommand({
     rawContent: true,
     ownerOnly: true,
     async execute(ctx, code) {
-        const console: any = {
-            _lines: [] as string[],
-            _log(...things: string[]) {
-                this._lines.push(
-                    ...things
-                        .map(x => inspect(x, { getters: true }))
-                        .join(" ")
-                        .split("\n")
-                );
-            }
-        };
-        console.log = console.error = console.warn = console.info = console._log.bind(console);
+        const console = makeFakeConsole();
 
         const { msg, reply, commandName, createMessage, prefix, react } = ctx;
         const { client, channel, author, content, guild, member } = msg;
@@ -54,7 +66,7 @@ defineCommand({
         let output = toCodeblock(res, "js");
         const consoleOutput = console._lines.join("\n").slice(0, Math.max(0, 1990 - output.length));
 
-        if (consoleOutput) output += `\n${toCodeblock(consoleOutput)}`;
+        if (consoleOutput) output += `\n${toCodeblock(consoleOutput, "ansi")}`;
 
         return reply(output);
     }
