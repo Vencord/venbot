@@ -8,29 +8,31 @@ import { resolveUserId } from "~/util/resolvers";
 
 const { categoryId, enabled, passRoleId } = Config.submissionPass;
 
+defineCommand({
+    enabled,
+
+    name: "submissionpass",
+    aliases: ["spass", "subpass", "sp"],
+    description: "Allow this user to post one submission",
+    usage: "<user>",
+    guildOnly: true,
+    modOnly: true,
+    async execute({ msg, react, reply }, user) {
+        const id = resolveUserId(user);
+        if (!id)
+            return reply("Invalid user input");
+
+        await msg.guild.addMemberRole(
+            id,
+            passRoleId,
+            `Submission pass granted by ${msg.author.tag}`
+        );
+
+        return react(Emoji.CheckMark);
+    },
+});
+
 if (enabled) {
-    defineCommand({
-        name: "submissionpass",
-        aliases: ["spass", "subpass", "sp"],
-        description: "Allow this user to post one submission",
-        usage: "<user>",
-        guildOnly: true,
-        modOnly: true,
-        async execute({ msg, react, reply }, user) {
-            const id = resolveUserId(user);
-            if (!id)
-                return reply("Invalid user input");
-
-            await msg.guild.addMemberRole(
-                id,
-                passRoleId,
-                `Submission pass granted by ${msg.author.tag}`
-            );
-
-            return react(Emoji.CheckMark);
-        },
-    });
-
     Vaius.on("threadCreate", async thread => {
         if (thread.parent?.type !== ChannelTypes.GUILD_FORUM || thread.parent?.parent?.id !== categoryId)
             return;

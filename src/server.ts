@@ -30,14 +30,15 @@ if (enabled) {
             .send(await getIndex());
 
 
-        // defer listen to allow for fastify plugins to be registered before starting the server
-        setImmediate(() => {
-            fastify.listen({ port: port }, err => {
-                if (err) {
-                    fastify.log.error(err);
-                    process.exit(1);
-                }
-            });
+    });
+
+    // defer listen to allow for fastify plugins to be registered before starting the server
+    setImmediate(() => {
+        fastify.listen({ port: port }, err => {
+            if (err) {
+                fastify.log.error(err);
+                process.exit(1);
+            }
         });
     });
 }

@@ -13,6 +13,8 @@ import { getAsMemberInHomeGuild, sendDm } from "~/util/discord";
 import { fetchJson } from "~/util/fetch";
 import { silently } from "~/util/functions";
 
+const { clientId, clientSecret, enabled, pat } = Config.githubLinking;
+
 export const githubAuthStates = new Map<string, {
     id: string;
     timeoutId: NodeJS.Timeout;
@@ -67,7 +69,7 @@ const LinkedRoles: Array<{
                 const res = await fetchJson("https://api.github.com/graphql", {
                     method: "POST",
                     headers: {
-                        Authorization: `Bearer ${Config.githubLinking.pat}`
+                        Authorization: `Bearer ${pat}`
                     },
                     body: JSON.stringify({ query })
                 }).catch(() => null);
@@ -113,7 +115,7 @@ const LinkedRoles: Array<{
 
 
 
-fastify.register(
+enabled && fastify.register(
     (fastify, opts, done) => {
         function get<const Keys extends ReadonlyArray<string>>(
             route: string,
@@ -150,7 +152,7 @@ fastify.register(
             [],
             (req, res) => {
                 const params = new URLSearchParams({
-                    client_id: Config.githubLinking.clientId,
+                    client_id: clientId,
                     redirect_uri: getRedirectUri(req.query.userId),
                     state: req.query.state,
                     allow_signup: "false"
@@ -175,8 +177,8 @@ fastify.register(
                         Accept: "application/json"
                     },
                     body: JSON.stringify({
-                        client_id: Config.githubLinking.clientId,
-                        client_secret: Config.githubLinking.clientSecret,
+                        client_id: clientId,
+                        client_secret: clientSecret,
                         code: req.query.code,
                         redirect_uri: getRedirectUri(req.query.userId)
                     })
@@ -307,6 +309,8 @@ fastify.register(
 
 
 defineCommand({
+    enabled,
+
     name: "link-github",
     description: "Link your GitHub account to claim the contributor and donor role",
     aliases: ["github", "linkgithub", "gh", "link-gh"],
