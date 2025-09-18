@@ -113,7 +113,15 @@ const Config = {
         // Github PAT with workflow dispatch scope. Used to trigger reporter workflow
         "pat": "",
         // generate with `openssl rand -hex 128`
-        "webhookSecret": ""
+        "webhookSecret": "",
+        // channel where each individual report will be posted
+        "logChannelId": "1337479880849362994",
+        // channel where the bot will post the latest status of stable and canary
+        "statusChannelId": "1337479816240431115",
+        // message id of the stable status message (must be in statusChannelId)
+        "stableMessageId": "1337500395311992954",
+        // message id of the canary status message (must be in statusChannelId)
+        "canaryMessageId": "1337500381923774544",
     }
 };
 

@@ -2,7 +2,6 @@ import { defineCommand } from "~/Commands";
 import { drawBlobCatCozy } from "~/modules/regularCotd";
 import { randomHexColor, toHexColorString } from "~/util/colors";
 
-
 defineCommand({
     name: "blobcatcozy",
     aliases: ["bcc", "blobcat", "blob", "cat", "cozy"],

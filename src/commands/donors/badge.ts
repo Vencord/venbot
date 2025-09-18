@@ -14,7 +14,7 @@ import { OwnerId, Vaius } from "../../Client";
 import { PROD } from "../../constants";
 import { fetchBuffer } from "../../util/fetch";
 
-const BasePath = "/tmp/badges.vencord.dev";
+const BasePath = "/var/www/badges.vencord.dev";
 const BadgeJson = `${BasePath}/badges.json`;
 const badgesForUser = (userId: string) => `${BasePath}/badges/${userId}`;
 
