@@ -6,13 +6,15 @@ import { ZWSP } from "~/constants";
 import { handleInteraction } from "~/SlashCommands";
 import { run } from "~/util/functions";
 
+import { buffer } from "stream/consumers";
 import Config from "~/config";
+import { spawnP } from "~/util/childProcess";
 import { getHomeGuild } from "~/util/discord";
 import { OwnerId, Vaius } from "../../Client";
 import { PROD } from "../../constants";
 import { fetchBuffer } from "../../util/fetch";
 
-const BasePath = "/var/www/badges.vencord.dev";
+const BasePath = "/tmp/badges.vencord.dev";
 const BadgeJson = `${BasePath}/badges.json`;
 const badgesForUser = (userId: string) => `${BasePath}/badges/${userId}`;
 
@@ -35,6 +37,19 @@ const NameMove = Name + "-move";
 const NameCopy = Name + "-copy";
 
 const description = "kiss you discord";
+
+async function optimizeImage(imgData: Buffer, ext: string) {
+    const { child } = ext === "gif"
+        ? spawnP("gifsicle", ["-O3", "--colors", "256", "--resize", "64x64"], {})
+        : spawnP("convert", ["-", "-resize", "64x64", "-quality", "75", "WEBP:-"], {});
+
+    child.stdin!.end(imgData);
+
+    return [
+        await buffer(child.stdout!),
+        ext === "gif" ? "gif" : "webp"
+    ] as const;
+}
 
 handleInteraction({
     type: InteractionTypes.APPLICATION_COMMAND_AUTOCOMPLETE,
@@ -179,6 +194,7 @@ handleInteraction({
         let tooltip = data.options.getString("tooltip");
         const image = data.options.getAttachment("image");
         const imageUrl = data.options.getString("image-url");
+        const optimize = data.options.getBoolean("optimize") ?? false;
 
         let url = image?.url ?? imageUrl;
         url &&= normaliseCdnUrl(url);
@@ -197,9 +213,13 @@ handleInteraction({
 
         i.defer(MessageFlags.EPHEMERAL);
 
-        const imgData = await fetchBuffer(url);
+        let imgData: Buffer = await fetchBuffer(url);
+        let ext = new URL(url).pathname.split(".").pop()!;
 
-        const ext = new URL(url).pathname.split(".").pop()!;
+        if (optimize) {
+            ([imgData, ext] = await optimizeImage(imgData, ext));
+        }
+
         const hash = createHash("sha1").update(imgData).digest("hex");
 
         BadgeData[user.id] ??= [];
@@ -298,6 +318,12 @@ Vaius.once("ready", () => {
         description,
         required: true
     };
+    const Optimize: ApplicationCommandOptions = {
+        name: "optimize",
+        type: ApplicationCommandOptionTypes.BOOLEAN,
+        description: "optimize images",
+        required: false
+    };
 
     registerCommand({
         type: ApplicationCommandTypes.CHAT_INPUT,
@@ -308,7 +334,8 @@ Vaius.once("ready", () => {
             Tooltip(true),
             ImageUrl,
             Image,
-            ExistingBadge("before", false)
+            ExistingBadge("before", false),
+            Optimize
         ]
     });
 
@@ -322,6 +349,7 @@ Vaius.once("ready", () => {
             Tooltip(false),
             ImageUrl,
             Image,
+            Optimize
         ]
     });
 
