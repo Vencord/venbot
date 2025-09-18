@@ -1,19 +1,19 @@
 import { createCanvas, loadImage } from "@napi-rs/canvas";
 import { readFile } from "fs/promises";
 import { join } from "path";
+import Config from "~/config";
 
-import { Vaius } from "~/Client";
-import { ASSET_DIR, REGULAR_ROLE_ID } from "~/constants";
-import { GUILD_ID } from "~/env";
+import { ASSET_DIR } from "~/constants";
 import { randomHexColor } from "~/util/colors";
 import { daily } from "~/util/daily";
+import { getHomeGuild } from "~/util/discord";
 import { fetchJson } from "~/util/fetch";
 
 interface ColorResponse {
     name: {
         value: string;
         closest_named_hex: string;
-    }
+    };
 }
 
 export async function drawBlobCatCozy(color: string, size = 512) {
@@ -54,7 +54,7 @@ export async function rerollCotd(inputHex?: string) {
     const color = parseInt(hex.slice(1), 16);
     const icon = await drawBlobCatCozy(hex);
 
-    await Vaius.guilds.get(GUILD_ID)!.editRole(REGULAR_ROLE_ID, {
+    await getHomeGuild()!.editRole(Config.roles.regular, {
         name: `regular (${name.toLowerCase()})`,
         color,
         icon,

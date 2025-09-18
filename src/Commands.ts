@@ -97,6 +97,7 @@ export interface Command<GuildOnly extends boolean = false> {
     permissions?: Array<PermissionName>,
     ownerOnly?: boolean;
     modOnly?: boolean;
+    enabled?: boolean;
     rawContent?: boolean;
     execute(context: CommandContext<GuildOnly>, ...args: string[]): Promise<any> | void;
 }
@@ -121,6 +122,8 @@ export function defineCommand<C extends Command<true>>(c: C & { guildOnly: true;
 export function defineCommand<C extends Command<false>>(c: C): void;
 export function defineCommand<C extends Command<boolean>>(c: C): void {
     const cmd = c as any as FullCommand;
+    if (cmd.enabled === false) return;
+
     cmd.rateLimits = new Deduper(10 * Millis.SECOND);
     cmd.category = currentCategory;
 

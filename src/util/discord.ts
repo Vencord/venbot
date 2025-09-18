@@ -1,8 +1,8 @@
 import { Client, CreateMessageOptions, Member, Message, PossiblyUncachedMessage, Role, User } from "oceanic.js";
 
 import { Vaius } from "~/Client";
-import { GUILD_ID } from "~/env";
 
+import Config from "~/config";
 import { silently } from "./functions";
 
 export const ID_REGEX = /^(?:<@!?)?(\d{17,20})>?$/;
@@ -35,10 +35,10 @@ export function getHighestRole({ guild, roles }: Member, filter?: (r: Role) => b
     return resolvedRoles.reduce((a, b) => a.position > b.position ? a : b);
 }
 
-export const getMainGuild = () => Vaius.guilds.get(GUILD_ID);
+export const getHomeGuild = () => Vaius.guilds.get(Config.homeGuildId);
 
-export async function getAsMemberInMainGuild(userId: string) {
-    const guild = getMainGuild();
+export async function getAsMemberInHomeGuild(userId: string) {
+    const guild = getHomeGuild();
     if (!guild) return null;
 
     return guild.members.get(userId) ?? guild.getMember(userId).catch(() => null);

@@ -11,7 +11,7 @@ Nevertheless it is still available under a free software license so you can easi
 Prequisites: git, nodejs, pnpm
 
 1. Clone the repository
-2. Copy `.env.example` to `.env` and fill in all values
+2. Copy `assets/examples/config.example.ts` to `src/config.ts` and fill in all values
 
 ## Running
 
@@ -20,5 +20,5 @@ Prequisites: git, nodejs, pnpm
 
 ## Running as a service
 
-1. Copy `venbot.service` to your systemd service directory. You might have to tweak the `WorkingDirectory` value.
+1. Copy `assets/examples/venbot.service` to your systemd service directory. You might have to tweak the `WorkingDirectory` value.
 2. Enable & Start the `venbot` systemd service via `systemctl [--user] enable --now venbot`

@@ -3,11 +3,11 @@ import { readdir, readFile } from "fs/promises";
 import { AnyTextableGuildChannel, AutoModerationActionTypes, EmbedOptions, Member, Message, MessageTypes } from "oceanic.js";
 import { join } from "path";
 
-import { GUILD_ID, MOD_LOG_CHANNEL_ID } from "~/env";
 import { reply, sendDm } from "~/util/discord";
 import { isTruthy, silently } from "~/util/functions";
 import { until } from "~/util/time";
 
+import Config from "~/config";
 import { Vaius } from "../Client";
 import { ASSET_DIR, Millis } from "../constants";
 
@@ -56,7 +56,7 @@ const ChannelRules: Record<string, (m: Message) => string | void> = {
 };
 
 export function logModerationAction(content: string, ...embeds: EmbedOptions[]) {
-    Vaius.rest.channels.createMessage(MOD_LOG_CHANNEL_ID, {
+    Vaius.rest.channels.createMessage(Config.channels.modLog, {
         content,
         embeds
     });
@@ -164,7 +164,7 @@ export async function moderateImageHosts(msg: Message) {
 
 const inviteRe = /discord(?:(?:app)?\.com\/invite|\.gg)\/([a-z0-9-]+)/ig;
 const allowedGuilds = new Set([
-    GUILD_ID,
+    Config.homeGuildId,
     "1015060230222131221", // vencord
     "811255666990907402", // aliucord
     "1015931589865246730", // vendetta
@@ -182,7 +182,6 @@ const allowedGuilds = new Set([
     "449175561529589761", // blackbox (userbg)
     "1196075698301968455", // pyoncord
     "1154257010532032512", // moonlight
-    "1009882479886344294", // poke
     "961691461554950145", // hyprland
     "1097993424931672216", // aero
     "1116074561734197270", // dziurwa insane
@@ -224,7 +223,7 @@ export async function moderateInvites(msg: Message) {
             silently(msg.member!.edit({ communicationDisabledUntil: until(5 * Millis.MINUTE), reason: "invite" }));
 
             const inviteImage = await getInviteImage(code);
-            Vaius.rest.channels.createMessage(MOD_LOG_CHANNEL_ID, {
+            Vaius.rest.channels.createMessage(Config.channels.modLog, {
                 content: `${msg.author.mention} posted an invite to ${inviteData.guild.name} in ${msg.channel!.mention}`,
                 embeds: [{
                     ...makeEmbedForMessage(msg),

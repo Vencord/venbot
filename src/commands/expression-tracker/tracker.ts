@@ -2,10 +2,11 @@ import { Expressions, ExpressionUses } from "kysely-codegen";
 import { AnyTextableGuildChannel, GuildEmoji, Member, PartialEmoji, PossiblyUncachedMessage, StickerFormatTypes, StickerItem, Uncached, User } from "oceanic.js";
 
 import { Vaius } from "~/Client";
+import Config from "~/config";
 import { Millis } from "~/constants";
 import { db, ExpressionFormatType, ExpressionType, ExpressionUsageType } from "~/db";
-import { GUILD_ID } from "~/env";
 import { Deduper } from "~/util/Deduper";
+import { getHomeGuild } from "~/util/discord";
 
 const coolDowns = new Deduper<string>(Millis.MINUTE);
 
@@ -107,7 +108,7 @@ function insertRows(rows: Row[]) {
 }
 
 Vaius.on("messageCreate", msg => {
-    if (msg.author.bot || msg.guildID !== GUILD_ID || !msg.inCachedGuildChannel()) return;
+    if (msg.author.bot || msg.guildID !== Config.homeGuildId || !msg.inCachedGuildChannel()) return;
 
     const msgId = msg.id;
     const userId = msg.author.id;
@@ -145,10 +146,10 @@ Vaius.on("messageCreate", msg => {
 
 function shouldHandleReactionEvent(msg: PossiblyUncachedMessage, emoji?: PartialEmoji, user?: Uncached | User | Member) {
     const guildId = msg.guildID || (Vaius.getChannel(msg.channelID) as AnyTextableGuildChannel)?.guildID;
-    if (guildId !== GUILD_ID) return false;
+    if (guildId !== Config.homeGuildId) return false;
 
     if (emoji?.id) {
-        if (!Vaius.guilds.get(GUILD_ID)?.emojis.has(emoji.id))
+        if (!getHomeGuild()?.emojis.has(emoji.id))
             return false;
     }
 

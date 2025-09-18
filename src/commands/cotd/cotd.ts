@@ -1,5 +1,5 @@
 import { defineCommand } from "~/Commands";
-import { REGULAR_ROLE_ID } from "~/constants";
+import Config from "~/config";
 import { drawBlobCatCozy } from "~/modules/regularCotd";
 import { toHexColorString } from "~/util/colors";
 
@@ -9,7 +9,7 @@ defineCommand({
     usage: null,
     guildOnly: true,
     async execute({ msg, reply }, hex: string) {
-        const regularRole = msg.guild!.roles.get(REGULAR_ROLE_ID)!;
+        const regularRole = msg.guild!.roles.get(Config.roles.regular)!;
 
         const [, colorName] = regularRole.name.match(/\((.+)\)/i)!;
 

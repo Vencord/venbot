@@ -2,8 +2,8 @@ import { AuditLogActionTypes, Guild } from "oceanic.js";
 
 import { Vaius } from "~/Client";
 import { defineCommand } from "~/Commands";
+import Config from "~/config";
 import { db } from "~/db";
-import { GUILD_ID } from "~/env";
 import { reply } from "~/util/discord";
 import { isNonNullish } from "~/util/guards";
 
@@ -15,7 +15,7 @@ const ignoreRoles = new Set([
 const shouldIgnoreRole = (roleId: string, guild: Guild) => ignoreRoles.has(roleId) || !!guild.roles.get(roleId)?.managed;
 
 Vaius.on("guildMemberAdd", async member => {
-    if (member.guild.id !== GUILD_ID) return;
+    if (member.guild.id !== Config.homeGuildId) return;
 
     const sticky = await db
         .selectFrom("stickyRoles")
@@ -28,7 +28,7 @@ Vaius.on("guildMemberAdd", async member => {
 });
 
 Vaius.on("guildAuditLogEntryCreate", async (maybeUncachedGuild, entry) => {
-    if (maybeUncachedGuild.id !== GUILD_ID) return;
+    if (maybeUncachedGuild.id !== Config.homeGuildId) return;
     if (entry.actionType !== AuditLogActionTypes.MEMBER_ROLE_UPDATE || !entry.targetID) return;
 
     const guild = maybeUncachedGuild instanceof Guild
@@ -68,7 +68,7 @@ defineCommand({
     ownerOnly: true,
     usage: null,
     async execute({ msg }) {
-        if (msg.guildID !== GUILD_ID) return;
+        if (msg.guildID !== Config.homeGuildId) return;
 
         const members = await msg.guild.fetchMembers();
 

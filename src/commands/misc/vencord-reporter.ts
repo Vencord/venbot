@@ -1,10 +1,13 @@
 import { defineCommand } from "~/Commands";
+import Config from "~/config";
 import { BotState } from "~/db/botState";
 import { DefaultReporterBranch, testDiscordVersion } from "~/modules/discordTracker";
 import { getEmoji } from "~/modules/emojiManager";
 import { reply } from "~/util/discord";
 
 defineCommand({
+    enabled: Config.reporter.enabled,
+
     name: "reporter",
     description: "Run the Vencord reporter workflow",
     usage: "[ref = dev] [branch = both]",

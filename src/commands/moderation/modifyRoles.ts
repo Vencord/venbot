@@ -1,42 +1,26 @@
 import { AnyTextableGuildChannel, Message } from "oceanic.js";
 
 import { defineCommand } from "~/Commands";
-import { DONOR_ROLE_ID, Emoji, REGULAR_ROLE_ID } from "~/constants";
+import { Emoji } from "~/constants";
 import { ID_REGEX } from "~/util/discord";
 import { makeConstants } from "~/util/objects";
 import { toCodeblock } from "~/util/text";
 
+import Config from "~/config";
 import { hasHigherRoleThan } from "./utils";
 
 const Aliases = makeConstants({
-    donor: DONOR_ROLE_ID,
-    d: DONOR_ROLE_ID,
+    donor: Config.roles.donor,
+    d: Config.roles.donor,
 
-    cute: REGULAR_ROLE_ID,
-    c: REGULAR_ROLE_ID,
+    cute: Config.roles.regular,
+    c: Config.roles.regular,
 
-    regular: REGULAR_ROLE_ID,
-    r: REGULAR_ROLE_ID,
+    regular: Config.roles.regular,
+    r: Config.roles.regular,
 
     needy: "1088566810976194693"
 });
-
-const ManageableRoles = [
-    DONOR_ROLE_ID,
-    REGULAR_ROLE_ID,
-    "1026534353167208489", // contributor
-    "1191202487978438656", // programming
-    "1136687385434918992", // image sender
-    "1018310742874791977", // brain rot
-    "1118620309382254654", // can't talk
-    "1173623814211506207", // can't vc
-    "1161815552919076867", // no modmail
-    "1088566810976194693", // needy
-    "1061276426478813245", // no support
-    "1205614728148422716", // no programming
-    "1241355250129178775", // angelsachse (no german)
-    "1136184488498561035", // snippet dev
-];
 
 function parseArgs(msg: Message<AnyTextableGuildChannel>, args: string[]) {
     const { guild, referencedMessage } = msg;
@@ -51,7 +35,7 @@ function parseArgs(msg: Message<AnyTextableGuildChannel>, args: string[]) {
 
     const candidates = msg.member.permissions.has("MANAGE_ROLES")
         ? guild.roles.toArray()
-        : guild.roles.filter(r => ManageableRoles.includes(r.id));
+        : guild.roles.filter(r => Config.roles.manageableRoles.includes(r.id));
 
     const roleName = args.slice(0, userStart).join(" ").toLowerCase();
     const role = Aliases[roleName as keyof typeof Aliases]

@@ -3,8 +3,8 @@ import { AnyGuildChannelWithoutThreads } from "oceanic.js";
 import { join } from "path";
 
 import { defineCommand } from "~/Commands";
+import Config from "~/config";
 import { ASSET_DIR } from "~/constants";
-import { SUPPORT_CHANNEL_ID } from "~/env";
 import { silently } from "~/util/functions";
 
 const WIDTH = 400;
@@ -41,7 +41,7 @@ defineCommand({
     usage: "[destination channel] [destination caption] | [origin caption]",
     guildOnly: true,
     async execute({ msg, createMessage }, channelId, ...captionElements) {
-        let channel = msg.client.getChannel(SUPPORT_CHANNEL_ID) as AnyGuildChannelWithoutThreads;
+        let channel = msg.client.getChannel(Config.channels.support) as AnyGuildChannelWithoutThreads;
         let caption = captionElements.join(" ");
         if (channelId) {
             const customChannel = msg.guild.channels.get(channelId.match(/\d+/)?.[0] || "");

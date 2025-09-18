@@ -1,9 +1,9 @@
 import { createHmac, randomUUID, timingSafeEqual } from "crypto";
 
 import { Vaius } from "~/Client";
+import Config from "~/config";
 import { Millis } from "~/constants";
 import { BotState } from "~/db/botState";
-import { GITHUB_WORKFLOW_DISPATCH_PAT, HTTP_DOMAIN, REPORTER_WEBHOOK_SECRET } from "~/env";
 import { fastify } from "~/server";
 import { doFetch } from "~/util/fetch";
 import { TTLMap } from "~/util/TTLMap";
@@ -27,26 +27,20 @@ interface ReportData {
 
 export const DefaultReporterBranch = "dev";
 
-const LogChannelId = "1337479880849362994";
-const StatusChannelId = "1337479816240431115";
-const StableMessageId = "1337500395311992954";
-const CanaryMessageId = "1337500381923774544";
+const { canaryMessageId, enabled, logChannelId, pat, stableMessageId, statusChannelId, webhookSecret } = Config.reporter;
 
 const pendingReports = new TTLMap<string, ReportData>(
     10 * Millis.MINUTE,
-    (_id, report) => Vaius.rest.channels.createMessage(LogChannelId, {
+    (_id, report) => Vaius.rest.channels.createMessage(logChannelId, {
         content: `Timed out while testing ${report.branch} ${report.hash[report.branch] || "with unknown hash"}`,
     })
 );
 
-setInterval(checkVersions, 30 * Millis.SECOND);
-checkVersions();
-
-export async function triggerReportWorkflow({ ref, inputs }: { ref: string, inputs: { discord_branch: Branch; webhook_url?: string; } }) {
+export async function triggerReportWorkflow({ ref, inputs }: { ref: string, inputs: { discord_branch: Branch; webhook_url?: string; }; }) {
     return await doFetch("https://api.github.com/repos/Vendicated/Vencord/actions/workflows/reportBrokenPlugins.yml/dispatches", {
         method: "POST",
         headers: {
-            Authorization: `Bearer ${GITHUB_WORKFLOW_DISPATCH_PAT}`,
+            Authorization: `Bearer ${pat}`,
         },
         body: JSON.stringify({
             ref,
@@ -108,7 +102,7 @@ export async function testDiscordVersion<B extends Branch>(branch: B, hash: Reco
         ref,
         inputs: {
             discord_branch: branch,
-            webhook_url: `${HTTP_DOMAIN}/reporter/webhook?runId=${runId}`
+            webhook_url: `${Config.httpServer.domain}/reporter/webhook?runId=${runId}`
         }
     });
 }
@@ -137,7 +131,7 @@ async function handleReportSubmit(report: ReportData, data: any) {
     report.onSubmit?.(report, data);
 
     if (report.shouldLog) {
-        Vaius.rest.channels.createMessage(LogChannelId, data);
+        Vaius.rest.channels.createMessage(logChannelId, data);
     }
 
     const latestHash = report.branch === "canary"
@@ -150,8 +144,8 @@ async function handleReportSubmit(report: ReportData, data: any) {
 
     data.embeds[0].description = `Last updated: <t:${Math.round(Date.now() / 1000)}>`;
 
-    const messageId = report.branch === "canary" ? CanaryMessageId : StableMessageId;
-    Vaius.rest.channels.editMessage(StatusChannelId, messageId, data);
+    const messageId = report.branch === "canary" ? canaryMessageId : stableMessageId;
+    Vaius.rest.channels.editMessage(statusChannelId, messageId, data);
 }
 
 const schema = {
@@ -170,38 +164,43 @@ const schema = {
     }
 };
 
-fastify.register(async fastify => {
-    // we need body as string instead of object to verify the signature
-    fastify.addContentTypeParser("application/json", { parseAs: "buffer" }, (req, body, done) => {
-        done(null, body);
+if (enabled) {
+    setInterval(checkVersions, 30 * Millis.SECOND);
+    checkVersions();
+
+    fastify.register(async fastify => {
+        // we need body as string instead of object to verify the signature
+        fastify.addContentTypeParser("application/json", { parseAs: "buffer" }, (req, body, done) => {
+            done(null, body);
+        });
+
+        fastify.post("/webhook", { schema }, async (req, res) => {
+            const { runId } = req.query as any;
+
+            const report = pendingReports.get(runId);
+            if (!report) {
+                res.status(404).send("Unknown runId");
+                return;
+            }
+
+            const data = req.body as string;
+            const signature = req.headers["x-signature"] as string;
+
+            const mac = createHmac("sha256", webhookSecret)
+                .update(data)
+                .digest();
+            const expected = Buffer.from(signature.replace("sha256=", ""), "hex");
+
+            if (!timingSafeEqual(mac, expected)) {
+                res.status(401).send("Invalid X-Signature");
+                return;
+            }
+
+            await handleReportSubmit(report, JSON.parse(data));
+
+            res.status(200).send();
+        });
+    }, {
+        prefix: "/reporter"
     });
-
-    fastify.post("/webhook", { schema }, async (req, res) => {
-        const { runId } = req.query as any;
-
-        const report = pendingReports.get(runId);
-        if (!report) {
-            res.status(404).send("Unknown runId");
-            return;
-        }
-
-        const data = req.body as string;
-        const signature = req.headers["x-signature"] as string;
-
-        const mac = createHmac("sha256", REPORTER_WEBHOOK_SECRET)
-            .update(data)
-            .digest();
-        const expected = Buffer.from(signature.replace("sha256=", ""), "hex");
-
-        if (!timingSafeEqual(mac, expected)) {
-            res.status(401).send("Invalid X-Signature");
-            return;
-        }
-
-        await handleReportSubmit(report, JSON.parse(data));
-
-        res.status(200).send();
-    });
-}, {
-    prefix: "/reporter"
-});
+}

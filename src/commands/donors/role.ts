@@ -1,10 +1,10 @@
 import { ApplicationCommandOptionTypes, ApplicationCommandTypes, MessageFlags } from "oceanic.js";
 
-import { GUILD_ID } from "~/env";
 import { handleCommandInteraction } from "~/SlashCommands";
 
+import Config from "~/config";
 import { Vaius } from "../../Client";
-import { DONOR_ROLE_ID, PROD } from "../../constants";
+import { PROD } from "../../constants";
 import { fetchBuffer } from "../../util/fetch";
 
 const Name = PROD ? "role-add" : "devrole-add";
@@ -38,11 +38,11 @@ handleCommandInteraction({
 
         await i.guild.editRolePositions([{
             id: role.id,
-            position: i.guild.roles.get(DONOR_ROLE_ID)!.position + 1
+            position: i.guild.roles.get(Config.roles.donor)!.position + 1
         }]);
 
         await i.guild.addMemberRole(user.id, role.id, "Custom Donor Role");
-        await i.guild.addMemberRole(user.id, DONOR_ROLE_ID, "Donor Role");
+        await i.guild.addMemberRole(user.id, Config.roles.donor, "Donor Role");
 
         await i.createFollowup({
             content: "Done!",
@@ -52,7 +52,7 @@ handleCommandInteraction({
 });
 
 Vaius.once("ready", () => {
-    Vaius.application.createGuildCommand(GUILD_ID, {
+    Vaius.application.createGuildCommand(Config.homeGuildId, {
         type: ApplicationCommandTypes.CHAT_INPUT,
         name: Name,
         description,

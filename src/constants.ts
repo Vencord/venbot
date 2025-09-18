@@ -1,8 +1,8 @@
 import { mkdirSync } from "fs";
 import { join } from "path";
 
-import { BOT_CHANNEL_ID, DEV_CHANNEL_ID, NODE_ENV, SUPPORT_CHANNEL_ID } from "~/env";
 import { makeConstants } from "~/util/objects";
+import Config from "./config";
 
 export const VENCORD_SITE = "https://vencord.dev";
 
@@ -10,17 +10,20 @@ export const ASSET_DIR = join(__dirname, "..", "assets");
 export const DATA_DIR = join(__dirname, "..", "data");
 mkdirSync(DATA_DIR, { recursive: true });
 
-export const PROD = NODE_ENV === "production";
+export const PROD = Config.mode === "production";
 
 export const SUPPORT_ALLOWED_CHANNELS = [
-    SUPPORT_CHANNEL_ID,
-    BOT_CHANNEL_ID,
-    DEV_CHANNEL_ID,
-    "1345457031426871417" // Vesktop support
+    Config.channels.dev,
+    Config.channels.support,
+    ...Config.channels.supportAllowedChannels
 ];
 
-export const DONOR_ROLE_ID = "1042507929485586532";
-export const REGULAR_ROLE_ID = "1026504932959977532";
+export const MANAGEABLE_ROLES = [
+    Config.roles.donor,
+    Config.roles.regular,
+    Config.roles.contributor,
+    ...Config.roles.manageableRoles
+];
 
 export const enum Seconds {
     SECOND = 1,
