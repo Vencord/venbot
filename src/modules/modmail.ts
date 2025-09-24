@@ -37,7 +37,7 @@ const COMMAND_NAME = PROD ? "modmail" : "devmodmail";
 type GuildInteraction = ComponentInteraction<ComponentTypes.BUTTON, AnyTextableGuildChannel> | CommandInteraction<AnyTextableGuildChannel>;
 
 async function log(content: string) {
-    return Vaius.rest.channels.createMessage(channelId, {
+    return Vaius.rest.channels.createMessage(logChannelId, {
         content
     });
 }
