@@ -3,9 +3,7 @@ import { Kysely, SqliteDialect } from "kysely";
 // generate via `pnpm sql:types`
 import type { DB } from "kysely-codegen";
 
-import { DATABASE_URL } from "~/env";
-
-const sqlite = new Sqlite(DATABASE_URL);
+const sqlite = new Sqlite("./data/db.sqlite3");
 sqlite.pragma("journal_mode = WAL");
 
 const dialect = new SqliteDialect({

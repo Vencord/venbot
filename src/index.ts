@@ -1,4 +1,4 @@
-import "./env";
+import "./config";
 
 import "./Commands";
 
@@ -13,7 +13,7 @@ import { Vaius } from "./Client";
 import { PROD } from "./constants";
 import { BotState } from "./db/botState";
 // eslint-disable-next-line no-duplicate-imports
-import { DEV_CHANNEL_ID } from "./env";
+import Config from "./config";
 import { initModListeners } from "./modules/moderate";
 import { handleCommandInteraction } from "./SlashCommands";
 import { silently } from "./util/functions";
@@ -50,7 +50,7 @@ export async function handleError(title: string, err: unknown) {
     const stack = err instanceof Error && err.stack;
     const text = stack || inspect(err);
 
-    await Vaius.rest.channels.createMessage(DEV_CHANNEL_ID, {
+    await Vaius.rest.channels.createMessage(Config.channels.dev, {
         embeds: [{
             title,
             description: toCodeblock(text, stack ? "js" : ""),
@@ -65,7 +65,7 @@ process.on("uncaughtException", async err => {
     await silently(handleError("Uncaught Exception. Restarting process", err));
     try {
         // proxy shouldn't throw but uncaughtException means anything could have happened so just in case
-        BotState.helloChannelId = DEV_CHANNEL_ID;
+        BotState.helloChannelId = Config.channels.dev;
     } catch { }
 
     process.exit(1);

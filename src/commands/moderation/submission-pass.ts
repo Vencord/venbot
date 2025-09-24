@@ -2,11 +2,15 @@ import { ChannelTypes } from "oceanic.js";
 
 import { Vaius } from "~/Client";
 import { defineCommand } from "~/Commands";
+import Config from "~/config";
 import { Emoji } from "~/constants";
-import { COMMUNITY_CATEGORY_CHANNEL_ID, COMMUNITY_POST_PASS_ROLE_ID } from "~/env";
 import { resolveUserId } from "~/util/resolvers";
 
+const { categoryId, enabled, passRoleId } = Config.submissionPass;
+
 defineCommand({
+    enabled,
+
     name: "submissionpass",
     aliases: ["spass", "subpass", "sp"],
     description: "Allow this user to post one submission",
@@ -20,7 +24,7 @@ defineCommand({
 
         await msg.guild.addMemberRole(
             id,
-            COMMUNITY_POST_PASS_ROLE_ID,
+            passRoleId,
             `Submission pass granted by ${msg.author.tag}`
         );
 
@@ -28,12 +32,14 @@ defineCommand({
     },
 });
 
-Vaius.on("threadCreate", async thread => {
-    if (thread.parent?.type !== ChannelTypes.GUILD_FORUM || thread.parent?.parent?.id !== COMMUNITY_CATEGORY_CHANNEL_ID)
-        return;
+if (enabled) {
+    Vaius.on("threadCreate", async thread => {
+        if (thread.parent?.type !== ChannelTypes.GUILD_FORUM || thread.parent?.parent?.id !== categoryId)
+            return;
 
-    const member = thread.guild.members.get(thread.ownerID) ?? await thread.guild.getMember(thread.ownerID).catch(() => null);
-    if (member?.roles.includes(COMMUNITY_POST_PASS_ROLE_ID)) {
-        member.removeRole(COMMUNITY_POST_PASS_ROLE_ID, "Submission pass used");
-    }
-});
+        const member = thread.guild.members.get(thread.ownerID) ?? await thread.guild.getMember(thread.ownerID).catch(() => null);
+        if (member?.roles.includes(passRoleId)) {
+            member.removeRole(passRoleId, "Submission pass used");
+        }
+    });
+}

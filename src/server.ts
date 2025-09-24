@@ -1,10 +1,12 @@
 import Fastify from "fastify";
 
 import { readFile } from "fs/promises";
+import Config from "./config";
 import { PROD } from "./constants";
-import { HTTP_SERVER_LISTEN_PORT } from "./env";
 import { getGitRemote } from "./util/git";
 import { makeLazy } from "./util/lazy";
+
+const { enabled, port } = Config.httpServer;
 
 export const fastify = Fastify({
     logger: !PROD && {
@@ -21,18 +23,22 @@ const getIndex = makeLazy(async () => {
     return contents.replace("%GIT_SOURCE_URL%", remote);
 });
 
-fastify.get("/", async (req, res) => {
-    res
-        .type("text/html")
-        .send(await getIndex());
-});
+if (enabled) {
+    fastify.get("/", async (req, res) => {
+        res
+            .type("text/html")
+            .send(await getIndex());
 
-// defer listen to allow for fastify plugins to be registered before starting the server
-setImmediate(() => {
-    fastify.listen({ port: HTTP_SERVER_LISTEN_PORT }, err => {
-        if (err) {
-            fastify.log.error(err);
-            process.exit(1);
-        }
+
     });
-});
+
+    // defer listen to allow for fastify plugins to be registered before starting the server
+    setImmediate(() => {
+        fastify.listen({ port: port }, err => {
+            if (err) {
+                fastify.log.error(err);
+                process.exit(1);
+            }
+        });
+    });
+}
