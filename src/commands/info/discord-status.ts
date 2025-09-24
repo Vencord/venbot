@@ -1,4 +1,5 @@
 import { defineCommand } from "~/Commands";
+import { handleError } from "~/index";
 import { fetchJson } from "~/util/fetch";
 import { stripIndent, toTitle } from "~/util/text";
 
@@ -41,7 +42,7 @@ interface DiscordComponentsResponse {
         status: string;
         description: string;
         position: number;
-        created_at: string
+        created_at: string;
     }>;
 }
 
@@ -112,10 +113,10 @@ defineCommand({
 
 async function getDiscordStatusComponents(): Promise<DiscordComponentsResponse | null> {
     return fetchJson("https://discordstatus.com/api/v2/components.json")
-        .catch(e => console.error("Error fetching Discord components:", e));
+        .catch(e => handleError("Error fetching Discord components:", e));
 }
 
 async function getDiscordStatusIncidents(): Promise<DiscordIncdentsResponse | null> {
     return fetchJson("https://discordstatus.com/api/v2/incidents.json")
-        .catch(e => console.error("Error fetching Discord incidents:", e));
+        .catch(e => handleError("Error fetching Discord incidents:", e));
 }

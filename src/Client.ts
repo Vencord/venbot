@@ -1,5 +1,6 @@
 import { AnyTextableChannel, Client, Message } from "oceanic.js";
 
+import { handleError } from ".";
 import { CommandContext, Commands } from "./Commands";
 import Config from "./config";
 import { Emoji, Millis, SUPPORT_ALLOWED_CHANNELS } from "./constants";
@@ -119,11 +120,7 @@ async function handleMessage(msg: Message, isEdit: boolean) {
         else
             await cmd.execute(context, ...args);
     } catch (e) {
-        console.error(
-            `Failed to run ${cmd.name}`,
-            `\n> ${msg.content}\n`,
-            e
-        );
+        handleError(`Failed to run ${cmd.name}`, e);
         silently(reply(msg, { content: "oop, that didn't go well 💥" }));
     }
 }

@@ -8,6 +8,7 @@ import { isTruthy, silently } from "~/util/functions";
 import { until } from "~/util/time";
 
 import Config from "~/config";
+import { handleError } from "..";
 import { Vaius } from "../Client";
 import { ASSET_DIR, Millis } from "../constants";
 
@@ -309,7 +310,7 @@ export async function lobotomiseMaybe(msg: Message<AnyTextableGuildChannel>) {
 
         return true;
     } catch (e) {
-        console.error("Failed to lobotomise", e);
+        handleError(`Failed to lobotomise ${msg.referencedMessage.member?.id}`, e);
         return false;
     }
 }

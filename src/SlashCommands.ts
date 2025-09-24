@@ -1,5 +1,6 @@
 import { AnyInteractionChannel, AnyInteractionGateway, AnyTextableGuildChannel, AutocompleteInteraction, CommandInteraction, ComponentInteraction, ComponentTypes, InteractionTypes, MessageFlags, ModalSubmitInteraction, SelectMenuTypes } from "oceanic.js";
 
+import { handleError } from ".";
 import { OwnerId, Vaius } from "./Client";
 import Config from "./config";
 
@@ -93,7 +94,7 @@ Vaius.on("interactionCreate", async interaction => {
     try {
         await handler.handle(interaction);
     } catch (e) {
-        console.error("Error handling interaction", e);
+        handleError("Error handling interaction", e);
 
         if (interaction.type === InteractionTypes.APPLICATION_COMMAND) {
             const message = `An error occurred: ${e}`;

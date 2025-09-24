@@ -7,6 +7,7 @@ import { defineCommand } from "~/Commands";
 import Config from "~/config";
 import { Millis } from "~/constants";
 import { db } from "~/db";
+import { handleError } from "~/index";
 import { removeStickyRoles } from "~/modules/stickyRoles";
 import { fastify } from "~/server";
 import { getAsMemberInHomeGuild, sendDm } from "~/util/discord";
@@ -218,7 +219,7 @@ enabled && fastify.register(
                     rolesToAdd = rolesToAdd.filter(role => role.result !== false);
                 } catch (err) {
                     if (!(err instanceof CheckError))
-                        console.error("Error while linking role for", req.query.userId, err);
+                        handleError(`Error while linking role for ${req.query.userId}`, err);
 
                     const message = err instanceof CheckError
                         ? err.message
