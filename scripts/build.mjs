@@ -92,4 +92,5 @@ await esbuild.build({
     inject: ["components-jsx/runtime.ts"],
     jsxFactory: "createElement",
     jsxFragment: "Fragment",
+    logOverride: { "direct-eval": "silent" }
 });
