@@ -54,7 +54,7 @@ const Config = {
     // rule command
     "rules": {
         "enabled": true,
-        "rulesChannelId": "1042507929485586532"
+        "rulesChannelId": "1015074670963335219"
     },
 
     // known issue command
