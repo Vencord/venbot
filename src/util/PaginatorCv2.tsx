@@ -1,9 +1,9 @@
-import { nanoid } from "nanoid";
 import { ButtonStyles, CreateMessageOptions, Message, MessageComponent, MessageFlags } from "oceanic.js";
 
 import { Emoji, Millis } from "~/constants";
 import { silently } from "~/util/functions";
 
+import { randomUUID } from "crypto";
 import { ActionRow, Button, Container, TextDisplay } from "~components";
 import { reply } from "./discord";
 import { BasePaginator, paginators } from "./Paginator";
@@ -12,7 +12,7 @@ import { Promiseable } from "./types";
 export class PaginatorCv2<T> implements BasePaginator {
     private _timeout: NodeJS.Timeout | undefined = undefined;
 
-    public readonly id = nanoid();
+    public readonly id = randomUUID();
     public readonly totalPages: number;
 
     public message: Message | null = null;
