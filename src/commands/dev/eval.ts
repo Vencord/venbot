@@ -1,5 +1,6 @@
 
 import { defineCommand } from "~/Commands";
+import Config from "~/config";
 import { AnsiBackgroundColor, ansiFormatText, AnsiTextColor } from "~/util/ansiFormat";
 import { inspect } from "~/util/inspect";
 import { countOccurrences, toCodeblock } from "~/util/text";
@@ -24,6 +25,25 @@ function makeFakeConsole() {
         error: makeLog(AnsiTextColor.Red),
         debug: makeLog(AnsiTextColor.Gray),
     };
+}
+
+const toRedact = [
+    Config.token,
+    Config.adventOfCode.cookie,
+    Config.githubLinking.clientSecret,
+    Config.githubLinking.pat,
+    Config.reporter.pat,
+    Config.reporter.webhookSecret
+];
+
+function redactCredentials(str: string) {
+    for (const secret of toRedact) {
+        if (secret) {
+            str = str.replaceAll(secret, "[REDACTED]");
+        }
+    }
+
+    return str;
 }
 
 defineCommand({
@@ -60,11 +80,11 @@ defineCommand({
 
         if (typeof result === "function") result = result.toString();
 
-        let res = inspect(result, { getters: true });
+        let res = redactCredentials(inspect(result, { getters: true }));
         res = res.slice(0, 2000 - 10 - countOccurrences(res, "`"));
 
         let output = toCodeblock(res, "js");
-        const consoleOutput = console._lines.join("\n").slice(0, Math.max(0, 1990 - output.length));
+        const consoleOutput = redactCredentials(console._lines.join("\n")).slice(0, Math.max(0, 1990 - output.length));
 
         if (consoleOutput) output += `\n${toCodeblock(consoleOutput, "ansi")}`;
 
