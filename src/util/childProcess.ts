@@ -13,7 +13,7 @@ export const spawnP = function spawn(...args: Parameters<typeof cp.spawn>) {
                 if (code === 0) {
                     resolve();
                 } else {
-                    reject(new Error(`Process exited with code ${code}`));
+                    reject(new Error(`Process ${args[0]} exited with code ${code} (args: ${args[1].join(" ")})`));
                 }
             });
         })

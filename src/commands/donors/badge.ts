@@ -66,6 +66,7 @@ handleInteraction({
                     value: String(i)
                 }))
                 .filter(b => b.name.toLowerCase().includes(oldBadgeInput.toLowerCase()))
+                .slice(0, 25)
             ?? []
         );
     }
@@ -76,12 +77,6 @@ function normaliseCdnUrl(rawUrl: string) {
     if (url.host !== "cdn.discordapp.com" || url.pathname.includes("/attachments/")) return rawUrl;
 
     url.searchParams.set("size", "128");
-
-    const isAnimated = url.searchParams.get("animated") === "true";
-    if (url.pathname.endsWith(".webp")) {
-        const newExt = isAnimated ? "gif" : "png";
-        url.pathname = url.pathname.slice(0, -4) + newExt;
-    }
 
     return url.toString();
 }
