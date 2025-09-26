@@ -93,6 +93,22 @@ const LinkedRoles: Array<{
             name: "Contributor",
             id: Config.roles.contributor,
             async check(user, accessToken) {
+                const prsRes = await fetchJson(`https://api.github.com/search/issues?q=author:${user.login}+org:Vencord+is:pr+is:merged+repo:Vendicated%2FVencord&per_page=1`, {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`
+                    }
+                }).catch(() => null);
+
+                if (!prsRes)
+                    throw new CheckError("Failed to fetch user PRs from GitHub");
+
+                const prs = safeParse(eventsSchema, prsRes);
+                if (!prs.success)
+                    throw new CheckError("Failed to parse user PRs from GitHub");
+
+                if (prs.output.total_count > 0)
+                    return `Based on ${prs.output.total_count} merged PRs`;
+
                 const res = await fetchJson(`https://api.github.com/search/commits?q=author:${user.login}+org:Vencord+repo:Vendicated%2FVencord&per_page=1`, {
                     headers: {
                         Authorization: `Bearer ${accessToken}`
