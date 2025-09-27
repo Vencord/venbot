@@ -45,9 +45,13 @@ async function optimizeImage(imgData: Buffer, ext: string) {
 
     child.stdin!.end(imgData);
 
+    const res = await buffer(child.stdout!);
+
     return [
-        await buffer(child.stdout!),
-        ext === "gif" ? "gif" : "webp"
+        res.byteLength < imgData.byteLength ? res : imgData,
+        ext === "gif" ? "gif" : "webp",
+        imgData.byteLength,
+        res.byteLength
     ] as const;
 }
 
@@ -210,9 +214,13 @@ handleInteraction({
 
         let imgData: Buffer = await fetchBuffer(url);
         let ext = new URL(url).pathname.split(".").pop()!;
+        let footer = "";
 
         if (optimize) {
-            ([imgData, ext] = await optimizeImage(imgData, ext));
+            let sizes: [number, number];
+            ([imgData, ext, ...sizes] = await optimizeImage(imgData, ext));
+
+            footer = `${(sizes[0] / 1024).toFixed(2)}k -> ${(sizes[1] / 1024).toFixed(2)}k\n`;
         }
 
         const hash = createHash("sha1").update(imgData).digest("hex");
@@ -252,7 +260,7 @@ handleInteraction({
         }
 
         i.createFollowup({
-            content: "Done!",
+            content: `Done!${footer && "\n\n-# " + footer}`,
             flags: MessageFlags.EPHEMERAL
         });
     }
