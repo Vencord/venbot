@@ -166,27 +166,7 @@ export async function moderateImageHosts(msg: Message) {
 const inviteRe = /discord(?:(?:app)?\.com\/invite|\.gg)\/([a-z0-9-]+)/ig;
 const allowedGuilds = new Set([
     Config.homeGuildId,
-    "1015060230222131221", // vencord
-    "811255666990907402", // aliucord
-    "1015931589865246730", // vendetta
-    "86004744966914048", // betterdiscord
-    "538759280057122817", // powercord
-    "950850315601711176", // enmity
-    "920674107111137340", // stupidity archive
-    "820732039253852171", // armcord
-    "458997239738793984", // strencher
-    "917308687423533086", // manti (reviewdb)
-    "613425648685547541", // ddevs
-    "891039687785996328", // kernel
-    "244230771232079873", // progamers hangout
-    "1096357702931841148", // decor
-    "449175561529589761", // blackbox (userbg)
-    "1196075698301968455", // pyoncord
-    "1154257010532032512", // moonlight
-    "961691461554950145", // hyprland
-    "1097993424931672216", // aero
-    "1116074561734197270", // dziurwa insane
-    "820745488231301210", // ntts
+    ...Config.moderation.inviteAllowedGuilds
 ]);
 
 async function getInviteImage(code: string) {
