@@ -57,7 +57,7 @@ function renderStickers(stickers: Expression[]) {
     return formatCountAndName(data);
 }
 
-async function createTop({ msg, reply }: CommandContext, user: User | null, expressionType: ExpressionType, usageType = ExpressionUsageType.MESSAGE) {
+async function createTop({ msg, reply }: CommandContext, user: User | null, noDeleted: boolean, expressionType: ExpressionType, usageType = ExpressionUsageType.MESSAGE) {
     let builder = db
         .selectFrom("expressionUses")
         .innerJoin("expressions", "expressions.id", "expressionUses.id")
@@ -78,9 +78,17 @@ async function createTop({ msg, reply }: CommandContext, user: User | null, expr
     if (user)
         builder = builder.where("userId", "=", user.id);
 
-    const stats = await builder.execute();
+    let stats = await builder.execute();
 
     const name = usageType === ExpressionUsageType.REACTION ? "reaction" : expressionType;
+
+    if (noDeleted && msg.guild) {
+        const expressions = expressionType === ExpressionType.EMOJI
+            ? msg.guild.emojis
+            : msg.guild.stickers;
+
+        stats = stats.filter(s => expressions.has(s.id));
+    }
 
     if (!stats.length)
         return reply(`No ${name}s have been tracked yet! D:`);
@@ -99,11 +107,18 @@ async function createTop({ msg, reply }: CommandContext, user: User | null, expr
     await paginator.create(msg);
 }
 
-const makeTop = (isUserMode: boolean) => async (ctx: CommandContext, type?: string, userInput?: string) => {
+const makeTop = (isUserMode: boolean) => async (ctx: CommandContext, type?: string, arg1?: string, arg2?: string) => {
     const { msg, reply } = ctx;
 
     type ||= "emojis";
     type = type.toLowerCase();
+
+    if (arg1 === "--no-deleted") {
+        ([arg1, arg2] = [arg2, arg1]);
+    }
+
+    let userInput = arg1;
+    let noDeleted = arg2 === "--no-deleted";
 
     let user = isUserMode ? msg.author : null;
     if (isUserMode && userInput) {
@@ -113,13 +128,13 @@ const makeTop = (isUserMode: boolean) => async (ctx: CommandContext, type?: stri
     }
 
     if ("emojis".startsWith(type) || "emotes".startsWith(type))
-        return createTop(ctx, user, ExpressionType.EMOJI);
+        return createTop(ctx, user, noDeleted, ExpressionType.EMOJI);
 
     if ("stickers".startsWith(type))
-        return createTop(ctx, user, ExpressionType.STICKER);
+        return createTop(ctx, user, noDeleted, ExpressionType.STICKER);
 
     if ("reactions".startsWith(type))
-        return createTop(ctx, user, ExpressionType.EMOJI, ExpressionUsageType.REACTION);
+        return createTop(ctx, user, noDeleted, ExpressionType.EMOJI, ExpressionUsageType.REACTION);
 
     return reply("Invalid type. Must be one of: `emojis`, `stickers`, `reactions`");
 };
@@ -128,7 +143,7 @@ defineCommand({
     name: "top",
     aliases: ["st", "stats"],
     description: "Get stats about most used emojis or stickers",
-    usage: "<emojis | stickers | reactions>",
+    usage: "<emojis | stickers | reactions> [--no-deleted]",
     execute: makeTop(false),
 });
 
@@ -136,6 +151,6 @@ defineCommand({
     name: "mytop",
     aliases: ["myt", "myst", "mystats"],
     description: "Get stats about your most used emojis or stickers",
-    usage: "<emojis | stickers | reactions> [user]",
+    usage: "<emojis | stickers | reactions> [user] [--no-deleted]",
     execute: makeTop(true),
 });
