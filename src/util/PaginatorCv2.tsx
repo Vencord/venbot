@@ -131,7 +131,7 @@ export class PaginatorCv2<T> implements BasePaginator {
                         disabled={isFirstPage}
                     />
                     <Button
-                        customID={`paginator:go-to:${id}`}
+                        customID={`paginator:go-to-modal:${id}`}
                         style={ButtonStyles.PRIMARY}
                         emoji={{ name: Emoji.InputNumbers }}
                         disabled={totalPages === 1}
@@ -167,11 +167,14 @@ export class PaginatorCv2<T> implements BasePaginator {
             : page;
 
         let footerText = isTableOfContents
-            ? "Table of Contents"
+            ? null
             : `Page ${actualPage + 1}/${this.totalPages}`;
 
         if (this.footerExtra) {
-            footerText += `  •  ${this.footerExtra}`;
+            if (footerText)
+                footerText += `  •  ${this.footerExtra}`;
+            else
+                footerText = this.footerExtra;
         }
 
         const data = isTableOfContents
@@ -186,7 +189,7 @@ export class PaginatorCv2<T> implements BasePaginator {
             <>
                 <TextDisplay># {title}</TextDisplay>
                 {typeof data === "string" ? <TextDisplay>{data}</TextDisplay> : data}
-                <TextDisplay>-# {footerText}</TextDisplay>
+                {!!footerText && <TextDisplay>-# {footerText}</TextDisplay>}
             </>
         );
     }

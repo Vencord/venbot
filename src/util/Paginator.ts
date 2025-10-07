@@ -1,4 +1,4 @@
-import { ButtonStyles, ComponentTypes, CreateMessageOptions, EmbedOptions, InteractionTypes, Message, MessageFlags, TextInputStyles } from "oceanic.js";
+import { ButtonStyles, ComponentTypes, CreateMessageOptions, EmbedOptions, GuildComponentSelectMenuInteraction, InteractionTypes, Message, MessageFlags, TextInputStyles } from "oceanic.js";
 
 import { Emoji, Millis } from "~/constants";
 import { handleInteraction } from "~/SlashCommands";
@@ -131,7 +131,7 @@ export class Paginator<T> implements BasePaginator {
                     },
                     {
                         type: ComponentTypes.BUTTON,
-                        customID: `paginator:go-to:${id}`,
+                        customID: `paginator:go-to-modal:${id}`,
                         style: ButtonStyles.PRIMARY,
                         emoji: { name: Emoji.InputNumbers },
                         disabled: totalPages === 1,
@@ -205,7 +205,7 @@ handleInteraction({
                 flags: MessageFlags.EPHEMERAL
             });
 
-        if (action !== "go-to")
+        if (action !== "go-to-modal")
             await interaction.deferUpdate();
 
         switch (action) {
@@ -222,9 +222,15 @@ handleInteraction({
                 await paginator.lastPage();
                 break;
             case "go-to":
+                if (!interaction.isSelectMenuComponentInteraction()) return;
+
+                const page = Number((interaction as GuildComponentSelectMenuInteraction).data.values.getStrings()[0]);
+                await paginator.navigateTo(page);
+                break;
+            case "go-to-modal":
                 await interaction.createModal({
                     title: "Go To Page",
-                    customID: `paginator:go-to-submit:${id}`,
+                    customID: `paginator:go-to-modal-submit:${id}`,
                     components: [{
                         type: ComponentTypes.ACTION_ROW,
                         components: [{
@@ -245,7 +251,7 @@ handleInteraction({
 
 handleInteraction({
     type: InteractionTypes.MODAL_SUBMIT,
-    isMatch: i => i.data.customID.startsWith("paginator:go-to-submit:"),
+    isMatch: i => i.data.customID.startsWith("paginator:go-to-modal-submit:"),
     async handle(interaction) {
         const [, , id] = interaction.data.customID.split(":");
         const paginator = paginators.get(id);

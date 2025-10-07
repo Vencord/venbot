@@ -2,7 +2,7 @@ import { CreateMessageOptions, EditMessageOptions, MessageComponent, MessageFlag
 
 import { childrenToArray } from "./utils";
 
-type MessageOptions = CreateMessageOptions | EditMessageOptions;
+type MessageOptions = CreateMessageOptions & EditMessageOptions;
 export type ComponentMessageProps = MessageOptions & { children: MessageComponent[]; };
 
 export function ComponentMessage({ children, flags, ...props }: ComponentMessageProps): MessageOptions {
