@@ -120,31 +120,31 @@ export class PaginatorCv2<T> implements BasePaginator {
                 <ActionRow>
                     <Button
                         customID={`paginator:first:${id}`}
-                        style={ButtonStyles.PRIMARY}
+                        style={ButtonStyles.SECONDARY}
                         emoji={{ name: Emoji.DoubleLeft }}
                         disabled={isFirstPage}
                     />
                     <Button
                         customID={`paginator:prev:${id}`}
-                        style={ButtonStyles.PRIMARY}
+                        style={ButtonStyles.SECONDARY}
                         emoji={{ name: Emoji.Left }}
                         disabled={isFirstPage}
                     />
                     <Button
                         customID={`paginator:go-to-modal:${id}`}
-                        style={ButtonStyles.PRIMARY}
+                        style={ButtonStyles.SECONDARY}
                         emoji={{ name: Emoji.InputNumbers }}
                         disabled={totalPages === 1}
                     />
                     <Button
                         customID={`paginator:next:${id}`}
-                        style={ButtonStyles.PRIMARY}
+                        style={ButtonStyles.SECONDARY}
                         emoji={{ name: Emoji.Right }}
                         disabled={isLastPage}
                     />
                     <Button
                         customID={`paginator:last:${id}`}
-                        style={ButtonStyles.PRIMARY}
+                        style={ButtonStyles.SECONDARY}
                         emoji={{ name: Emoji.DoubleRight }}
                         disabled={isLastPage}
                     />
