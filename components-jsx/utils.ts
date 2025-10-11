@@ -27,3 +27,11 @@ export function childrenToArray(children: any) {
     }
     return [children];
 }
+
+export function singleChild(name: string, children: any) {
+    if (!Array.isArray(children) || children.length !== 1) {
+        throw new Error(`${name} must have exactly one child`);
+    }
+
+    return children[0];
+}

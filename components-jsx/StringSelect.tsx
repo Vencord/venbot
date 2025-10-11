@@ -1,4 +1,4 @@
-import { ComponentTypes, StringSelectMenu } from "oceanic.js";
+import { ComponentTypes, SelectOption, StringSelectMenu } from "oceanic.js";
 
 import { childrenToArray } from "./utils";
 
@@ -10,4 +10,8 @@ export function StringSelect({ children, ...props }: StringSelectProps): StringS
         options: childrenToArray(children),
         ...props
     };
+}
+
+export function StringOption(props: SelectOption) {
+    return props;
 }

@@ -1,4 +1,4 @@
-import { ActivityTypes, AnyTextableGuildChannel, ApplicationCommandTypes, ButtonStyles, ChannelTypes, CommandInteraction, ComponentInteraction, ComponentTypes, InteractionTypes, MessageActionRow, MessageFlags, SelectMenuTypes, TextButton, TextChannel, TextInputStyles } from "oceanic.js";
+import { ActivityTypes, AnyTextableGuildChannel, ApplicationCommandTypes, ButtonStyles, ChannelTypes, CommandInteraction, ComponentInteraction, ComponentTypes, InteractionTypes, MessageActionRow, MessageFlags, ModalSubmitInteraction, TextButton, TextChannel, TextInputStyles } from "oceanic.js";
 
 import { db } from "~/db";
 import { handleCommandInteraction, handleComponentInteraction, handleInteraction } from "~/SlashCommands";
@@ -6,6 +6,7 @@ import { sendDm } from "~/util/discord";
 import { stripIndent } from "~/util/text";
 
 import Config from "~/config";
+import { ModalLabel, StringSelect, TextDisplay, TextInput } from "~components";
 import { Vaius } from "../Client";
 import { defineCommand } from "../Commands";
 import { Emoji, PROD } from "../constants";
@@ -14,7 +15,6 @@ const { banRoleId, channelId, enabled, logChannelId, modRoleId } = Config.modmai
 
 const enum Ids {
     OPEN_TICKET = "modmail:open_ticket",
-    OPEN_CONFIRM = "modmail:open_confirm",
     OPEN_SUBMIT = "modmail:open_submit",
 
     REASON_MONKEY = "modmail:iamamonkey",
@@ -49,7 +49,7 @@ function getThreadParent() {
     return c as TextChannel;
 }
 
-async function createModmailConfirm(interaction: GuildInteraction) {
+async function createModmailModal(interaction: GuildInteraction) {
     if (interaction.member.roles.includes(banRoleId)) {
         return interaction.createMessage({
             content: "You are banned from using modmail.",
@@ -57,69 +57,83 @@ async function createModmailConfirm(interaction: GuildInteraction) {
         });
     }
 
-    interaction.createMessage({
-        content: "Why are you creating this ticket?",
-        flags: MessageFlags.EPHEMERAL,
-        components: [{
-            type: ComponentTypes.ACTION_ROW,
-            components: [{
-                type: ComponentTypes.STRING_SELECT,
-                customID: Ids.OPEN_CONFIRM,
-                options: [
-                    {
-                        label: "I want to submit my plugin",
-                        value: Ids.REASON_PLUGIN,
-                        emoji: { name: "🧩" }
-                    },
-                    {
-                        label: "I want to submit my css snippet",
-                        value: Ids.REASON_CSS,
-                        emoji: { name: "🎨" }
-                    },
-                    {
-                        label: "I want to submit my js snippet",
-                        value: Ids.REASON_JS,
-                        emoji: { name: "🛠️" }
-                    },
-                    {
-                        label: "I need help with Vencord",
-                        value: Ids.REASON_MONKEY + 1,
-                        emoji: { name: "🛟" }
-                    },
-                    {
-                        label: "I need to talk to a moderator",
-                        value: Ids.REASON_MOD,
-                        emoji: { name: "👥" }
-                    },
-                    {
-                        label: "I donated and want to redeem my rewards",
-                        value: Ids.REASON_DONOR,
-                        emoji: { name: "🤝" }
-                    },
-                    {
-                        label: "I need Vencord support",
-                        value: Ids.REASON_MONKEY + 2,
-                        emoji: { name: "🛟" }
-                    },
-                    {
-                        label: "I just want to test modmail",
-                        value: Ids.REASON_MONKEY + 3,
-                        emoji: { name: "🛟" }
-                    },
-                    {
-                        label: "My Vencord is broken!",
-                        value: Ids.REASON_MONKEY + 4,
-                        emoji: { name: "🛟" }
-                    }
-                ]
-            }]
-        }]
+    const options = [
+        {
+            label: "I donated and want to redeem my rewards",
+            value: Ids.REASON_DONOR,
+            emoji: { name: "❤️" }
+        },
+        {
+            label: "I need help with Vencord",
+            value: Ids.REASON_MONKEY + 1,
+            emoji: { name: "🛟" }
+        },
+        {
+            label: "My Vencord is broken!",
+            value: Ids.REASON_MONKEY + 2,
+            emoji: { name: "🛟" }
+        },
+        {
+            label: "I need to talk to a moderator",
+            value: Ids.REASON_MOD,
+            emoji: { name: "👥" }
+        },
+        {
+            label: "I want to submit my css snippet",
+            value: Ids.REASON_CSS,
+            emoji: { name: "🎨" }
+        },
+        {
+            label: "I want to submit my plugin",
+            value: Ids.REASON_PLUGIN,
+            emoji: { name: "🧩" }
+        },
+        {
+            label: "I want to submit my js snippet",
+            value: Ids.REASON_JS,
+            emoji: { name: "🛠️" }
+        },
+    ];
+
+    await interaction.createModal({
+        title: "Open a Ticket",
+        customID: Ids.OPEN_SUBMIT,
+        components: <>
+            <TextDisplay>
+                {stripIndent`
+                    Before submitting your ticket, please make sure it follows the rules:
+                    - Tickets are **only for issues regarding this server** that require moderator attention
+                    - Tickets are **not for Vencord support or questions**! Use <#1026515880080842772>
+                    - We only moderate things that happen in this server. **Don't report users for things that happened elsewhere**. This includes DMs, unless it's a scam or ad. Block users to stop them from messaging you.
+                `}
+            </TextDisplay>
+
+            <ModalLabel label="Why are you opening this ticket?">
+                <StringSelect
+                    placeholder="Choose a Reason"
+                    customID="reason"
+                    required
+                >
+                    {options}
+                </StringSelect>
+            </ModalLabel>
+
+            <ModalLabel label="Type your message" description="Include any relevant information. You can attach media after submitting this form.">
+                <TextInput
+                    style={TextInputStyles.PARAGRAPH}
+                    placeholder="Write your message here..."
+                    customID="message"
+                    minLength={20}
+                    maxLength={1000}
+                    required
+                />
+            </ModalLabel>
+        </>
     });
 }
 
 defineCommand({
     enabled,
-
     name: "modmail:post",
     ownerOnly: true,
     description: "Post the modmail message",
@@ -150,20 +164,20 @@ if (enabled) {
     handleCommandInteraction({
         name: COMMAND_NAME,
         guildOnly: true,
-        handle: createModmailConfirm
+        handle: createModmailModal
     });
 
     handleComponentInteraction({
         customID: Ids.OPEN_TICKET,
         guildOnly: true,
-        handle: createModmailConfirm
+        handle: createModmailModal
     });
 
 
-    handleComponentInteraction({
-        customID: Ids.OPEN_CONFIRM,
-        guildOnly: true,
-        async handle(interaction: ComponentInteraction<SelectMenuTypes, AnyTextableGuildChannel>) {
+    handleInteraction({
+        type: InteractionTypes.MODAL_SUBMIT,
+        isMatch: i => i.data.customID === Ids.OPEN_SUBMIT,
+        async handle(interaction: ModalSubmitInteraction<TextChannel>) {
             if (interaction.member.roles.includes(banRoleId)) {
                 return interaction.createMessage({
                     content: "You are banned from using modmail.",
@@ -171,11 +185,13 @@ if (enabled) {
                 });
             }
 
-            const reason = interaction.data.values.getStrings()[0];
+            const message = interaction.data.components.getTextInput("message", true);
+            // TODO: use getStringSelectValues once my pr was merged
+            const reason = interaction.data.components.getStringSelectComponent("reason", true).values[0];
 
             if (reason.startsWith(Ids.REASON_MONKEY)) {
                 return await interaction.createMessage({
-                    content: `This form is NOT FOR VENCORD SUPPORT OR TESTING. To get Vencord support, use <#${Config.channels.support}>`,
+                    content: `To get Vencord support, use <#${Config.channels.support}>`,
                     flags: MessageFlags.EPHEMERAL
                 });
             }
@@ -186,34 +202,6 @@ if (enabled) {
                     flags: MessageFlags.EPHEMERAL
                 });
             }
-
-            await interaction.createModal({
-                title: "Open a Ticket",
-                customID: `${Ids.OPEN_SUBMIT}:${reason}`,
-                components: [{
-                    type: ComponentTypes.ACTION_ROW,
-                    components: [{
-                        type: ComponentTypes.TEXT_INPUT,
-                        label: "Why are you creating this ticket?",
-                        customID: "message",
-                        placeholder: "You will be able to attach media & more info after submitting this form",
-                        style: TextInputStyles.PARAGRAPH,
-                        required: true,
-                        minLength: 20,
-                        maxLength: 1000
-                    }]
-                }]
-            });
-        }
-    });
-
-    handleInteraction({
-        type: InteractionTypes.MODAL_SUBMIT,
-        isMatch: i => i.data.customID.startsWith(Ids.OPEN_SUBMIT + ":"),
-        async handle(interaction) {
-            const message = interaction.data.components.getTextInput("message");
-
-            const reason = interaction.data.customID.slice(Ids.OPEN_SUBMIT.length + 1);
 
             await interaction.defer(MessageFlags.EPHEMERAL);
 
