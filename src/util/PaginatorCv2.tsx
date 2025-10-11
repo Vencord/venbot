@@ -1,10 +1,10 @@
-import { ButtonStyles, CreateMessageOptions, Message, MessageComponent, MessageFlags } from "oceanic.js";
+import { ButtonStyles, CreateMessageOptions, Message, MessageComponent, MessageFlags, SeparatorSpacingSize } from "oceanic.js";
 
 import { Emoji, Millis } from "~/constants";
 import { silently } from "~/util/functions";
 
 import { randomUUID } from "crypto";
-import { ActionRow, Button, Container, TextDisplay } from "~components";
+import { ActionRow, Button, Container, Separator, TextDisplay } from "~components";
 import { reply } from "./discord";
 import { BasePaginator, paginators } from "./Paginator";
 import { Promiseable } from "./types";
@@ -114,41 +114,42 @@ export class PaginatorCv2<T> implements BasePaginator {
         return {
             flags: MessageFlags.IS_COMPONENTS_V2,
             components: <>
-                <Container>
+                <Container accentColor={0x5865F2}>
                     {await this.buildComponents(page)}
+                    <Separator spacing={SeparatorSpacingSize.LARGE} />
+                    <ActionRow>
+                        <Button
+                            customID={`paginator:first:${id}`}
+                            style={ButtonStyles.PRIMARY}
+                            emoji={{ name: Emoji.DoubleLeft }}
+                            disabled={isFirstPage}
+                        />
+                        <Button
+                            customID={`paginator:prev:${id}`}
+                            style={ButtonStyles.PRIMARY}
+                            emoji={{ name: Emoji.Left }}
+                            disabled={isFirstPage}
+                        />
+                        <Button
+                            customID={`paginator:go-to-modal:${id}`}
+                            style={ButtonStyles.PRIMARY}
+                            emoji={{ name: Emoji.InputNumbers }}
+                            disabled={totalPages === 1}
+                        />
+                        <Button
+                            customID={`paginator:next:${id}`}
+                            style={ButtonStyles.PRIMARY}
+                            emoji={{ name: Emoji.Right }}
+                            disabled={isLastPage}
+                        />
+                        <Button
+                            customID={`paginator:last:${id}`}
+                            style={ButtonStyles.PRIMARY}
+                            emoji={{ name: Emoji.DoubleRight }}
+                            disabled={isLastPage}
+                        />
+                    </ActionRow>
                 </Container>
-                <ActionRow>
-                    <Button
-                        customID={`paginator:first:${id}`}
-                        style={ButtonStyles.SECONDARY}
-                        emoji={{ name: Emoji.DoubleLeft }}
-                        disabled={isFirstPage}
-                    />
-                    <Button
-                        customID={`paginator:prev:${id}`}
-                        style={ButtonStyles.SECONDARY}
-                        emoji={{ name: Emoji.Left }}
-                        disabled={isFirstPage}
-                    />
-                    <Button
-                        customID={`paginator:go-to-modal:${id}`}
-                        style={ButtonStyles.SECONDARY}
-                        emoji={{ name: Emoji.InputNumbers }}
-                        disabled={totalPages === 1}
-                    />
-                    <Button
-                        customID={`paginator:next:${id}`}
-                        style={ButtonStyles.SECONDARY}
-                        emoji={{ name: Emoji.Right }}
-                        disabled={isLastPage}
-                    />
-                    <Button
-                        customID={`paginator:last:${id}`}
-                        style={ButtonStyles.SECONDARY}
-                        emoji={{ name: Emoji.DoubleRight }}
-                        disabled={isLastPage}
-                    />
-                </ActionRow>
             </>
         } satisfies CreateMessageOptions;
     }
