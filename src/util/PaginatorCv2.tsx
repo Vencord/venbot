@@ -1,9 +1,10 @@
 import { ButtonStyles, CreateMessageOptions, Message, MessageComponent, MessageFlags, SeparatorSpacingSize } from "oceanic.js";
 
-import { Emoji, Millis } from "~/constants";
+import { Millis } from "~/constants";
 import { silently } from "~/util/functions";
 
 import { randomUUID } from "crypto";
+import { getEmojiData } from "~/modules/emojiManager";
 import { ActionRow, Button, Container, Separator, TextDisplay } from "~components";
 import { reply } from "./discord";
 import { BasePaginator, paginators } from "./Paginator";
@@ -120,32 +121,32 @@ export class PaginatorCv2<T> implements BasePaginator {
                     <ActionRow>
                         <Button
                             customID={`paginator:first:${id}`}
-                            style={ButtonStyles.PRIMARY}
-                            emoji={{ name: Emoji.DoubleLeft }}
+                            style={ButtonStyles.SECONDARY}
+                            emoji={getEmojiData("nav_first_page")}
                             disabled={isFirstPage}
                         />
                         <Button
                             customID={`paginator:prev:${id}`}
-                            style={ButtonStyles.PRIMARY}
-                            emoji={{ name: Emoji.Left }}
+                            style={ButtonStyles.SECONDARY}
+                            emoji={getEmojiData("nav_chevron_left")}
                             disabled={isFirstPage}
                         />
                         <Button
                             customID={`paginator:go-to-modal:${id}`}
-                            style={ButtonStyles.PRIMARY}
-                            emoji={{ name: Emoji.InputNumbers }}
+                            style={ButtonStyles.SECONDARY}
+                            emoji={getEmojiData("nav_dots")}
                             disabled={totalPages === 1}
                         />
                         <Button
                             customID={`paginator:next:${id}`}
-                            style={ButtonStyles.PRIMARY}
-                            emoji={{ name: Emoji.Right }}
+                            style={ButtonStyles.SECONDARY}
+                            emoji={getEmojiData("nav_chevron_right")}
                             disabled={isLastPage}
                         />
                         <Button
                             customID={`paginator:last:${id}`}
-                            style={ButtonStyles.PRIMARY}
-                            emoji={{ name: Emoji.DoubleRight }}
+                            style={ButtonStyles.SECONDARY}
+                            emoji={getEmojiData("nav_last_page")}
                             disabled={isLastPage}
                         />
                     </ActionRow>
