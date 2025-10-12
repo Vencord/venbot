@@ -19,6 +19,7 @@ export class PaginatorCv2<T> implements BasePaginator {
     public message: Message | null = null;
     public userId: string = "";
     public currentPage = 0;
+    public isDestroyed = false;
 
     public getPageData: (page: number) => T[] = this._getPageData;
     public getTitle = (page: number) => this.title;
@@ -50,7 +51,7 @@ export class PaginatorCv2<T> implements BasePaginator {
     }
 
     async create(targetMessage: Message) {
-        await this.destroy();
+        await this.destroy(true);
 
         this.message = await reply(targetMessage, await this.buildMessageData(0));
 
@@ -59,10 +60,14 @@ export class PaginatorCv2<T> implements BasePaginator {
         paginators.set(this.id, this);
     }
 
-    async destroy() {
+    async destroy(isReset = false) {
+        if (!isReset) {
+            this.isDestroyed = true;
+        }
+
         if (this.message) {
             // might error if the message is deleted
-            silently(this.message.edit({ components: [] }));
+            silently(this.message!.edit(await this.buildMessageData(this.currentPage, true)));
             this.message = null;
         }
 
@@ -107,49 +112,54 @@ export class PaginatorCv2<T> implements BasePaginator {
         }
     }
 
-    private async buildMessageData(page: number) {
+    private async buildMessageData(page: number, noNav = false) {
         const { id, totalPages, totalPagesWithTableOfContents } = this;
         const isFirstPage = page === 0;
         const isLastPage = page === totalPagesWithTableOfContents - 1;
+
+        const { body, footer } = await this.buildComponents(page);
 
         return {
             flags: MessageFlags.IS_COMPONENTS_V2,
             components: <>
                 <Container accentColor={0x5865F2}>
-                    {await this.buildComponents(page)}
-                    <Separator spacing={SeparatorSpacingSize.LARGE} />
-                    <ActionRow>
-                        <Button
-                            customID={`paginator:first:${id}`}
-                            style={ButtonStyles.SECONDARY}
-                            emoji={getEmojiData("nav_first_page")}
-                            disabled={isFirstPage}
-                        />
-                        <Button
-                            customID={`paginator:prev:${id}`}
-                            style={ButtonStyles.SECONDARY}
-                            emoji={getEmojiData("nav_chevron_left")}
-                            disabled={isFirstPage}
-                        />
-                        <Button
-                            customID={`paginator:go-to-modal:${id}`}
-                            style={ButtonStyles.SECONDARY}
-                            emoji={getEmojiData("nav_dots")}
-                            disabled={totalPages === 1}
-                        />
-                        <Button
-                            customID={`paginator:next:${id}`}
-                            style={ButtonStyles.SECONDARY}
-                            emoji={getEmojiData("nav_chevron_right")}
-                            disabled={isLastPage}
-                        />
-                        <Button
-                            customID={`paginator:last:${id}`}
-                            style={ButtonStyles.SECONDARY}
-                            emoji={getEmojiData("nav_last_page")}
-                            disabled={isLastPage}
-                        />
-                    </ActionRow>
+                    {body}
+                    {!noNav && <>
+                        <Separator spacing={SeparatorSpacingSize.LARGE} />
+                        <ActionRow>
+                            <Button
+                                customID={`paginator:first:${id}`}
+                                style={ButtonStyles.SECONDARY}
+                                emoji={getEmojiData("nav_first_page")}
+                                disabled={isFirstPage}
+                            />
+                            <Button
+                                customID={`paginator:prev:${id}`}
+                                style={ButtonStyles.SECONDARY}
+                                emoji={getEmojiData("nav_chevron_left")}
+                                disabled={isFirstPage}
+                            />
+                            <Button
+                                customID={`paginator:go-to-modal:${id}`}
+                                style={ButtonStyles.SECONDARY}
+                                emoji={getEmojiData("nav_dots")}
+                                disabled={totalPages === 1}
+                            />
+                            <Button
+                                customID={`paginator:next:${id}`}
+                                style={ButtonStyles.SECONDARY}
+                                emoji={getEmojiData("nav_chevron_right")}
+                                disabled={isLastPage}
+                            />
+                            <Button
+                                customID={`paginator:last:${id}`}
+                                style={ButtonStyles.SECONDARY}
+                                emoji={getEmojiData("nav_last_page")}
+                                disabled={isLastPage}
+                            />
+                        </ActionRow>
+                    </>}
+                    {footer}
                 </Container>
             </>
         } satisfies CreateMessageOptions;
@@ -187,13 +197,13 @@ export class PaginatorCv2<T> implements BasePaginator {
             ? this.title
             : this.getTitle(actualPage);
 
-        return (
-            <>
+        return {
+            body: <>
                 <TextDisplay># {title}</TextDisplay>
                 {typeof data === "string" ? <TextDisplay>{data}</TextDisplay> : data}
-                {!!footerText && <TextDisplay>-# {footerText}</TextDisplay>}
-            </>
-        );
+            </>,
+            footer: footerText ? <TextDisplay>-# {footerText}</TextDisplay> : null
+        };
     }
 
     private startTimeout() {

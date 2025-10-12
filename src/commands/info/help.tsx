@@ -7,7 +7,7 @@ import { getGitRemote } from "~/util/git";
 import { groupBy } from "~/util/groupBy";
 import { PaginatorCv2 } from "~/util/PaginatorCv2";
 import { makeEmbedSpaces, snakeToTitle, stripIndent, toCodeblock, toInlineCode, toTitle } from "~/util/text";
-import { ActionRow, ComponentMessage, Container, Separator, StringSelect, TextDisplay } from "~components";
+import { ActionRow, ComponentMessage, Container, Separator, StringOption, StringSelect, TextDisplay } from "~components";
 
 defineCommand({
     name: "help",
@@ -38,20 +38,20 @@ defineCommand({
 
 const formatCategory = (category: string) => toTitle(category, /[ -]/) + " Commands";
 
-function JumpToCategory({ pages, paginatorId }: { pages: string[], paginatorId: string; }) {
+function JumpToCategory({ pages, paginator }: { pages: string[], paginator: PaginatorCv2<FullCommand>; }) {
     return (
         <>
             <Separator spacing={SeparatorSpacingSize.LARGE} />
             <ActionRow>
-                <StringSelect customID={`paginator:go-to:${paginatorId}`} placeholder="Jump to category">
-                    {pages.map((p, i) => ({ label: formatCategory(p), value: String(i) }))}
+                <StringSelect customID={`paginator:go-to:${paginator.id}`} placeholder="Jump to category" disabled={paginator.isDestroyed}>
+                    {pages.map((p, i) => <StringOption label={formatCategory(p)} value={String(i)} />)}
                 </StringSelect>
             </ActionRow>
         </>
     );
 }
 
-async function renderTableOfContents(pages: string[], { prefix, commandName }: CommandContext, id: string) {
+async function renderTableOfContents(pages: string[], { prefix, commandName }: CommandContext, paginator: PaginatorCv2<FullCommand>) {
     const description = stripIndent`
         My ${Config.prefixes.length === 1 ? "prefix is" : "prefixes are"} ${Config.prefixes.map(toInlineCode).join(", ")}.
         Use \`${prefix}${commandName} <command>\` for more information on a specific command!
@@ -62,12 +62,12 @@ async function renderTableOfContents(pages: string[], { prefix, commandName }: C
     return (
         <>
             <TextDisplay>{description}</TextDisplay>
-            <JumpToCategory pages={pages} paginatorId={id} />
+            <JumpToCategory pages={pages} paginator={paginator} />
         </>
     );
 }
 
-function renderHelpPage(Commands: FullCommand[], { prefix, commandName }: CommandContext, pages: string[], paginatorId: string) {
+function renderHelpPage(Commands: FullCommand[], { prefix, commandName }: CommandContext, pages: string[], paginator: PaginatorCv2<FullCommand>) {
     const longestNameLength = Commands.reduce((max, { name }) => Math.max(max, name.length), 0) + 1;
 
     const commandDescriptions = Commands.map(({ name, description }, i) => {
@@ -82,7 +82,7 @@ function renderHelpPage(Commands: FullCommand[], { prefix, commandName }: Comman
             <TextDisplay>{commandDescriptions}</TextDisplay>
             <Separator spacing={SeparatorSpacingSize.LARGE} divider={false} />
             <TextDisplay>{footer}</TextDisplay>
-            <JumpToCategory pages={pages} paginatorId={paginatorId} />
+            <JumpToCategory pages={pages} paginator={paginator} />
         </>
     );
 }
@@ -97,15 +97,15 @@ async function createCommandList(ctx: CommandContext) {
 
     const pages = Object.keys(categories);
 
-    const paginator = new PaginatorCv2<FullCommand>(
+    const paginator: PaginatorCv2<FullCommand> = new PaginatorCv2<FullCommand>(
         "Help Menu",
         pages as any,
         1,
-        (commands, page) => renderHelpPage(commands, ctx, pages, paginator.id)
+        (commands, page) => renderHelpPage(commands, ctx, pages, paginator)
     );
     paginator.getPageData = page => categories[pages[page]];
     paginator.getTitle = page => formatCategory(pages[page]);
-    paginator.renderTableOfContents = () => renderTableOfContents(pages, ctx, paginator.id);
+    paginator.renderTableOfContents = () => renderTableOfContents(pages, ctx, paginator);
 
     paginator.create(ctx.msg);
 }
