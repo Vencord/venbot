@@ -48,20 +48,30 @@ const ai = new GoogleGenAI({ apiKey });
 
 const getSystemPrompt = makeLazy(() => readFile(join(ASSET_DIR, "gemini-system-prompt.txt"), "utf-8"));
 
-async function generateContent(config: Omit<GenerateContentParameters, "model">, model = models[0]) {
+async function generateContent(params: Omit<GenerateContentParameters, "model">, model = models[0]) {
     try {
+        const response = await ai.models.generateContent({
+            ...params,
+            config: {
+                ...params.config,
+                tools: model === models[0]
+                    ? [{
+                        googleSearch: {}
+                    }]
+                    : []
+            },
+            model,
+        });
+
         return {
-            response: await ai.models.generateContent({
-                ...config,
-                model
-            }),
+            response,
             model
         };
     } catch (e) {
         if (e instanceof ApiError && e.status === 429) {
             const nextModel = models[models.indexOf(model) + 1];
             if (nextModel) {
-                return generateContent(config, nextModel);
+                return generateContent(params, nextModel);
             }
         }
 

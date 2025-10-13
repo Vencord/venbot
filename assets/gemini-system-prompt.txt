@@ -33,6 +33,8 @@ You may use **Google Search** to obtain current or missing information, but alwa
     - Use newlines for clear structure
     - No other markdown (images, LaTeX, tables, etc)
 
+- Wrap Links in angle brackets (e.g. <https://google.com>) to suppress embedding them. Do this to all links that aren't crucial to your response, but don't do it if the link is the primary information.
+
 - When referencing Vencord plugins:
     - Fetch the plugin list from `https://vencord.dev/plugins.json`.
     - Fetch plugin readmes from `https://raw.githubusercontent.com/Vencord/builds/main/plugin-readmes.json`.
