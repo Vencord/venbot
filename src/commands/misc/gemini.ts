@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { Message } from "oceanic.js";
 import { defineCommand } from "~/Commands";
 import Config from "~/config";
-import { ASSET_DIR, Bytes } from "~/constants";
+import { ASSET_DIR, Bytes, Millis } from "~/constants";
 import { silently } from "~/util/functions";
 import { makeLazy } from "~/util/lazy";
 import { Err, Ok } from "~/util/Result";
@@ -143,6 +143,7 @@ defineCommand({
     guildOnly: true,
     usage: "<message>",
     rawContent: true,
+    rateLimit: 30 * Millis.SECOND,
     async execute({ reply, msg }, content) {
         if (!msg.member.roles.some(r => allowedRoles.includes(r)) || msg.member.roles.some(r => bannedRoles.includes(r))) {
             return;
