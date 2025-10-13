@@ -20,6 +20,7 @@
     "keywords": [],
     "author": "Vendicated <vendicated+npm@riseup.net>",
     "dependencies": {
+        "@google/genai": "^1.24.0",
         "@napi-rs/canvas": "^0.1.80",
         "better-sqlite3": "^12.4.1",
         "fastify": "^5.6.1",

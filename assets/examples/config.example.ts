@@ -46,6 +46,7 @@ const Config = {
             "1088566810976194693", // needy
             "1061276426478813245", // no support
             "1205614728148422716", // no programming
+            "1427368278866792669", // no ai
             "1241355250129178775", // angelsachse (no german)
             "1136184488498561035", // snippet dev
         ]
@@ -96,6 +97,22 @@ const Config = {
         "enabled": true,
         "categoryId": "1256395889354997771",
         "passRoleId": "1257065526019231945"
+    },
+
+    // gemini ai command
+    "gemini": {
+        "enabled": false,
+        "apiKey": "",
+        "allowedRoles": [
+            "1026509424686284924", // mod
+            "1042507929485586532", // donor
+            "1026534353167208489", // contributor
+            "1026504932959977532", // regular
+        ],
+        "bannedRoles": [
+            "1427368278866792669", // no ai
+            "1018310742874791977"  // brain rot
+        ],
     },
 
     "modmail": {
