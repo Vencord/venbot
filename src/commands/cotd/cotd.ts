@@ -15,15 +15,15 @@ defineCommand({
 
         return reply({
             embeds: [{
-                description: `The cozy of the day is ${colorName}! (${toHexColorString(regularRole.color)})`,
-                color: regularRole.color,
+                description: `The cozy of the day is ${colorName}! (${toHexColorString(regularRole.colors.primaryColor)})`,
+                color: regularRole.colors.primaryColor,
                 image: {
                     url: "attachment://blobcatcozy.png"
                 }
             }],
             files: [{
                 name: "blobcatcozy.png",
-                contents: await drawBlobCatCozy(toHexColorString(regularRole.color)) // role icons are non-perma links
+                contents: await drawBlobCatCozy(toHexColorString(regularRole.colors.primaryColor)) // role icons are non-perma links
             }]
         });
     }

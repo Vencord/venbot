@@ -28,7 +28,9 @@ handleCommandInteraction({
 
         const role = await i.guild.createRole({
             name,
-            color: parseInt(color, 16),
+            colors: {
+                primaryColor: parseInt(color, 16),
+            },
             icon: iconBuf,
             hoist: false,
             mentionable: false,

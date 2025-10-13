@@ -56,7 +56,9 @@ export async function rerollCotd(inputHex?: string) {
 
     await getHomeGuild()!.editRole(Config.roles.regular, {
         name: `regular (${name.toLowerCase()})`,
-        color,
+        colors: {
+            primaryColor: color,
+        },
         icon,
         reason: "Rerolled cozy of the day"
     });
