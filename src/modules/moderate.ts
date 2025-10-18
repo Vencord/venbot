@@ -90,16 +90,16 @@ async function moderateMultiChannelSpam(msg: Message<AnyTextableGuildChannel>) {
             if (!channelsMessaged.size)
                 channelsMessagedUserMap.delete(msg.author.id);
         }
-    }, 5 * Millis.SECOND);
+    }, 15 * Millis.SECOND);
 
     if (channelsMessaged.size < 3) return false;
 
     await msg.member.edit({
         communicationDisabledUntil: until(1 * Millis.HOUR),
-        reason: "Messaged >=3 different channels within 5 seconds"
+        reason: "Messaged >=3 different channels within 15 seconds"
     });
 
-    logModerationAction(`Muted <@${msg.author.id}> for messaging >=3 different channels within 5 seconds`, makeEmbedForMessage(msg));
+    logModerationAction(`Muted <@${msg.author.id}> for messaging >=3 different channels within 15 seconds`, makeEmbedForMessage(msg));
 
     await silently(msg.delete());
 
