@@ -14,20 +14,48 @@ export function makeLazy<T>(factory: () => T): () => T {
     };
 }
 
-export function ttlLazy<Args extends unknown[], Res>(factory: (...args: Args) => Res, ttl: number): (...args: Args) => Res {
+/**
+ * Return this value from the factory to skip caching the result and make this call return `null
+ */
+export const ttlLazyFailure = Symbol("TtlLazySkip");
+type TtlLazyFailure = typeof ttlLazyFailure;
+
+type TtlLazyReturn<Res> = Res extends Promise<infer T>
+    ? Promise<TtlLazyReturn<T>>
+    : TtlLazyFailure extends Res
+    ? Exclude<Res, TtlLazyFailure> | null
+    : Res;
+
+export function ttlLazy<Args extends unknown[], Res>(factory: (...args: Args) => Res, ttl: number): (...args: Args) => TtlLazyReturn<Res> {
     let cachedValue: Res | null = null;
     let cacheTimestamp = 0;
 
     const wrapper = (...args: Args) => {
         if (Date.now() - cacheTimestamp > ttl) {
-            cachedValue = factory(...args);
+            let res = factory(...args);
+            if (res === ttlLazyFailure) {
+                return null;
+            }
+
+            if (res instanceof Promise) {
+                res = res.then(r => {
+                    if (r === ttlLazyFailure) {
+                        cacheTimestamp = 0;
+                        return null;
+                    }
+
+                    return r;
+                }) as any;
+            }
+
+            cachedValue = res;
             cacheTimestamp = Date.now();
         }
 
         return cachedValue!;
     };
 
-    return Object.assign(
+    return <any>Object.assign(
         wrapper,
         {
             wrappedFunction: factory,
