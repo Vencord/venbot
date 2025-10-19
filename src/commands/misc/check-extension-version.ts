@@ -1,5 +1,7 @@
 import { defineCommand } from "~/Commands";
 import { doFetch, makeCachedJsonFetch } from "~/util/fetch";
+import { Err, Ok } from "~/util/Result";
+import { toInlineCode } from "~/util/text";
 
 interface GithubTag {
     name: string;
@@ -16,9 +18,15 @@ defineCommand({
     usage: null,
     async execute({ reply }) {
         const res = await doFetch("https://chromewebstore.google.com/detail/vencord-web/cbghhgpcnddeihccjmnadmkaejncjndb")
-            .then(res => res.text());
+            .then(res => res.text())
+            .then(Ok)
+            .catch(e => Err(String(e)));
 
-        const version = VersionRe.exec(res)?.[1];
+        if (!res.ok) {
+            return reply(`Failed to fetch the Vencord Chrome Extension page. Try again later! (${toInlineCode(res.error)})`);
+        }
+
+        const version = VersionRe.exec(res.value)?.[1];
 
         if (!version) return reply("Failed to look up the Vencord Chrome Extension version :( Try again later!");
 
