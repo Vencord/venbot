@@ -145,7 +145,11 @@ async function handleReportSubmit(report: ReportData, data: any) {
     }, 0);
 
     if (descriptionTooLarge || contentLength > 6000) {
-        data.embeds[1].description = "The report is too long to display here. Please check [on GitHub](https://github.com/Vendicated/Vencord/actions/workflows/reportBrokenPlugins.yml).";
+        data.embeds.forEach((embed, i) => {
+            if (i !== 0) {
+                embed.description = "The report is too long to display here. Please check [on GitHub](https://github.com/Vendicated/Vencord/actions/workflows/reportBrokenPlugins.yml).";
+            }
+        });
     }
 
     report.onSubmit?.(report, data);
