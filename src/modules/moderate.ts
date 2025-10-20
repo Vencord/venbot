@@ -142,8 +142,8 @@ export async function moderateNick(member: Member) {
     const normalizedName = name
         .normalize("NFKC")
         .replace(HoistCharactersRegex, "")
-        .replace(/[\u0300-\u036f\u0489]+/g, "") // diacritics
-        .replaceAll(/[\u3099-\u309C]/g, "") // renders as a space and can be used for "empty" usernames
+        .replace(/[\u0300-\u036f\u0489]/g, "") // diacritics
+        .replace(/[\u20df\u3099-\u309C]/g, "") // renders as a space and can be used for "empty" usernames
         .replaceAll("﷽", "")
         .trim()
         || member.username.replace(HoistCharactersRegex, "").trim()

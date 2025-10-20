@@ -1,4 +1,5 @@
 import { createHmac, randomUUID, timingSafeEqual } from "crypto";
+import { EmbedOptions } from "oceanic.js";
 
 import { Vaius } from "~/Client";
 import Config from "~/config";
@@ -127,6 +128,25 @@ async function handleReportSubmit(report: ReportData, data: any) {
     };
     // trolley
     data.embeds[0].author.iconURL = data.embeds[0].author.icon_url;
+
+    let descriptionTooLarge = false;
+    const contentLength = data.embeds.reduce((total: number, embed: EmbedOptions) => {
+        if (embed.description && embed.description.length > 4096) descriptionTooLarge = true;
+
+        const lengths = [
+            total,
+            embed.title?.length || 0,
+            embed.description?.length || 0,
+            embed.author?.name?.length || 0,
+            embed.footer?.text?.length || 0
+        ];
+
+        return lengths.reduce((a, b) => a + b, 0);
+    }, 0);
+
+    if (descriptionTooLarge || contentLength > 6000) {
+        data.embeds[1].description = "The report is too long to display here. Please check [on GitHub](https://github.com/Vendicated/Vencord/actions/workflows/reportBrokenPlugins.yml).";
+    }
 
     report.onSubmit?.(report, data);
 
