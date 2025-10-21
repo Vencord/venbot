@@ -4,10 +4,11 @@ import { AnyTextableGuildChannel, AutoModerationActionTypes, EmbedOptions, Membe
 import { join } from "path";
 
 import { reply, sendDm } from "~/util/discord";
-import { isTruthy, silently } from "~/util/functions";
+import { silently } from "~/util/functions";
 import { until } from "~/util/time";
 
 import Config from "~/config";
+import { isTruthy } from "~/util/guards";
 import { handleError } from "..";
 import { Vaius } from "../Client";
 import { ASSET_DIR, Millis } from "../constants";
