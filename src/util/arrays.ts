@@ -9,3 +9,7 @@ export function groupBy<T, K extends PropertyKey>(arr: T[], keyFn: (item: T) => 
 
     return map;
 }
+
+export function deduplicate<T>(arr: T[]): T[] {
+    return arr.filter((item, index) => arr.indexOf(item) === index);
+}

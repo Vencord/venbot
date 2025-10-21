@@ -1,9 +1,9 @@
-import { Embed } from "oceanic.js";
 
 import { Vaius } from "~/Client";
 import { defineCommand } from "~/Commands";
 import Config from "~/config";
 import { Emoji, Millis } from "~/constants";
+import { deduplicate } from "~/util/arrays";
 import { run, silently } from "~/util/functions";
 import { isNonNullish } from "~/util/guards";
 import { ttlLazy } from "~/util/lazy";
@@ -37,7 +37,7 @@ defineCommand({
         const results = run(() => {
             const isSearch = query.some(c => isNaN(Number(c)));
 
-            if (!isSearch) return query.map(n => rules[Number(n) - 1]);
+            if (!isSearch) return deduplicate(query.map(n => rules[Number(n) - 1]));
 
             const search = query.join(" ").toLowerCase();
 
@@ -51,30 +51,43 @@ defineCommand({
         if (!results.length || !results.every(isNonNullish))
             return react(Emoji.QuestionMark);
 
-        const embeds: Embed[] = results.map(r => ({
-            title: `Rule ${r.title}`,
-            description: r.description,
-            color: 0xdd7878,
-        }));
-
         const isReply = !!msg.referencedMessage;
+
+        const options = run(() => {
+            const footer = isReply ? { text: `Auto-response invoked by ${msg.author.tag}` } : undefined;
+
+            if (results.length > 3) {
+                return {
+                    embeds: [{
+                        description: `Please read the rules -> <#${rulesChannelId}>`,
+                        color: 0xdd7878,
+                        footer
+                    }]
+                };
+            }
+
+            return {
+                embeds: results.map((r, i) => ({
+                    title: `Rule ${r.title}`,
+                    description: r.description,
+                    color: 0xdd7878,
+                    footer: i === results.length - 1 ? footer : undefined
+                }))
+            };
+        });
+
         if (isReply) {
             silently(msg.delete());
-            embeds.at(-1)!.footer = {
-                text: `Auto-response invoked by ${msg.author.tag}`,
-            };
 
             return msg.channel.createMessage({
                 messageReference: {
                     messageID: msg.referencedMessage?.id ?? msg.id,
                 },
                 allowedMentions: { repliedUser: isReply },
-                embeds: embeds,
+                ...options
             });
         }
 
-        reply({
-            embeds: embeds,
-        });
+        reply(options);
     },
 });
