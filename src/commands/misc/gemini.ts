@@ -68,7 +68,8 @@ async function generateContent(params: Omit<GenerateContentParameters, "model">,
             model
         };
     } catch (e) {
-        if (e instanceof ApiError && e.status === 429) {
+        // 503 = model overloaded
+        if (e instanceof ApiError && (e.status === 429 || e.status === 503)) {
             const nextModel = models[models.indexOf(model) + 1];
             if (nextModel) {
                 return generateContent(params, nextModel);
