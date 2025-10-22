@@ -1,4 +1,4 @@
-import { ChannelTypes } from "oceanic.js";
+import { ChannelTypes, Guild } from "oceanic.js";
 
 import { Vaius } from "~/Client";
 import { defineCommand } from "~/Commands";
@@ -7,6 +7,14 @@ import { Emoji } from "~/constants";
 import { resolveUserId } from "~/util/resolvers";
 
 const { categoryId, enabled, passRoleId } = Config.submissionPass;
+
+export function grantSubmissionPass(guild: Guild, userId: string, grantedBy: string) {
+    return guild.addMemberRole(
+        userId,
+        passRoleId,
+        `Submission pass granted by ${grantedBy}`
+    );
+}
 
 defineCommand({
     enabled,
@@ -22,11 +30,7 @@ defineCommand({
         if (!id)
             return reply("Invalid user input");
 
-        await msg.guild.addMemberRole(
-            id,
-            passRoleId,
-            `Submission pass granted by ${msg.author.tag}`
-        );
+        await grantSubmissionPass(msg.guild, id, msg.author.tag);
 
         return react(Emoji.CheckMark);
     },

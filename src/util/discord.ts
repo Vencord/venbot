@@ -51,3 +51,7 @@ export async function sendDm(user: User, data: CreateMessageOptions) {
     return dm.createMessage(data)
         .catch(() => false as const);
 }
+
+export function formatEmoji(emoji: { id: string; name: string; animated: boolean; }) {
+    return `<${emoji.animated ? "a" : ""}:${emoji.name}:${emoji.id}>`;
+}

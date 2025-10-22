@@ -1,15 +1,18 @@
-import { ActivityTypes, AnyTextableGuildChannel, ApplicationCommandTypes, ButtonStyles, ChannelTypes, CommandInteraction, ComponentInteraction, ComponentTypes, InteractionTypes, MessageActionRow, MessageFlags, ModalSubmitInteraction, TextButton, TextChannel, TextInputStyles } from "oceanic.js";
+import { ActivityTypes, AnyTextableGuildChannel, ApplicationCommandTypes, ButtonStyles, ChannelTypes, CommandInteraction, ComponentInteraction, ComponentTypes, InteractionTypes, MessageFlags, ModalSubmitInteraction, TextChannel, TextInputStyles } from "oceanic.js";
 
 import { db } from "~/db";
 import { handleCommandInteraction, handleComponentInteraction, handleInteraction } from "~/SlashCommands";
-import { sendDm } from "~/util/discord";
 import { stripIndent } from "~/util/text";
 
+import { grantSubmissionPass } from "~/commands/moderation/submission-pass";
 import Config from "~/config";
-import { ModalLabel, StringSelect, TextDisplay, TextInput } from "~components";
+import { sendDm } from "~/util/discord";
+import { run } from "~/util/functions";
+import { isNonNullish } from "~/util/guards";
+import { ActionRow, Button, ComponentMessage, Container, ModalLabel, StringOption, StringSelect, TextDisplay, TextInput } from "~components";
 import { Vaius } from "../Client";
 import { defineCommand } from "../Commands";
-import { Emoji, PROD } from "../constants";
+import { Emoji, MANAGEABLE_ROLES, PROD } from "../constants";
 
 const { banRoleId, channelId, enabled, logChannelId, modRoleId } = Config.modmail;
 
@@ -245,51 +248,73 @@ if (enabled) {
 
             if (!thread) return;
 
-            const msg = await thread.createMessage({
-                content: `👋 ${interaction.user.mention}\n\n${prompt}. A moderator will be with you shortly!\n### Message\n${message}`,
-                components: [{
-                    type: ComponentTypes.ACTION_ROW,
-                    components: [
-                        {
-                            type: ComponentTypes.BUTTON,
-                            label: "Close ticket",
-                            style: ButtonStyles.DANGER,
-                            customID: `modmail:close:${thread.id}`,
-                            emoji: {
-                                name: Emoji.TrashCan
-                            }
-                        },
-                        {
-                            type: ComponentTypes.BUTTON,
-                            label: "User ignored modmail rules",
-                            style: ButtonStyles.DANGER,
-                            customID: `modmail:close-ban:${thread.id}`,
-                            emoji: {
-                                name: Emoji.Hammer
-                            }
-                        },
-                        {
-                            type: ComponentTypes.BUTTON,
-                            label: "Claim ticket",
-                            style: ButtonStyles.SECONDARY,
-                            customID: `modmail:claim-ticket:${thread.id}`,
-                            emoji: {
-                                name: Emoji.Claim
-                            }
+            const msg = await thread.createMessage(
+                <ComponentMessage allowedMentions={{ users: [interaction.user.id] }}>
+                    <Container>
+                        <TextDisplay>
+                            👋 {interaction.user.mention}
+                            <br /><br />
+                            {prompt}
+                            <br />
+                            A moderator will be with you shortly!
+                        </TextDisplay>
+                    </Container>
+
+                    <Container>
+                        <TextDisplay>
+                            ### User Message
+                            <br />
+                            {message}
+                        </TextDisplay>
+
+                    </Container>
+
+                    <ActionRow>
+                        <Button
+                            customID={`modmail:close:${thread.id}`}
+                            style={ButtonStyles.DANGER}
+                            emoji={{ name: Emoji.TrashCan }}
+                        >
+                            Close ticket
+                        </Button>
+                        <Button
+                            customID={`modmail:close-ban:${thread.id}`}
+                            style={ButtonStyles.DANGER}
+                            emoji={{ name: Emoji.Hammer }}
+                        >
+                            Close ticket & modmail-ban user
+                        </Button>
+                        {reason === Ids.REASON_PLUGIN
+                            ? (
+                                <Button
+                                    customID={`modmail:approve-submission:${thread.id}`}
+                                    style={ButtonStyles.SUCCESS}
+                                    emoji={{ name: "✅" }}
+                                >
+                                    Approve Submission
+                                </Button>
+                            )
+                            : (
+                                <Button
+                                    customID={`modmail:manage-roles:${thread.id}`}
+                                    style={ButtonStyles.SECONDARY}
+                                    emoji={{ name: "👤" }}
+                                >
+                                    Manage Roles
+                                </Button>
+                            )
                         }
-                    ]
-                }],
-                allowedMentions: {
-                    users: [interaction.user.id]
-                }
-            });
+                    </ActionRow>
+                </ComponentMessage>
+            );
 
-
+            // @ts-ignore trolley
+            msg.components[0].components[0].content = msg.components[0].components[0].content.replace("moderator", `<@&${modRoleId}>`);
             await msg.edit({
                 allowedMentions: {
                     roles: [modRoleId],
                 },
-                content: msg.content.replace("moderator", `<@&${modRoleId}>`)
+                components: msg.components
             });
 
             await interaction.createFollowup({
@@ -342,23 +367,34 @@ if (enabled) {
             const member = await interaction.guild.getMember(res.userId).catch(() => null);
             if (!member) return;
 
-            if (isBan) {
-                member.addRole(banRoleId);
-                sendDm(member.user, {
-                    content: stripIndent`
-                    Your modmail ticket has been closed and you have been banned from creating tickets.
+            const messageContent = run(() => {
+                if (isBan) {
+                    member.addRole(banRoleId);
+                    return stripIndent`
+                        Your modmail ticket has been closed and you have been banned from creating tickets.
 
-                    This is most likely because you didn't follow the modmail rules. See <#${channelId}> for more information.
-                `
-                });
-            } else {
-                sendDm(member.user, {
-                    content: stripIndent`
-                    Your modmail ticket has been closed as resolved.
+                        This is most likely because you didn't follow the modmail rules. See <#${channelId}> for more information.
+                    `;
+                } else {
+                    return stripIndent`
+                        Your modmail ticket has been closed as resolved.
 
-                    It will remain accessible at ${interaction.channel.mention} for future reference.
-                `
+                        It will remain accessible at ${interaction.channel.mention} for future reference. (If it says \`#unknown\`, just click on it to load it)
+                    `;
+                }
+            });
+
+            const sentDm = await sendDm(member.user, { content: messageContent });
+            if (!sentDm) {
+                await interaction.channel.createMessage({
+                    allowedMentions: { users: [member.id] },
+                    content: stripIndent`
+                        ${member.user.mention}
+
+                        This ticket has been closed as resolved${isBan ? " and you have been banned from creating tickets due to breaking the rules.\n" : ". "}You can find this ticket again in the future via the Threads tab.
+                    `
                 });
+                await interaction.channel.edit({ archived: true, locked: true });
             }
         }
     });
@@ -366,33 +402,87 @@ if (enabled) {
     handleInteraction({
         type: InteractionTypes.MESSAGE_COMPONENT,
         guildOnly: true,
-        isMatch: i => i.data.customID.startsWith("modmail:claim-ticket:"),
+        isMatch: i => i.data.customID.startsWith("modmail:approve-submission:"),
         async handle(interaction) {
             const isModAction = interaction.member.roles.includes(modRoleId);
-
             if (!isModAction) return;
 
-            await interaction.defer(MessageFlags.EPHEMERAL);
+            await interaction.defer();
 
-            await interaction.channel.edit({
-                name: `[${interaction.member.username}] ${interaction.channel.name}`
-            });
+            const res = await db.selectFrom("tickets")
+                .where("channelId", "=", interaction.channel.id)
+                .select(["userId", "id"])
+                .executeTakeFirst();
+            if (!res) return;
 
-            // replace the Claim ticket button with a disabled one
-            const { components } = interaction.message;
-            (components[0] as MessageActionRow).components.find(
-                component =>
-                    component.type === ComponentTypes.BUTTON
-                    && (component as TextButton).customID.startsWith("modmail:claim-ticket:")
-            )!.disabled = true;
-
-            await interaction.message.edit({
-                components
-            });
+            await grantSubmissionPass(interaction.guild, res.userId, interaction.user.tag);
 
             await interaction.createFollowup({
-                content: "Ticket claimed.",
-                flags: MessageFlags.EPHEMERAL
+                content: `<@${res.userId}>\n\nYour submission was approved by ${interaction.user.tag}! You can now post it in the appropriate channel.`,
+            });
+        }
+    });
+
+    handleInteraction({
+        type: InteractionTypes.MESSAGE_COMPONENT,
+        guildOnly: true,
+        isMatch: i => i.data.customID.startsWith("modmail:manage-roles:"),
+        async handle(interaction) {
+            const isModAction = interaction.member.roles.includes(modRoleId);
+            if (!isModAction) return;
+
+            const options = MANAGEABLE_ROLES
+                .map(roleId => interaction.guild.roles.get(roleId))
+                .filter(isNonNullish)
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .slice(0, 25)
+                .map(role => <StringOption label={role.name} value={role.id} />);
+
+            await interaction.createMessage(
+                <ComponentMessage flags={MessageFlags.EPHEMERAL}>
+                    <Container>
+                        <TextDisplay>## Manage User Roles</TextDisplay>
+                        <ActionRow>
+                            <StringSelect customID={interaction.data.customID.replace("manage-roles", "add-role")} placeholder="Add role" >{options}</StringSelect>
+                        </ActionRow>
+                        <ActionRow>
+                            <StringSelect customID={interaction.data.customID.replace("manage-roles", "remove-role")} placeholder="Remove role" >{options}</StringSelect>
+                        </ActionRow>
+                    </Container>
+                </ComponentMessage>
+            );
+        }
+    });
+
+    handleInteraction({
+        type: InteractionTypes.MESSAGE_COMPONENT,
+        guildOnly: true,
+        isMatch: i => i.data.customID.startsWith("modmail:add-role:") || i.data.customID.startsWith("modmail:remove-role:"),
+        async handle(interaction: ComponentInteraction<ComponentTypes.STRING_SELECT, AnyTextableGuildChannel>) {
+            const isModAction = interaction.member.roles.includes(modRoleId);
+            if (!isModAction) return;
+
+            const roleId = interaction.data.values.getStrings()[0];
+            if (!roleId || !MANAGEABLE_ROLES.includes(roleId)) return;
+
+            const isAdd = interaction.data.customID.startsWith("modmail:add-role:");
+
+            await interaction.defer();
+
+            const res = await db.selectFrom("tickets")
+                .where("channelId", "=", interaction.channel.id)
+                .select(["userId", "id"])
+                .executeTakeFirst();
+            if (!res) return;
+
+            await interaction.guild[isAdd ? "addMemberRole" : "removeMemberRole"](
+                res.userId,
+                interaction.data.values.getStrings()[0],
+                `${isAdd ? "Added" : "Removed"} by ${interaction.user.tag} via ticket ${res.id}`
+            );
+
+            await interaction.createFollowup({
+                content: `<@${res.userId}>\n\nThe role <@&${roleId}> has been ${isAdd ? "added to" : "removed from"} you by ${interaction.user.tag}.`,
             });
         }
     });
