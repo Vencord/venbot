@@ -418,6 +418,7 @@ if (enabled) {
             await grantSubmissionPass(interaction.guild, res.userId, interaction.user.tag);
 
             await interaction.createFollowup({
+                allowedMentions: { users: [res.userId] },
                 content: `<@${res.userId}>\n\nYour submission was approved by ${interaction.user.tag}! You can now post it in the appropriate channel.`,
             });
         }
@@ -482,6 +483,7 @@ if (enabled) {
             );
 
             await interaction.createFollowup({
+                allowedMentions: { users: [res.userId] },
                 content: `<@${res.userId}>\n\nThe role <@&${roleId}> has been ${isAdd ? "added to" : "removed from"} you by ${interaction.user.tag}.`,
             });
         }
