@@ -286,7 +286,7 @@ if (enabled) {
                             {message}
                         </TextDisplay>
 
-                        <Separator spacing={SeparatorSpacingSize.LARGE} divider={false} />
+                        {files.length > 0 && <Separator spacing={SeparatorSpacingSize.LARGE} divider={false} />}
 
                         {images.length > 0 && (
                             <MediaGallery>
