@@ -13,3 +13,18 @@ export function groupBy<T, K extends PropertyKey>(arr: T[], keyFn: (item: T) => 
 export function deduplicate<T>(arr: T[]): T[] {
     return arr.filter((item, index) => arr.indexOf(item) === index);
 }
+
+export function partition<T>(arr: T[], predicate: (item: T) => boolean): [T[], T[]] {
+    const truthy: T[] = [];
+    const falsy: T[] = [];
+
+    for (const item of arr) {
+        if (predicate(item)) {
+            truthy.push(item);
+        } else {
+            falsy.push(item);
+        }
+    }
+
+    return [truthy, falsy];
+}

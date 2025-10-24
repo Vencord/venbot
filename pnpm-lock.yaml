@@ -36,8 +36,8 @@ importers:
         specifier: ^3.0.4
         version: 3.0.4
       oceanic.js:
-        specifier: 1.12.1-dev.08fc370
-        version: 1.12.1-dev.08fc370
+        specifier: 1.13.0
+        version: 1.13.0
       pako:
         specifier: ^2.1.0
         version: 2.1.0
@@ -1147,8 +1147,8 @@ packages:
       encoding:
         optional: true
 
-  oceanic.js@1.12.1-dev.08fc370:
-    resolution: {integrity: sha512-xFSLXzvDu6EwCei9bd3NvfqjcXYXF50opbHkJFl//3mH/vLSdo+fuxsO7pf/WNN0ZV+pM/oinGnQzKXhACPxWw==}
+  oceanic.js@1.13.0:
+    resolution: {integrity: sha512-WXE8KhAZI9Fv/OsD+mEYMnRq363XfDHlPLiYe52SF+ND7+HyUxYuhBxDhPx2DqXUuC7fiB4ocxiMZGvlvHLVCQ==}
     engines: {node: '>=18.13.0'}
 
   on-exit-leak-free@2.1.2:
@@ -2527,7 +2527,7 @@ snapshots:
     dependencies:
       whatwg-url: 5.0.0
 
-  oceanic.js@1.12.1-dev.08fc370:
+  oceanic.js@1.13.0:
     dependencies:
       tslib: 2.8.1
       ws: 8.18.3

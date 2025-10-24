@@ -1,4 +1,4 @@
-import { ActivityTypes, AnyTextableGuildChannel, ApplicationCommandTypes, ButtonStyles, ChannelTypes, CommandInteraction, ComponentInteraction, ComponentTypes, InteractionTypes, MessageFlags, ModalSubmitInteraction, TextChannel, TextInputStyles } from "oceanic.js";
+import { ActivityTypes, AnyTextableGuildChannel, ApplicationCommandTypes, ButtonStyles, ChannelTypes, CommandInteraction, ComponentInteraction, ComponentTypes, InteractionTypes, MessageFlags, ModalSubmitInteraction, SeparatorSpacingSize, TextChannel, TextInputStyles } from "oceanic.js";
 
 import { db } from "~/db";
 import { handleCommandInteraction, handleComponentInteraction, handleInteraction } from "~/SlashCommands";
@@ -6,10 +6,12 @@ import { stripIndent } from "~/util/text";
 
 import { grantSubmissionPass } from "~/commands/moderation/submission-pass";
 import Config from "~/config";
+import { partition } from "~/util/arrays";
 import { sendDm } from "~/util/discord";
+import { fetchBuffer } from "~/util/fetch";
 import { run } from "~/util/functions";
 import { isNonNullish } from "~/util/guards";
-import { ActionRow, Button, ComponentMessage, Container, ModalLabel, StringOption, StringSelect, TextDisplay, TextInput } from "~components";
+import { ActionRow, Button, ComponentMessage, Container, File, FileUpload, MediaGallery, MediaGalleryItem, ModalLabel, Separator, StringOption, StringSelect, TextDisplay, TextInput } from "~components";
 import { Vaius } from "../Client";
 import { defineCommand } from "../Commands";
 import { Emoji, MANAGEABLE_ROLES, PROD } from "../constants";
@@ -121,7 +123,7 @@ async function createModmailModal(interaction: GuildInteraction) {
                 </StringSelect>
             </ModalLabel>
 
-            <ModalLabel label="Type your message" description="Include any relevant information. You can attach media after submitting this form.">
+            <ModalLabel label="Type your message" description="Include any relevant information.">
                 <TextInput
                     style={TextInputStyles.PARAGRAPH}
                     placeholder="Write your message here..."
@@ -130,6 +132,9 @@ async function createModmailModal(interaction: GuildInteraction) {
                     maxLength={1000}
                     required
                 />
+            </ModalLabel>
+            <ModalLabel label="Add supporting media" description="Include any relevant attachments.">
+                <FileUpload customID="attachments" minValues={0} maxValues={10} required={false} />
             </ModalLabel>
         </>
     });
@@ -188,9 +193,7 @@ if (enabled) {
                 });
             }
 
-            const message = interaction.data.components.getTextInput("message", true);
-            // TODO: use getStringSelectValues once my pr was merged
-            const reason = interaction.data.components.getStringSelectComponent("reason", true).values[0];
+            const reason = interaction.data.components.getStringSelectValues("reason", true)[0];
 
             if (reason.startsWith(Ids.REASON_MONKEY)) {
                 return await interaction.createMessage({
@@ -248,8 +251,24 @@ if (enabled) {
 
             if (!thread) return;
 
+            const message = interaction.data.components.getTextInput("message", true);
+            const ephemeralAttachments = interaction.data.components.getFileUploadValues("attachments") ?? [];
+
+            // need to reupload attachments as the ephemeral ones will expire
+            const files = await Promise.all(ephemeralAttachments.map(async ({ url, filename, contentType }, i) => {
+                const buf = await fetchBuffer(url);
+
+                return {
+                    name: `${i}-${filename}`,
+                    contents: buf,
+                    contentType
+                };
+            }));
+
+            const [images, otherFiles] = partition(files, f => f.contentType?.startsWith("image/") ?? false);
+
             const msg = await thread.createMessage(
-                <ComponentMessage allowedMentions={{ users: [interaction.user.id] }}>
+                <ComponentMessage allowedMentions={{ users: [interaction.user.id] }} files={files}>
                     <Container>
                         <TextDisplay>
                             👋 {interaction.user.mention}
@@ -267,6 +286,14 @@ if (enabled) {
                             {message}
                         </TextDisplay>
 
+                        <Separator spacing={SeparatorSpacingSize.LARGE} divider={false} />
+
+                        {images.length > 0 && (
+                            <MediaGallery>
+                                {images.map(f => <MediaGalleryItem url={`attachment://${f.name}`} />)}
+                            </MediaGallery>
+                        )}
+                        {otherFiles.map(f => <File filename={f.name} />)}
                     </Container>
 
                     <ActionRow>
