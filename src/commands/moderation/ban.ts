@@ -24,7 +24,7 @@ function parseCrap(msg: Message<AnyTextableGuildChannel>, args: string[], isSoft
         reason = `${isSoft ? "Softbanned" : "Banned"} for message: "${content.slice(0, 400)}"`;
     }
 
-    return [possibleDays, ids, reason ? `${msg.author.tag}: ${reason}` : null] as const;
+    return [possibleDays, ids, reason] as const;
 }
 
 async function banExecutor({ msg, reply }: CommandContext<true>, args: string[], isSoft: boolean) {
@@ -46,6 +46,8 @@ async function banExecutor({ msg, reply }: CommandContext<true>, args: string[],
         return reply("Please use `softban` for scams & hacked accounts");
     }
 
+    const reasonWithMod = `${msg.author.tag}: ${reason}`;
+
     const members = await msg.guild.fetchMembers({ userIDs: ids });
     const restIds = ids.filter(id => !members.some(m => m.id === id));
 
@@ -58,7 +60,7 @@ async function banExecutor({ msg, reply }: CommandContext<true>, args: string[],
 
     const doBan = async (id: string, member?: Member) => {
         try {
-            await msg.guild.createBan(id, { reason, deleteMessageDays: daysToDelete as 0 });
+            await msg.guild.createBan(id, { reason: reasonWithMod, deleteMessageDays: daysToDelete as 0 });
 
             bannedUsers.push(`**<@${id}>**`);
 
@@ -91,7 +93,7 @@ async function banExecutor({ msg, reply }: CommandContext<true>, args: string[],
             await silently(
                 member.user.createDM()
                     .then(dm => dm.createMessage({
-                        content: `You have been ${isSoft ? "kicked" : "banned"} from the Vencord Server by ${msg.author.tag}.\n## Reason:\n${toCodeblock(reason)}`
+                        content: `You have been ${isSoft ? "kicked" : "banned"} from the Vencord Server by ${msg.author.tag}.\n## Reason:\n${toCodeblock(reasonWithMod)}`
                     }))
             );
 

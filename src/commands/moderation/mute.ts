@@ -33,7 +33,7 @@ defineCommand({
         if (!ids.length)
             return reply("Gimme some users dummy");
 
-        reason = `${msg.author.tag}: ${reason}`;
+        const reasonWithMod = `${msg.author.tag}: ${reason}`;
 
         const members = await msg.guild.fetchMembers({ userIDs: ids });
         const authorHighestRolePosition = getHighestRolePosition(msg.member);
@@ -53,11 +53,11 @@ defineCommand({
             silently(
                 member.user.createDM()
                     .then(dm => dm.createMessage({
-                        content: `You have been muted on the Vencord Server for ${durationText} by ${msg.author.tag}.\n## Reason:\n${toCodeblock(reason)}`
+                        content: `You have been muted on the Vencord Server for ${durationText} by ${msg.author.tag}.\n## Reason:\n${toCodeblock(reasonWithMod)}`
                     }))
             );
 
-            await member.edit({ communicationDisabledUntil: until(duration), reason })
+            await member.edit({ communicationDisabledUntil: until(duration), reason: reasonWithMod })
                 .then(() => mutedUsers.push(`**${member.tag}** (${member.mention})`))
                 .catch(e => fails.push(`Failed to mute **${member.tag}** (${member.mention}): \`${String(e)}\``));
 

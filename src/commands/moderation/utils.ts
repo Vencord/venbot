@@ -44,24 +44,20 @@ export function logUserRestriction(data: {
     const { title, user, id, reason, moderator, jumpLink, color } = data;
 
     logModerationAction({
-        embeds: [{
-            title,
-            author: {
-                name: user ? user.tag : id,
-                iconURL: user?.avatarURL(undefined, 128),
-            },
-            description: `${reason}\n\n[Jump to context](${jumpLink})`,
-            fields: [
-                {
-                    name: "User ID",
-                    value: `${id} - <@${id}>`,
+        content: `# ${title}`,
+        embeds: [
+            {
+                author: {
+                    name: user ? user.tag : id,
+                    iconURL: user?.avatarURL(undefined, 128),
                 },
-            ],
-            color,
-            footer: {
-                text: `Moderator: ${moderator.tag}`,
-                iconURL: moderator.avatarURL(undefined, 128),
+                description: `${id} - <@${id}>\n### Reason\n${reason}\n\n[Jump to context](${jumpLink})`,
+                color,
+                footer: {
+                    text: `Moderator: ${moderator.tag}`,
+                    iconURL: moderator.avatarURL(undefined, 128),
+                }
             }
-        }]
+        ]
     });
 }
