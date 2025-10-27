@@ -41,8 +41,9 @@ export async function logUserRestriction(data: {
     moderator: User;
     jumpLink: string;
     color?: ModerationColor;
+    expires?: Date;
 }) {
-    const { title, user, id, reason, moderator, jumpLink, color } = data;
+    const { title, user, id, reason, moderator, jumpLink, color, expires } = data;
 
     logModerationAction(
         <ComponentMessage>
@@ -62,6 +63,7 @@ export async function logUserRestriction(data: {
 
                 <Separator spacing={SeparatorSpacingSize.LARGE} />
 
+                {expires && <TextDisplay>**Expires:** {`<t:${Math.floor(expires.getTime() / 1000)}:R>`}</TextDisplay>}
                 <TextDisplay>-# by {moderator.tag}</TextDisplay>
 
                 <ActionRow>

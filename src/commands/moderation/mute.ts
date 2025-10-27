@@ -69,6 +69,7 @@ defineCommand({
                 moderator: msg.author,
                 jumpLink: msg.jumpLink,
                 color: ModerationColor.Light,
+                expires: new Date(Date.now() + duration),
             });
         }));
 
