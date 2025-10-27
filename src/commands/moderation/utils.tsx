@@ -1,9 +1,8 @@
-import { ButtonStyles, Member, User } from "oceanic.js";
-import { ZWSP } from "~/constants";
+import { ButtonStyles, Member, SeparatorSpacingSize, User } from "oceanic.js";
 
 import { getHighestRole, ID_REGEX } from "~/util/discord";
 import { logModerationAction } from "~/util/logAction";
-import { ActionRow, Button } from "~components";
+import { ActionRow, Button, ComponentMessage, Container, Section, Separator, TextDisplay, Thumbnail } from "~components";
 
 export function hasHigherRoleThan(roleId: string, member: Member) {
     const g = member.guild;
@@ -34,7 +33,7 @@ export function parseUserIdsAndReason(args: string[], defaultReason: string = "N
     return { ids, reason, hasCustomReason };
 }
 
-export function logUserRestriction(data: {
+export async function logUserRestriction(data: {
     title: string;
     user?: User;
     id: string;
@@ -45,26 +44,30 @@ export function logUserRestriction(data: {
 }) {
     const { title, user, id, reason, moderator, jumpLink, color } = data;
 
-    logModerationAction({
-        content: `# ${title}`,
-        embeds: [
-            {
-                author: {
-                    name: user ? user.tag : id,
-                    iconURL: user?.avatarURL(undefined, 128),
-                },
-                description: `${id} - <@${id}>\n### Reason\n${reason}\n${ZWSP}`,
-                color,
-                footer: {
-                    text: `Moderator: ${moderator.tag}`,
-                    iconURL: moderator.avatarURL(undefined, 128),
+    logModerationAction(
+        <ComponentMessage>
+            <Container accentColor={color}>
+                {user
+                    ? (
+                        <Section accessory={<Thumbnail url={user.avatarURL()} />}>
+                            <TextDisplay># {title}</TextDisplay>
+                            <TextDisplay>**{user.tag}**</TextDisplay>
+                            <TextDisplay>-# {`<@${id}>`} - {id}</TextDisplay>
+                        </Section>
+                    )
+                    : <TextDisplay># {title} {`<@${id}>`}</TextDisplay>
                 }
-            }
-        ],
-        components: [
-            <ActionRow>
-                <Button style={ButtonStyles.LINK} url={jumpLink}>Jump to context</Button>
-            </ActionRow>
-        ]
-    });
+
+                <TextDisplay>{reason}</TextDisplay>
+
+                <Separator spacing={SeparatorSpacingSize.LARGE} />
+
+                <TextDisplay>-# by {moderator.tag}</TextDisplay>
+
+                <ActionRow>
+                    <Button style={ButtonStyles.LINK} url={jumpLink}>Jump to context</Button>
+                </ActionRow>
+            </Container>
+        </ComponentMessage>
+    );
 }
