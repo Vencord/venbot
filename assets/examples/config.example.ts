@@ -7,10 +7,13 @@ const Config = {
     "mode": "development",
 
     "channels": {
-        // channel where venbot will post moderation logs
+        // channel where venbot will post automatic moderation logs, leave empty to disable
+        "autoModLog": "1156349646965325824",
+
+        // channel where venbot will post moderation logs (like ban, mute, etc), leave empty to disable
         "modLog": "1156349646965325824",
 
-        // this is where venbot will send information like errors
+        // channel where venbot will send information like errors
         "dev": "1033680203433660458",
         // used as default for the not-support command and some other features
         "support": "1026515880080842772",

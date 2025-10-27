@@ -1,6 +1,7 @@
-import { Member } from "oceanic.js";
+import { Member, User } from "oceanic.js";
 
 import { getHighestRole, ID_REGEX } from "~/util/discord";
+import { logModerationAction } from "~/util/logAction";
 
 export function hasHigherRoleThan(roleId: string, member: Member) {
     const g = member.guild;
@@ -29,4 +30,38 @@ export function parseUserIdsAndReason(args: string[], defaultReason: string = "N
     }
 
     return { ids, reason, hasCustomReason };
+}
+
+export function logUserRestriction(data: {
+    title: string;
+    user?: User;
+    id: string;
+    reason: string;
+    moderator: User;
+    jumpLink: string;
+    color?: number;
+}) {
+    const { title, user, id, reason, moderator, jumpLink, color } = data;
+
+    logModerationAction({
+        embeds: [{
+            title,
+            author: {
+                name: user ? user.tag : id,
+                iconURL: user?.avatarURL(undefined, 128),
+            },
+            description: `${reason}\n\n[Jump to context](${jumpLink})`,
+            fields: [
+                {
+                    name: "User ID",
+                    value: `${id} - <@${id}>`,
+                },
+            ],
+            color,
+            footer: {
+                text: `Moderator: ${moderator.tag}`,
+                iconURL: moderator.avatarURL(undefined, 128),
+            }
+        }]
+    });
 }

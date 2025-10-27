@@ -1,12 +1,11 @@
-import { AnyTextableGuildChannel, Message, MessageTypes } from "oceanic.js";
+import { AnyTextableGuildChannel, Member, Message, MessageTypes } from "oceanic.js";
 
 import { CommandContext, defineCommand } from "~/Commands";
-import { Millis } from "~/constants";
 import { silently } from "~/util/functions";
-import { pluralise, stripIndent, toCodeblock } from "~/util/text";
+import { toCodeblock } from "~/util/text";
 
 import { getEmoji } from "~/modules/emojiManager";
-import { getHighestRolePosition, parseUserIdsAndReason } from "./utils";
+import { getHighestRolePosition, logUserRestriction, parseUserIdsAndReason } from "./utils";
 
 function parseCrap(msg: Message<AnyTextableGuildChannel>, args: string[], isSoft: boolean) {
     let possibleDays = Number(args[0]) || 0;
@@ -57,11 +56,21 @@ async function banExecutor({ msg, reply }: CommandContext<true>, args: string[],
 
     const banName = isSoft ? "softban" : "ban";
 
-    const doBan = async (id: string) => {
+    const doBan = async (id: string, member?: Member) => {
         try {
             await msg.guild.createBan(id, { reason, deleteMessageDays: daysToDelete as 0 });
 
             bannedUsers.push(`**<@${id}>**`);
+
+            logUserRestriction({
+                title: isSoft ? "Soft-banned User" : "Banned User",
+                user: member?.user,
+                id,
+                reason,
+                moderator: msg.author,
+                jumpLink: msg.jumpLink,
+                color: isSoft ? 0xffa500 : 0xff0000,
+            });
 
             if (isSoft)
                 await msg.guild.removeBan(id, "soft-ban")
@@ -72,7 +81,7 @@ async function banExecutor({ msg, reply }: CommandContext<true>, args: string[],
     };
 
     await Promise.all([
-        ...restIds.map(doBan),
+        ...restIds.map(id => doBan(id)),
         ...members.map(async member => {
             if (getHighestRolePosition(member) >= authorHighestRolePosition) {
                 fails.push(`Failed to ${banName} **${member.tag}** (${member.mention}): You can't ${banName} that person!`);
@@ -86,7 +95,7 @@ async function banExecutor({ msg, reply }: CommandContext<true>, args: string[],
                     }))
             );
 
-            await doBan(member.id);
+            await doBan(member.id, member);
         }),
     ]);
 
@@ -116,31 +125,4 @@ defineCommand({
     guildOnly: true,
     modOnly: true,
     execute: (ctx, ...args) => banExecutor(ctx, args, true)
-});
-
-defineCommand({
-    name: "bulkban",
-    description: "bulk ban up to 200 users with an optional reason and delete message days",
-    usage: "[daysToDelete] <user> [user...] [reason]",
-    guildOnly: true,
-    ownerOnly: true,
-    modOnly: true,
-    async execute({ msg, reply }, ...args) {
-        const [daysToDelete, userIDs, reason] = parseCrap(msg, args, false);
-        if (!userIDs.length) return reply("Gimme some users silly");
-        if (userIDs.length > 200) return reply("That's tooooo many users bestie....");
-        if (!reason) return reply("A reason is required");
-
-        const res = await msg.guild.bulkBan({ userIDs, reason, deleteMessageSeconds: daysToDelete * Millis.DAY / 1000 })
-            .catch(e => null);
-
-        if (!res || !res.bannedUsers.length) return reply("No bans succeeded.");
-
-        if (!res.failedUsers.length) return reply(`Success! Banned ${pluralise(res.bannedUsers.length, "user")}.`);
-
-        return reply(stripIndent`
-            Successfully banned ${pluralise(res.bannedUsers.length, "user")}.
-            Failed to ban ${pluralise(res.failedUsers.length, "user")} (${res.failedUsers.join(", ")}).
-        `);
-    }
 });

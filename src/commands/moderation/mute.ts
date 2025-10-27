@@ -6,7 +6,7 @@ import { silently } from "~/util/functions";
 import { msToHumanReadable, toCodeblock } from "~/util/text";
 import { until } from "~/util/time";
 
-import { getHighestRolePosition, parseUserIdsAndReason } from "./utils";
+import { getHighestRolePosition, logUserRestriction, parseUserIdsAndReason } from "./utils";
 
 defineCommand({
     name: "mute",
@@ -60,6 +60,16 @@ defineCommand({
             await member.edit({ communicationDisabledUntil: until(duration), reason })
                 .then(() => mutedUsers.push(`**${member.tag}** (${member.mention})`))
                 .catch(e => fails.push(`Failed to mute **${member.tag}** (${member.mention}): \`${String(e)}\``));
+
+            logUserRestriction({
+                title: "Muted User",
+                user: member.user,
+                id: member.id,
+                reason,
+                moderator: msg.author,
+                jumpLink: msg.jumpLink,
+                color: 0xffff00,
+            });
         }));
 
         let content = fails.join("\n") || "Done!";

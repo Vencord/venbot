@@ -1,6 +1,6 @@
 import { defineCommand } from "~/Commands";
 
-import { parseUserIdsAndReason } from "./utils";
+import { logUserRestriction, parseUserIdsAndReason } from "./utils";
 
 defineCommand({
     name: "unban",
@@ -35,6 +35,18 @@ defineCommand({
                     return s + `(<@${id}>)`;
                 })
                 .join(", ");
+        }
+
+        for (const id of unbannedUsers) {
+            logUserRestriction({
+                title: "Unbanned User",
+                id,
+                user: msg.client.users.get(id),
+                reason,
+                moderator: msg.author,
+                jumpLink: msg.jumpLink,
+                color: 0x00ff00,
+            });
         }
 
         return reply(content);
