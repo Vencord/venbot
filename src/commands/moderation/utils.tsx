@@ -1,7 +1,9 @@
-import { Member, User } from "oceanic.js";
+import { ButtonStyles, Member, User } from "oceanic.js";
+import { ZWSP } from "~/constants";
 
 import { getHighestRole, ID_REGEX } from "~/util/discord";
 import { logModerationAction } from "~/util/logAction";
+import { ActionRow, Button } from "~components";
 
 export function hasHigherRoleThan(roleId: string, member: Member) {
     const g = member.guild;
@@ -51,13 +53,18 @@ export function logUserRestriction(data: {
                     name: user ? user.tag : id,
                     iconURL: user?.avatarURL(undefined, 128),
                 },
-                description: `${id} - <@${id}>\n### Reason\n${reason}\n\n[Jump to context](${jumpLink})`,
+                description: `${id} - <@${id}>\n### Reason\n${reason}\n${ZWSP}`,
                 color,
                 footer: {
                     text: `Moderator: ${moderator.tag}`,
                     iconURL: moderator.avatarURL(undefined, 128),
                 }
             }
+        ],
+        components: [
+            <ActionRow>
+                <Button style={ButtonStyles.LINK} url={jumpLink}>Jump to context</Button>
+            </ActionRow>
         ]
     });
 }
