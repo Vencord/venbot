@@ -40,7 +40,7 @@ export async function logUserRestriction(data: {
     reason: string;
     moderator: User;
     jumpLink: string;
-    color?: number;
+    color?: ModerationColor;
 }) {
     const { title, user, id, reason, moderator, jumpLink, color } = data;
 
@@ -70,4 +70,10 @@ export async function logUserRestriction(data: {
             </Container>
         </ComponentMessage>
     );
+}
+
+export enum ModerationColor {
+    Severe = 0xffb3ba,
+    Light = 0xffffba,
+    Positive = 0xbaffc9
 }

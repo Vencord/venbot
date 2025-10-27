@@ -1,6 +1,6 @@
 import { defineCommand } from "~/Commands";
 
-import { logUserRestriction, parseUserIdsAndReason } from "./utils";
+import { logUserRestriction, ModerationColor, parseUserIdsAndReason } from "./utils";
 
 defineCommand({
     name: "unban",
@@ -45,7 +45,7 @@ defineCommand({
                 reason,
                 moderator: msg.author,
                 jumpLink: msg.jumpLink,
-                color: 0x00ff00,
+                color: ModerationColor.Positive,
             });
         }
 

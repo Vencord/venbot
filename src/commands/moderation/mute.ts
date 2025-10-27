@@ -6,7 +6,7 @@ import { silently } from "~/util/functions";
 import { msToHumanReadable, toCodeblock } from "~/util/text";
 import { until } from "~/util/time";
 
-import { getHighestRolePosition, logUserRestriction, parseUserIdsAndReason } from "./utils";
+import { getHighestRolePosition, logUserRestriction, ModerationColor, parseUserIdsAndReason } from "./utils";
 
 defineCommand({
     name: "mute",
@@ -68,7 +68,7 @@ defineCommand({
                 reason,
                 moderator: msg.author,
                 jumpLink: msg.jumpLink,
-                color: 0xffff00,
+                color: ModerationColor.Light,
             });
         }));
 

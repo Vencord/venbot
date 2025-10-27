@@ -5,7 +5,7 @@ import { silently } from "~/util/functions";
 import { toCodeblock } from "~/util/text";
 
 import { getEmoji } from "~/modules/emojiManager";
-import { getHighestRolePosition, logUserRestriction, parseUserIdsAndReason } from "./utils";
+import { getHighestRolePosition, logUserRestriction, ModerationColor, parseUserIdsAndReason } from "./utils";
 
 function parseCrap(msg: Message<AnyTextableGuildChannel>, args: string[], isSoft: boolean) {
     let possibleDays = Number(args[0]) || 0;
@@ -71,7 +71,7 @@ async function banExecutor({ msg, reply }: CommandContext<true>, args: string[],
                 reason,
                 moderator: msg.author,
                 jumpLink: msg.jumpLink,
-                color: isSoft ? 0xffa500 : 0xff0000,
+                color: isSoft ? ModerationColor.Light : ModerationColor.Severe,
             });
 
             if (isSoft)
