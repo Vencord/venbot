@@ -49,7 +49,7 @@ export async function logUserRestriction(data: {
             <Container accentColor={color}>
                 {user
                     ? (
-                        <Section accessory={<Thumbnail url={user.avatarURL()} />}>
+                        <Section accessory={<Thumbnail url={user.avatarURL(undefined, 128)} />}>
                             <TextDisplay>## {title}</TextDisplay>
                             <TextDisplay>**{user.tag}**</TextDisplay>
                             <TextDisplay>-# {`<@${id}>`} - {id}</TextDisplay>
