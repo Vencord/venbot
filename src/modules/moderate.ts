@@ -245,7 +245,8 @@ export function initModListeners() {
             ["roblox", "free"].some(s => data.content.includes(s))
         );
 
-        const isMrBeastScam = data.content.match(/\/[1-4]\.(jpe?g|gif|png|webp)/g)?.length! >= 2;
+        const isMrBeastScam = data.content.match(/\/[1-4]\.(jpe?g|gif|png|webp)/g)?.length! >= 2 ||
+            (includesPing && new RegExp(String.raw`(https://(cdn|media)\.discordapp\.(net|com)/attachments/\d+/\d+/image\.(jpe?g|gif|png|webp)(\?\S+)?[\s\n]*){3,4}`).test(data.content));
 
         const isScam = isSteamScam || isMediaFireScam || isRobloxScam || isMrBeastScam;
 
