@@ -50,12 +50,12 @@ export async function logUserRestriction(data: {
                 {user
                     ? (
                         <Section accessory={<Thumbnail url={user.avatarURL()} />}>
-                            <TextDisplay># {title}</TextDisplay>
+                            <TextDisplay>## {title}</TextDisplay>
                             <TextDisplay>**{user.tag}**</TextDisplay>
                             <TextDisplay>-# {`<@${id}>`} - {id}</TextDisplay>
                         </Section>
                     )
-                    : <TextDisplay># {title} {`<@${id}>`}</TextDisplay>
+                    : <TextDisplay>## {title} {`<@${id}>`}</TextDisplay>
                 }
 
                 <TextDisplay>{reason}</TextDisplay>
