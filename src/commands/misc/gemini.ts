@@ -54,10 +54,9 @@ async function generateContent(params: Omit<GenerateContentParameters, "model">,
             ...params,
             config: {
                 ...params.config,
+                // Enable Google Search only for the primary model (flash)
                 tools: model === models[0]
-                    ? [{
-                        googleSearch: {}
-                    }]
+                    ? [{ googleSearch: {} }]
                     : []
             },
             model,
@@ -68,9 +67,10 @@ async function generateContent(params: Omit<GenerateContentParameters, "model">,
             model
         };
     } catch (e) {
-        // 503 = model overloaded
+        // Fallback to next model if rate limited or overloaded
         if (e instanceof ApiError && (e.status === 429 || e.status === 503)) {
-            const nextModel = models[models.indexOf(model) + 1];
+            const modelIndex = models.indexOf(model);
+            const nextModel = models[modelIndex + 1];
             if (nextModel) {
                 return generateContent(params, nextModel);
             }
@@ -81,12 +81,15 @@ async function generateContent(params: Omit<GenerateContentParameters, "model">,
 }
 
 async function uploadAttachments(msg: Message) {
+    // Validate attachment sizes and types first
     for (const a of msg.attachments.values()) {
-        if (a.size > 5 * Bytes.MB)
-            return Err(`Attachment ${toInlineCode(a.filename)} is too large. Maximum size is 5MB`);
+        if (a.size > 5 * Bytes.MB) {
+            return Err(`Attachment ${toInlineCode(a.filename)} is too large. Maximum size is 5MB.`);
+        }
 
-        if (a.contentType && !supportedMimeTypes.has(a.contentType))
-            return Err(`Attachment ${toInlineCode(a.filename)} is of unsupported type ${toInlineCode(a.contentType)}`);
+        if (a.contentType && !supportedMimeTypes.has(a.contentType)) {
+            return Err(`Attachment ${toInlineCode(a.filename)} has unsupported type ${toInlineCode(a.contentType)}.`);
+        }
     }
 
     const errors = [] as string[];
@@ -106,7 +109,8 @@ async function uploadAttachments(msg: Message) {
                 }
             });
 
-            // why are there no events man
+            // Poll for upload processing completion
+            // Note: The API doesn't provide events, so we need to poll
             while (upload.state === "STATE_UNSPECIFIED" || upload.state === "PROCESSING") {
                 await sleep(300);
                 upload = await ai.files.get({
@@ -116,15 +120,17 @@ async function uploadAttachments(msg: Message) {
 
             return createPartFromUri(upload.uri!, upload.mimeType!);
         } catch (e) {
-            errors.push(`Failed to upload attachment to gemini ${a.filename}: ${toInlineCode(String(e))}`);
-            return null as never; // we early return so this will never be consumed
+            errors.push(`Failed to upload attachment ${toInlineCode(a.filename)}: ${toInlineCode(String(e))}`);
+            return null as never; // Early return before this is consumed
         }
     }));
 
     if (errors.length) return Err(errors.join("\n"));
 
-    for (const youtubeLink of msg.content.matchAll(youtubeVideoRegex)) {
-        const url = `https://www.youtube.com/watch?v=${youtubeLink[5]}`;
+    // Extract and add YouTube videos from message content
+    for (const youtubeMatch of msg.content.matchAll(youtubeVideoRegex)) {
+        const videoId = youtubeMatch[5];
+        const url = `https://www.youtube.com/watch?v=${videoId}`;
         files.push({
             fileData: {
                 fileUri: url
@@ -146,7 +152,11 @@ defineCommand({
     rawContent: true,
     rateLimit: 30 * Millis.SECOND,
     async execute({ reply, msg }, content) {
-        if (!msg.member.roles.some(r => allowedRoles.includes(r)) || msg.member.roles.some(r => bannedRoles.includes(r))) {
+        // Check permissions: user must have allowed role and not have banned role
+        const hasAllowedRole = msg.member.roles.some(r => allowedRoles.includes(r));
+        const hasBannedRole = msg.member.roles.some(r => bannedRoles.includes(r));
+        
+        if (!hasAllowedRole || hasBannedRole) {
             return;
         }
 
@@ -170,6 +180,7 @@ defineCommand({
                 return reply(referencedFiles.error);
             }
 
+            // Add referenced message as context
             contents.unshift(
                 createUserContent([
                     `This message is being replied to, treat it as context but not as part of the conversation or prompt.\n\n${msg.referencedMessage.content}`,
@@ -190,18 +201,22 @@ defineCommand({
         const { response, model } = await generateContent({
             contents,
             config: {
-                maxOutputTokens: 2000,
+                // Limit to ~500 tokens to encourage concise responses (~2000 chars)
+                // System prompt asks for 200-2000 characters, this helps enforce that
+                maxOutputTokens: 500,
                 systemInstruction: systemPrompt
             }
         });
 
         let text = response.text ?? "Bro didn't say anything";
 
-        // make sure it doesn't send js codeblocks in the support category, as Vencord will add an Execute button to those
-        if (msg.channel.parentID === "1108135649699180705") {
+        // Prevent JS codeblocks in support category (Vencord adds Execute button)
+        const supportCategoryId = "1108135649699180705";
+        if (msg.channel.parentID === supportCategoryId) {
             text = text.replaceAll(/```js\n(.+?)```/sg, (_, code) => "```ts\n" + code + "```");
         }
 
-        reply(truncateString(text, 1900) + (response.text ? `\n\n-# Response generated by ${model}. AI may be incorrect or misleading.` : ""));
+        const disclaimer = response.text ? `\n\n-# Response generated by ${model}. AI may be incorrect or misleading.` : "";
+        reply(truncateString(text, 1900) + disclaimer);
     }
 });
