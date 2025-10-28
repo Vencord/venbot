@@ -155,7 +155,7 @@ defineCommand({
         // Check permissions: user must have allowed role and not have banned role
         const hasAllowedRole = msg.member.roles.some(r => allowedRoles.includes(r));
         const hasBannedRole = msg.member.roles.some(r => bannedRoles.includes(r));
-        
+
         if (!hasAllowedRole || hasBannedRole) {
             return;
         }

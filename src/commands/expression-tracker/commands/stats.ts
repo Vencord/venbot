@@ -117,8 +117,8 @@ const makeTop = (isUserMode: boolean) => async (ctx: CommandContext, type?: stri
         ([arg1, arg2] = [arg2, arg1]);
     }
 
-    let userInput = arg1;
-    let noDeleted = arg2 === "--no-deleted";
+    const userInput = arg1;
+    const noDeleted = arg2 === "--no-deleted";
 
     let user = isUserMode ? msg.author : null;
     if (isUserMode && userInput) {
