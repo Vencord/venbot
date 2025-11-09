@@ -1,4 +1,4 @@
-import { ApiError, createPartFromUri, createUserContent, GenerateContentParameters, GoogleGenAI } from "@google/genai";
+import { ApiError, createPartFromUri, createUserContent, GenerateContentParameters, GoogleGenAI, HarmBlockThreshold, HarmCategory } from "@google/genai";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { Message } from "oceanic.js";
@@ -57,7 +57,13 @@ async function generateContent(params: Omit<GenerateContentParameters, "model">,
                 // Enable Google Search only for the primary model (flash)
                 tools: model === models[0]
                     ? [{ googleSearch: {} }]
-                    : []
+                    : [],
+                safetySettings: [
+                    HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+                    HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+                    HarmCategory.HARM_CATEGORY_HARASSMENT,
+                    HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT
+                ].map(category => ({ category, threshold: HarmBlockThreshold.OFF })),
             },
             model,
         });
@@ -208,7 +214,10 @@ defineCommand({
             }
         });
 
-        let text = response.text ?? "Bro didn't say anything";
+        let { text } = response;
+        text ??= response.promptFeedback?.blockReason !== undefined
+            ? `Blocked because: ${response.promptFeedback.blockReasonMessage ?? response.promptFeedback.blockReason}`
+            : "Bro didn't say anything";
 
         // Prevent JS codeblocks in support category (Vencord adds Execute button)
         const supportCategoryId = "1108135649699180705";
