@@ -1,6 +1,6 @@
 import { ApplicationCommandOptionTypes, ApplicationCommandTypes, CreateMessageOptions, InteractionTypes, MessageFlags, SeparatorSpacingSize } from "oceanic.js";
 import { Vaius } from "~/Client";
-import { defineCommand } from "~/Commands";
+import { Commands, defineCommand } from "~/Commands";
 import Config from "~/config";
 import { Emoji } from "~/constants";
 import { getEmoji } from "~/modules/emojiManager";
@@ -39,8 +39,8 @@ defineCommand({
     },
 });
 
-Vaius.once("ready", () => {
-    Vaius.application.createGuildCommand(Config.homeGuildId, {
+Vaius.once("ready", async () => {
+    await Vaius.application.createGuildCommand(Config.homeGuildId, {
         type: ApplicationCommandTypes.CHAT_INPUT,
         name: "translate",
         description: "Translate text between languages",
@@ -76,6 +76,12 @@ Vaius.once("ready", () => {
         type: ApplicationCommandTypes.MESSAGE,
         name: "Translate to English"
     });
+
+    const cmd = await Vaius.application.getGuildCommands(Config.homeGuildId);
+    const translateCmd = cmd.find(c => c.name === "translate");
+    if (!translateCmd) return;
+
+    Commands.translate.description = Commands.translate.description.replace("/translate", `</translate:${translateCmd.id}>`);
 });
 
 handleCommandInteraction({
