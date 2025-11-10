@@ -70,6 +70,7 @@ export const Emoji = makeConstants({
 
     Die: "🎲",
     Coin: "🪙",
+    Earth: "🌍",
 });
 
 export const ZWSP = "\u200B";
