@@ -1,5 +1,5 @@
 import { createHash } from "crypto";
-import { cpSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "fs";
+import { cpSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "fs";
 import { ApplicationCommandOptions, ApplicationCommandOptionTypes, ApplicationCommandTypes, ApplicationIntegrationTypes, CreateChatInputApplicationCommandOptions, InteractionContextTypes, InteractionTypes, MessageFlags } from "oceanic.js";
 
 import { ZWSP } from "~/constants";
@@ -133,10 +133,28 @@ handleInteraction({
                     flags: MessageFlags.EPHEMERAL
                 });
 
-            renameSync(badgesForUser(oldUser.id), badgesForUser(newUser.id));
+            const oldFolder = badgesForUser(oldUser.id);
+            const newFolder = badgesForUser(newUser.id);
 
-            BadgeData[newUser.id] = BadgeData[oldUser.id];
-            BadgeData[newUser.id].forEach(b => b.badge = b.badge.replace(oldUser.id, newUser.id));
+            if (BadgeData[newUser.id]) {
+                const files = readdirSync(oldFolder);
+                for (const file of files) {
+                    const oldPath = `${oldFolder}/${file}`;
+                    const newPath = `${newFolder}/${file}`;
+
+                    renameSync(oldPath, newPath);
+                }
+
+                rmSync(oldFolder, { recursive: true, force: true });
+            } else {
+                renameSync(oldFolder, newFolder);
+                BadgeData[newUser.id] = [];
+            }
+
+            const oldBadgeData = BadgeData[oldUser.id];
+            oldBadgeData.forEach(b => b.badge = b.badge.replace(oldUser.id, newUser.id));
+            BadgeData[newUser.id].push(...oldBadgeData);
+
             delete BadgeData[oldUser.id];
             saveBadges();
 
@@ -227,7 +245,7 @@ handleInteraction({
 
         BadgeData[user.id] ??= [];
         const index = existingBadgeIndex ?? BadgeData[user.id].length;
-        const fileName = `${index + 1}-${hash}.${ext}`;
+        const fileName = `${hash}.${ext}`;
 
         const newBadgeData = {
             tooltip: tooltip,
