@@ -1,4 +1,4 @@
-import { SeparatorSpacingSize } from "oceanic.js";
+import { Component, ComponentTypes, SeparatorSpacingSize } from "oceanic.js";
 
 import { CommandContext, Commands, defineCommand, FullCommand } from "~/Commands";
 import Config from "~/config";
@@ -7,6 +7,7 @@ import { groupBy } from "~/util/arrays";
 import { getGitRemote } from "~/util/git";
 import { PaginatorCv2 } from "~/util/PaginatorCv2";
 import { makeEmbedSpaces, snakeToTitle, stripIndent, toCodeblock, toInlineCode, toTitle } from "~/util/text";
+import { translate } from "~/util/translate";
 import { ActionRow, ComponentMessage, Container, Separator, StringOption, StringSelect, TextDisplay } from "~components";
 
 defineCommand({
@@ -32,11 +33,28 @@ defineCommand({
                 </ComponentMessage>
             );
 
+        await turkify(content.components);
+
         return reply(content);
     },
 });
 
 const formatCategory = (category: string) => toTitle(category, /[ -]/) + " Commands";
+
+async function turkify(components: Component[]) {
+    for (const c of components) {
+        if (c.type === ComponentTypes.TEXT_DISPLAY && !c.content.includes("```")) {
+            c.content = (await translate(c.content, "en", "tr")).text;
+            continue;
+        }
+
+        // @ts-expect-error
+        if (c.components && c.components.length > 1) {
+            // @ts-expect-error
+            await turkify(c.components);
+        }
+    }
+}
 
 function JumpToCategory({ pages, paginator }: { pages: string[], paginator: PaginatorCv2<FullCommand>; }) {
     return (
