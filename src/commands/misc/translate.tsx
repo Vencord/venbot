@@ -29,7 +29,7 @@ defineCommand({
     usage: "<text>",
     rawContent: true,
     async execute({ msg, react, reply }, content) {
-        content ??= msg.referencedMessage?.content!;
+        content ||= msg.referencedMessage?.content!;
 
         if (!content) return react(Emoji.QuestionMark);
 
