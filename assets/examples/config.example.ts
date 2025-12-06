@@ -98,7 +98,7 @@ const Config = {
     // submission pass command
     "submissionPass": {
         "enabled": true,
-        "categoryId": "1256395889354997771",
+        "categoryId": "1216095763571019887",
         "passRoleId": "1257065526019231945"
     },
 
