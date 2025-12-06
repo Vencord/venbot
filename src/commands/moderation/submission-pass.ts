@@ -16,6 +16,14 @@ export function grantSubmissionPass(guild: Guild, userId: string, grantedBy: str
     );
 }
 
+export function removeSubmissionPass(guild: Guild, userId: string, removedBy: string) {
+    return guild.removeMemberRole(
+        userId,
+        passRoleId,
+        `Submission pass removed by ${removedBy}`
+    );
+}
+
 defineCommand({
     enabled,
 
@@ -31,6 +39,26 @@ defineCommand({
             return reply("Invalid user input");
 
         await grantSubmissionPass(msg.guild, id, msg.author.tag);
+
+        return react(Emoji.CheckMark);
+    },
+});
+
+defineCommand({
+    enabled,
+
+    name: "removesubmissionpass",
+    aliases: ["removespass", "removesubpass", "rspass", "rsp", "rmsp"],
+    description: "Remove this user's submission pass",
+    usage: "<user>",
+    guildOnly: true,
+    modOnly: true,
+    async execute({ msg, react, reply }, user) {
+        const id = resolveUserId(user);
+        if (!id)
+            return reply("Invalid user input");
+
+        await removeSubmissionPass(msg.guild, id, msg.author.tag);
 
         return react(Emoji.CheckMark);
     },
