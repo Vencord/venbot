@@ -16,7 +16,7 @@ export async function doFetch(url: Url, options?: RequestInit) {
     let message = `${options?.method ?? "GET"} ${url}: ${res.status} ${res.statusText}`;
     try {
         const reason = await res.text();
-        message += `\n${reason}`;
+        message += `\n${reason.slice(0, 500)}`;
     } catch { }
 
     throw new Error(message);
