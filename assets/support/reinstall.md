@@ -1,6 +1,16 @@
 ---
-aliases: redownload
+aliases: r, corrupt
 emoji: 🔄
 ---
 
-The easiest & fastest solution to most issues is to just reinstalll. Don't worry, you won't lose your settings! They'll all be there like nothing happened once you're back :3
+Do a clean reinstall using the guide below (its completely different to a normal reinstall)   
+https://support.discord.com/hc/en-us/articles/115004307527--Windows-Corrupt-Installation      
+
+tldr:      
+- press `windows+r`   
+- paste `%AppData%`   
+- delete `Discord`     
+
+- repeat for `%LocalAppData%`     
+
+- Install discord

@@ -13,8 +13,12 @@ const Config = {
         // channel where venbot will post moderation logs (like ban, mute, etc), leave empty to disable
         "modLog": "1156349646965325824",
 
+        // channel where venbot will post bot audit logs (badge changes, etc), leave empty to disable
+        "botAuditLog": "1450180761679302676",
+
         // channel where venbot will send information like errors
         "dev": "1033680203433660458",
+
         // used as default for the not-support command and some other features
         "support": "1026515880080842772",
 
@@ -98,7 +102,7 @@ const Config = {
     // submission pass command
     "submissionPass": {
         "enabled": true,
-        "categoryId": "1256395889354997771",
+        "categoryId": "1216095763571019887",
         "passRoleId": "1257065526019231945"
     },
 

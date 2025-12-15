@@ -1,16 +1,18 @@
 import { createHash } from "crypto";
-import { cpSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "fs";
-import { ApplicationCommandOptions, ApplicationCommandOptionTypes, ApplicationCommandTypes, ApplicationIntegrationTypes, CreateChatInputApplicationCommandOptions, InteractionContextTypes, InteractionTypes, MessageFlags } from "oceanic.js";
+import { cpSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "fs";
+import { MessageFlags } from "oceanic.js";
 
 import { ZWSP } from "~/constants";
-import { handleInteraction } from "~/SlashCommands";
+import { ChatInputCommandOptions, CommandInteractionHandler, registerChatInputCommand } from "~/SlashCommands";
 import { run } from "~/util/functions";
 
 import { buffer } from "stream/consumers";
 import Config from "~/config";
 import { spawnP } from "~/util/childProcess";
 import { getHomeGuild } from "~/util/discord";
-import { OwnerId, Vaius } from "../../Client";
+import { logBotAuditAction } from "~/util/logAction";
+import { CommandAttachmentOption, CommandBooleanOption, CommandIntegerOption, CommandStringOption, CommandUserOption } from "~components";
+import { OwnerId } from "../../Client";
 import { PROD } from "../../constants";
 import { fetchBuffer } from "../../util/fetch";
 
@@ -36,8 +38,6 @@ const NameRemoveAll = Name + "-remove-all";
 const NameMove = Name + "-move";
 const NameCopy = Name + "-copy";
 
-const description = "kiss you discord";
-
 async function optimizeImage(imgData: Buffer, ext: string) {
     const { child } = ext === "gif"
         ? spawnP("gifsicle", ["-O3", "--colors", "256", "--resize", "64x64"], {})
@@ -55,27 +55,6 @@ async function optimizeImage(imgData: Buffer, ext: string) {
     ] as const;
 }
 
-handleInteraction({
-    type: InteractionTypes.APPLICATION_COMMAND_AUTOCOMPLETE,
-    isMatch: i => i.data.name.startsWith(`${Name}-`),
-    handle(i) {
-        const user = i.data.options.getUserOption("user")!;
-        const oldBadgeInput = i.data.options.getOptions().find(opt => opt.name === "badge" || opt.name === "before")!.value as string;
-        const existingBadges = BadgeData[user.value];
-
-        return i.result(
-            existingBadges
-                ?.map((b, i) => ({
-                    name: `${i} - ${b.tooltip === ZWSP ? "<ZWSP>" : b.tooltip}`,
-                    value: String(i)
-                }))
-                .filter(b => b.name.toLowerCase().includes(oldBadgeInput.toLowerCase()))
-                .slice(0, 25)
-            ?? []
-        );
-    }
-});
-
 function normaliseCdnUrl(rawUrl: string) {
     const url = new URL(rawUrl);
     if (url.host !== "cdn.discordapp.com" || url.pathname.includes("/attachments/")) return rawUrl;
@@ -85,9 +64,7 @@ function normaliseCdnUrl(rawUrl: string) {
     return url.toString();
 }
 
-handleInteraction({
-    type: InteractionTypes.APPLICATION_COMMAND,
-    isMatch: i => i.data.name.startsWith(`${Name}-`),
+const handler: CommandInteractionHandler = {
     async handle(i) {
         if (i.user.id !== OwnerId) return;
 
@@ -117,6 +94,7 @@ handleInteraction({
             }));
             saveBadges();
 
+            logBotAuditAction(`Badges copied from ${oldUser.username} (${oldUser.mention}) to ${newUser.username} (${newUser.mention})`);
             return i.createMessage({
                 content: "Done!",
                 flags: MessageFlags.EPHEMERAL
@@ -133,12 +111,32 @@ handleInteraction({
                     flags: MessageFlags.EPHEMERAL
                 });
 
-            renameSync(badgesForUser(oldUser.id), badgesForUser(newUser.id));
+            const oldFolder = badgesForUser(oldUser.id);
+            const newFolder = badgesForUser(newUser.id);
 
-            BadgeData[newUser.id] = BadgeData[oldUser.id];
-            BadgeData[newUser.id].forEach(b => b.badge = b.badge.replace(oldUser.id, newUser.id));
+            if (BadgeData[newUser.id]) {
+                const files = readdirSync(oldFolder);
+                for (const file of files) {
+                    const oldPath = `${oldFolder}/${file}`;
+                    const newPath = `${newFolder}/${file}`;
+
+                    renameSync(oldPath, newPath);
+                }
+
+                rmSync(oldFolder, { recursive: true, force: true });
+            } else {
+                renameSync(oldFolder, newFolder);
+                BadgeData[newUser.id] = [];
+            }
+
+            const oldBadgeData = BadgeData[oldUser.id];
+            oldBadgeData.forEach(b => b.badge = b.badge.replace(oldUser.id, newUser.id));
+            BadgeData[newUser.id].push(...oldBadgeData);
+
             delete BadgeData[oldUser.id];
             saveBadges();
+
+            logBotAuditAction(`Badges moved from ${oldUser.username} (${oldUser.mention}) to ${newUser.username} (${newUser.mention})`);
 
             return i.createMessage({
                 content: "Done!",
@@ -162,6 +160,8 @@ handleInteraction({
 
             saveBadges();
 
+            logBotAuditAction(`All badges removed from ${user.username} (${user.mention})`);
+
             return i.createMessage({
                 content: "Done!",
                 flags: MessageFlags.EPHEMERAL
@@ -176,19 +176,34 @@ handleInteraction({
             });
 
             const fileName = new URL(existingBadge.badge).pathname.split("/").pop()!;
-            rmSync(`${badgesForUser(user.id)}/${fileName}`, { force: true });
+            const contents = readFileSync(`${badgesForUser(user.id)}/${fileName}`);
 
             BadgeData[user.id].splice(existingBadgeIndex!, 1);
+
+            if (!BadgeData[user.id].some(b => b.badge === existingBadge.badge)) {
+                rmSync(`${badgesForUser(user.id)}/${fileName}`, { force: true });
+            }
+
             if (BadgeData[user.id].length === 0)
                 delete BadgeData[user.id];
 
             saveBadges();
+
+            logBotAuditAction({
+                content: `Badge removed from ${user.username} (${user.mention})`,
+                files: [{
+                    name: fileName,
+                    contents
+                }]
+            });
 
             return i.createMessage({
                 content: "Done!",
                 flags: MessageFlags.EPHEMERAL
             });
         }
+
+        // Add or Edit
 
         let tooltip = data.options.getString("tooltip");
         const image = data.options.getAttachment("image");
@@ -227,7 +242,7 @@ handleInteraction({
 
         BadgeData[user.id] ??= [];
         const index = existingBadgeIndex ?? BadgeData[user.id].length;
-        const fileName = `${index + 1}-${hash}.${ext}`;
+        const fileName = `${hash}.${ext}`;
 
         const newBadgeData = {
             tooltip: tooltip,
@@ -239,7 +254,7 @@ handleInteraction({
             BadgeData[user.id].splice(before, 0, newBadgeData);
         } else {
             const existingBadge = BadgeData[user.id][index];
-            if (existingBadge) {
+            if (existingBadge && BadgeData[user.id].filter(b => b.badge === existingBadge.badge).length === 1) {
                 const fileName = new URL(existingBadge.badge).pathname.split("/").pop()!;
                 rmSync(`${badgesForUser(user.id)}/${fileName}`, { force: true });
             }
@@ -259,137 +274,94 @@ handleInteraction({
             }
         }
 
+        logBotAuditAction({
+            content: `Badge ${data.name === NameEdit ? "edited" : "added"} for ${user.username} (${user.mention})`,
+            files: [{
+                name: fileName,
+                contents: imgData
+            }]
+        });
+
         i.createFollowup({
             content: `Done!${footer && "\n\n-# " + footer}`,
             flags: MessageFlags.EPHEMERAL
         });
-    }
-});
+    },
 
-function registerCommand(data: CreateChatInputApplicationCommandOptions) {
-    Vaius.application.createGuildCommand(Config.homeGuildId, {
+    autoComplete(i) {
+        const user = i.data.options.getUserOption("user")!;
+        const oldBadgeInput = i.data.options.getOptions().find(opt => opt.name === "badge" || opt.name === "before")!.value as string;
+        const existingBadges = BadgeData[user.value];
+
+        return i.result(
+            existingBadges
+                ?.map((b, i) => ({
+                    name: `${i} - ${b.tooltip === ZWSP ? "<ZWSP>" : b.tooltip}`,
+                    value: String(i)
+                }))
+                .filter(b => b.name.toLowerCase().includes(oldBadgeInput.toLowerCase()))
+                .slice(0, 25)
+            ?? []
+        );
+    }
+};
+
+function registerCommand(data: ChatInputCommandOptions) {
+    registerChatInputCommand({
         ...data,
         defaultMemberPermissions: "0",
-    });
-
-    Vaius.application.createGlobalCommand({
-        ...data,
-        contexts: [InteractionContextTypes.BOT_DM, InteractionContextTypes.GUILD, InteractionContextTypes.PRIVATE_CHANNEL],
-        integrationTypes: [ApplicationIntegrationTypes.USER_INSTALL]
-    });
+    }, handler);
 }
 
-Vaius.once("ready", () => {
-    const RequiredUser: ApplicationCommandOptions = {
-        name: "user",
-        type: ApplicationCommandOptionTypes.USER,
-        description,
-        required: true
-    };
-    const Tooltip = (required: boolean) => ({
-        name: "tooltip",
-        type: ApplicationCommandOptionTypes.STRING,
-        description,
-        required
-    } as ApplicationCommandOptions);
-    const ExistingBadge = (name: string, required = true) => ({
-        name,
-        description,
-        type: ApplicationCommandOptionTypes.INTEGER,
-        autocomplete: true,
-        required
-    } as ApplicationCommandOptions);
-    const Image: ApplicationCommandOptions = {
-        name: "image",
-        type: ApplicationCommandOptionTypes.ATTACHMENT,
-        description
-    };
-    const ImageUrl: ApplicationCommandOptions = {
-        name: "image-url",
-        type: ApplicationCommandOptionTypes.STRING,
-        description
-    };
-    const OldUser: ApplicationCommandOptions = {
-        name: "old-user",
-        type: ApplicationCommandOptionTypes.USER,
-        description,
-        required: true
-    };
-    const NewUser: ApplicationCommandOptions = {
-        name: "new-user",
-        type: ApplicationCommandOptionTypes.USER,
-        description,
-        required: true
-    };
-    const Optimize: ApplicationCommandOptions = {
-        name: "optimize",
-        type: ApplicationCommandOptionTypes.BOOLEAN,
-        description: "optimize images",
-        required: false
-    };
+const RequiredUser = <CommandUserOption name="user" required />;
+const NewUser = <CommandUserOption name="new-user" required />;
+const OldUser = <CommandUserOption name="old-user" required />;
+const Optimize = <CommandBooleanOption name="optimize" />;
+const Image = <CommandAttachmentOption name="image" />;
+const ImageUrl = <CommandStringOption name="image-url" />;
+const makeTooltip = (required: boolean) => <CommandStringOption name="tooltip" required={required} />;
+const makeExistingBadge = (name: string, required = true) => <CommandIntegerOption name={name} required={required} autocomplete />;
 
-    registerCommand({
-        type: ApplicationCommandTypes.CHAT_INPUT,
-        name: NameAdd,
-        description,
-        options: [
-            RequiredUser,
-            Tooltip(true),
-            ImageUrl,
-            Image,
-            ExistingBadge("before", false),
-            Optimize
-        ]
-    });
+registerCommand({
+    name: NameAdd,
+    options: [
+        RequiredUser,
+        makeTooltip(true),
+        ImageUrl,
+        Image,
+        makeExistingBadge("before", false),
+        Optimize
+    ]
+});
 
-    registerCommand({
-        type: ApplicationCommandTypes.CHAT_INPUT,
-        name: NameEdit,
-        description,
-        options: [
-            RequiredUser,
-            ExistingBadge("badge"),
-            Tooltip(false),
-            ImageUrl,
-            Image,
-            Optimize
-        ]
-    });
+registerCommand({
+    name: NameEdit,
+    options: [
+        RequiredUser,
+        makeExistingBadge("badge"),
+        makeTooltip(false),
+        ImageUrl,
+        Image,
+        Optimize
+    ]
+});
 
-    registerCommand({
-        type: ApplicationCommandTypes.CHAT_INPUT,
-        name: NameRemove,
-        description,
-        options: [
-            RequiredUser,
-            ExistingBadge("badge")
-        ]
-    });
+registerCommand({
+    name: NameRemove,
+    options: [RequiredUser, makeExistingBadge("badge")]
+});
 
-    registerCommand({
-        type: ApplicationCommandTypes.CHAT_INPUT,
-        name: NameRemoveAll,
-        description,
-        options: [RequiredUser]
-    });
+registerCommand({
+    name: NameRemoveAll,
+    options: [RequiredUser]
+});
 
-    registerCommand({
-        type: ApplicationCommandTypes.CHAT_INPUT,
-        name: NameMove,
-        description,
-        options: [
-            OldUser,
-            NewUser
-        ]
-    });
+registerCommand({
+    name: NameMove,
+    options: [OldUser, NewUser]
+});
 
-    registerCommand({
-        type: ApplicationCommandTypes.CHAT_INPUT,
-        name: NameCopy,
-        description,
-        options: [
-            OldUser,
-            NewUser
-        ]
-    });
+registerCommand({
+    name: NameCopy,
+    options: [OldUser, NewUser]
 });

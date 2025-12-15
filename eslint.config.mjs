@@ -1,7 +1,8 @@
-import tseslint from "typescript-eslint";
 import stylistic from "@stylistic/eslint-plugin";
+import { defineConfig } from "eslint/config";
+import tseslint from "typescript-eslint";
 
-export default tseslint.config(
+export default defineConfig(
     { ignores: ["dist"] },
     {
         files: ["{src,components-jsx}/**/*.{tsx,ts,mts,mjs,js,jsx}", "eslint.config.mjs"],

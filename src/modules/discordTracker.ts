@@ -52,14 +52,13 @@ export async function triggerReportWorkflow({ ref, inputs }: { ref: string, inpu
 
 async function fetchHash(url: string) {
     return doFetch(url)
-        .then(res => res.json<VersionData>())
-        .then(json => json.hash);
+        .then(res => res.headers.get("x-build-id") ?? Promise.reject(new Error(`No x-build-id header found for ${url}`)));
 }
 
 async function checkVersions() {
     const [stable, canary] = await Promise.all([
-        fetchHash("https://discord.com/assets/version.stable.json"),
-        fetchHash("https://canary.discord.com/assets/version.canary.json"),
+        fetchHash("https://discord.com/app"),
+        fetchHash("https://canary.discord.com/app"),
     ]);
 
     const versions = BotState.discordTracker ??= {

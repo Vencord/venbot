@@ -5,7 +5,6 @@ import "./Commands";
 import "__modules__";
 
 import {
-    ApplicationCommandTypes,
     DiscordHTTPError
 } from "oceanic.js";
 
@@ -15,27 +14,9 @@ import { BotState } from "./db/botState";
 // eslint-disable-next-line no-duplicate-imports
 import Config from "./config";
 import { initModListeners } from "./modules/moderate";
-import { handleCommandInteraction } from "./SlashCommands";
 import { silently } from "./util/functions";
 import { inspect } from "./util/inspect";
 import { toCodeblock } from "./util/text";
-
-if (PROD) {
-    Vaius.once("ready", () => {
-        Vaius.application.createGlobalCommand({
-            type: ApplicationCommandTypes.CHAT_INPUT,
-            name: "owo",
-            description: "owo",
-        });
-    });
-
-    handleCommandInteraction({
-        name: "owo",
-        handle(i) {
-            i.createMessage({ content: "owo " });
-        }
-    });
-}
 
 initModListeners();
 

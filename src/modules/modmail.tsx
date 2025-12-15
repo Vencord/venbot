@@ -1,7 +1,7 @@
-import { ActivityTypes, AnyTextableGuildChannel, ApplicationCommandTypes, ButtonStyles, ChannelTypes, CommandInteraction, ComponentInteraction, ComponentTypes, InteractionTypes, MessageFlags, ModalSubmitInteraction, SeparatorSpacingSize, TextChannel, TextInputStyles } from "oceanic.js";
+import { ActivityTypes, AnyTextableGuildChannel, ButtonStyles, ChannelTypes, CommandInteraction, ComponentInteraction, ComponentTypes, InteractionTypes, MessageFlags, ModalSubmitInteraction, SeparatorSpacingSize, TextChannel, TextInputStyles } from "oceanic.js";
 
 import { db } from "~/db";
-import { handleCommandInteraction, handleComponentInteraction, handleInteraction } from "~/SlashCommands";
+import { handleComponentInteraction, handleInteraction, registerChatInputCommand } from "~/SlashCommands";
 import { stripIndent } from "~/util/text";
 
 import { grantSubmissionPass } from "~/commands/moderation/submission-pass";
@@ -169,11 +169,16 @@ defineCommand({
 });
 
 if (enabled) {
-    handleCommandInteraction({
-        name: COMMAND_NAME,
-        guildOnly: true,
-        handle: createModmailModal
-    });
+    registerChatInputCommand(
+        {
+            name: COMMAND_NAME,
+            description: "Open a modmail ticket",
+        },
+        {
+            guildOnly: true,
+            handle: createModmailModal
+        }
+    );
 
     handleComponentInteraction({
         customID: Ids.OPEN_TICKET,
@@ -523,11 +528,5 @@ if (enabled) {
                 name: "/modmail"
             }]);
         }
-
-        Vaius.application.createGuildCommand(Config.homeGuildId, {
-            type: ApplicationCommandTypes.CHAT_INPUT,
-            name: COMMAND_NAME,
-            description: "Open a modmail ticket",
-        });
     });
 }
