@@ -1,8 +1,9 @@
-import { ApplicationCommandOptionTypes, MessageFlags } from "oceanic.js";
+import { MessageFlags } from "oceanic.js";
 
 import { registerChatInputCommand } from "~/SlashCommands";
 
 import Config from "~/config";
+import { CommandAttachmentOption, CommandStringOption, CommandUserOption } from "~components";
 import { PROD } from "../../constants";
 import { fetchBuffer } from "../../util/fetch";
 
@@ -14,35 +15,13 @@ registerChatInputCommand(
         name: Name,
         description,
         defaultMemberPermissions: "0",
-        options: [
-            {
-                name: "user",
-                type: ApplicationCommandOptionTypes.USER,
-                description,
-                required: true
-            },
-            {
-                name: "name",
-                type: ApplicationCommandOptionTypes.STRING,
-                description,
-                required: true
-            },
-            {
-                name: "color",
-                type: ApplicationCommandOptionTypes.STRING,
-                description
-            },
-            {
-                name: "icon-url",
-                type: ApplicationCommandOptionTypes.STRING,
-                description
-            },
-            {
-                name: "icon",
-                type: ApplicationCommandOptionTypes.ATTACHMENT,
-                description
-            }
-        ]
+        options: <>
+            <CommandUserOption name="user" required />
+            <CommandStringOption name="name" required />
+            <CommandStringOption name="color" />
+            <CommandStringOption name="icon-url" />
+            <CommandAttachmentOption name="icon" />
+        </>
     },
     {
         guildOnly: true,

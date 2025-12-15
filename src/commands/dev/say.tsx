@@ -1,27 +1,18 @@
-import { ApplicationCommandOptionTypes, CreateMessageOptions, MessageFlags } from "oceanic.js";
+import { CreateMessageOptions, MessageFlags } from "oceanic.js";
 
 import { Vaius } from "~/Client";
 import { registerChatInputCommand } from "~/SlashCommands";
+import { CommandStringOption } from "~components";
 
 registerChatInputCommand(
     {
         name: "say",
         description: "say",
         defaultMemberPermissions: "0",
-        options: [
-            {
-                name: "content",
-                description: "content",
-                type: ApplicationCommandOptionTypes.STRING,
-                required: true
-            },
-            {
-                name: "reply-to",
-                description: "reply",
-                type: ApplicationCommandOptionTypes.STRING,
-                required: false
-            }
-        ]
+        options: <>
+            <CommandStringOption name="content" description="content" required />
+            <CommandStringOption name="reply-to" description="reply" required={false} />
+        </>
     },
     {
         ownerOnly: true,

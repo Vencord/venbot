@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionTypes, CreateMessageOptions, MessageFlags, SeparatorSpacingSize } from "oceanic.js";
+import { CreateMessageOptions, MessageFlags, SeparatorSpacingSize } from "oceanic.js";
 import { Vaius } from "~/Client";
 import { Commands, defineCommand } from "~/Commands";
 import Config from "~/config";
@@ -6,7 +6,7 @@ import { Emoji } from "~/constants";
 import { getEmoji } from "~/modules/emojiManager";
 import { registerChatInputCommand, registerMessageCommand } from "~/SlashCommands";
 import { formatLanguage, GoogleLanguageMap, Locale, translate } from "~/util/translate";
-import { ComponentMessage, Container, Separator, TextDisplay } from "~components";
+import { CommandBooleanOption, CommandStringOption, ComponentMessage, Container, Separator, TextDisplay } from "~components";
 
 async function doTranslate(content: string, sourceLanguage: Locale, targetLanguage: Locale): Promise<CreateMessageOptions> {
     const { text, src } = await translate(content, sourceLanguage, targetLanguage);
@@ -43,32 +43,12 @@ registerChatInputCommand(
     {
         name: "translate",
         description: "Translate text between languages",
-        options: [
-            {
-                name: "text",
-                description: "The text to translate",
-                type: ApplicationCommandOptionTypes.STRING,
-                required: true
-            },
-            {
-                name: "from",
-                description: "The source language (default: auto-detect)",
-                type: ApplicationCommandOptionTypes.STRING,
-                autocomplete: true
-            },
-            {
-                name: "to",
-                description: "The target language (default: English)",
-                type: ApplicationCommandOptionTypes.STRING,
-                autocomplete: true
-            },
-            {
-                name: "ephemeral",
-                description: "Whether the response should be ephemeral (only visible to you)",
-                type: ApplicationCommandOptionTypes.BOOLEAN,
-                required: false
-            }
-        ],
+        options: <>
+            <CommandStringOption name="text" description="The text to translate" required />
+            <CommandStringOption name="from" description="The source language (default: auto-detect)" autocomplete />
+            <CommandStringOption name="to" description="The target language (default: English)" autocomplete />
+            <CommandBooleanOption name="ephemeral" description="Whether the response should be ephemeral (only visible to you)" />
+        </>
     },
     {
         async handle(interaction) {

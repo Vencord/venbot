@@ -1,5 +1,6 @@
 import { AnyInteractionChannel, AnyInteractionGateway, AnyTextableGuildChannel, ApplicationCommandTypes, ApplicationIntegrationTypes, AutocompleteInteraction, CommandInteraction, ComponentInteraction, ComponentTypes, CreateGuildApplicationCommandOptions, CreateGuildChatInputApplicationCommandOptions, InteractionContextTypes, InteractionTypes, MessageFlags, ModalSubmitInteraction, SelectMenuTypes } from "oceanic.js";
 
+import { SetOptional } from "type-fest";
 import { handleError } from ".";
 import { OwnerId, Vaius } from "./Client";
 import Config from "./config";
@@ -128,10 +129,13 @@ export function registerMessageCommand(handler: NamedCommandInteractionHandler) 
     handleCommandInteraction(handler);
 }
 
-export function registerChatInputCommand(options: Omit<CreateGuildChatInputApplicationCommandOptions, "type">, handler: CommandInteractionHandler) {
+export type ChatInputCommandOptions = SetOptional<Omit<CreateGuildChatInputApplicationCommandOptions, "type">, "description">;
+
+export function registerChatInputCommand(options: ChatInputCommandOptions, handler: CommandInteractionHandler) {
     SlashCommands.push({
         type: ApplicationCommandTypes.CHAT_INPUT,
-        ...options
+        ...options,
+        description: options.description || "No description provided"
     });
 
     handleCommandInteraction({

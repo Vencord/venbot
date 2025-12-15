@@ -1,9 +1,9 @@
 import { createHash } from "crypto";
 import { cpSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "fs";
-import { ApplicationCommandOptions, ApplicationCommandOptionTypes, CreateChatInputApplicationCommandOptions, MessageFlags } from "oceanic.js";
+import { MessageFlags } from "oceanic.js";
 
 import { ZWSP } from "~/constants";
-import { CommandInteractionHandler, registerChatInputCommand } from "~/SlashCommands";
+import { ChatInputCommandOptions, CommandInteractionHandler, registerChatInputCommand } from "~/SlashCommands";
 import { run } from "~/util/functions";
 
 import { buffer } from "stream/consumers";
@@ -11,6 +11,7 @@ import Config from "~/config";
 import { spawnP } from "~/util/childProcess";
 import { getHomeGuild } from "~/util/discord";
 import { logBotAuditAction } from "~/util/logAction";
+import { CommandAttachmentOption, CommandBooleanOption, CommandIntegerOption, CommandStringOption, CommandUserOption } from "~components";
 import { OwnerId } from "../../Client";
 import { PROD } from "../../constants";
 import { fetchBuffer } from "../../util/fetch";
@@ -36,8 +37,6 @@ const NameRemove = Name + "-remove";
 const NameRemoveAll = Name + "-remove-all";
 const NameMove = Name + "-move";
 const NameCopy = Name + "-copy";
-
-const description = "kiss you discord";
 
 async function optimizeImage(imgData: Buffer, ext: string) {
     const { child } = ext === "gif"
@@ -307,81 +306,40 @@ const handler: CommandInteractionHandler = {
     }
 };
 
-function registerCommand(data: Omit<CreateChatInputApplicationCommandOptions, "type">) {
+function registerCommand(data: ChatInputCommandOptions) {
     registerChatInputCommand({
         ...data,
         defaultMemberPermissions: "0",
     }, handler);
 }
 
-const RequiredUser: ApplicationCommandOptions = {
-    name: "user",
-    type: ApplicationCommandOptionTypes.USER,
-    description,
-    required: true
-};
-const Tooltip = (required: boolean) => ({
-    name: "tooltip",
-    type: ApplicationCommandOptionTypes.STRING,
-    description,
-    required
-} as ApplicationCommandOptions);
-const ExistingBadge = (name: string, required = true) => ({
-    name,
-    description,
-    type: ApplicationCommandOptionTypes.INTEGER,
-    autocomplete: true,
-    required
-} as ApplicationCommandOptions);
-const Image: ApplicationCommandOptions = {
-    name: "image",
-    type: ApplicationCommandOptionTypes.ATTACHMENT,
-    description
-};
-const ImageUrl: ApplicationCommandOptions = {
-    name: "image-url",
-    type: ApplicationCommandOptionTypes.STRING,
-    description
-};
-const OldUser: ApplicationCommandOptions = {
-    name: "old-user",
-    type: ApplicationCommandOptionTypes.USER,
-    description,
-    required: true
-};
-const NewUser: ApplicationCommandOptions = {
-    name: "new-user",
-    type: ApplicationCommandOptionTypes.USER,
-    description,
-    required: true
-};
-const Optimize: ApplicationCommandOptions = {
-    name: "optimize",
-    type: ApplicationCommandOptionTypes.BOOLEAN,
-    description: "optimize images",
-    required: false
-};
+const RequiredUser = <CommandUserOption name="user" required />;
+const NewUser = <CommandUserOption name="new-user" required />;
+const OldUser = <CommandUserOption name="old-user" required />;
+const Optimize = <CommandBooleanOption name="optimize" />;
+const Image = <CommandAttachmentOption name="image" />;
+const ImageUrl = <CommandStringOption name="image-url" />;
+const makeTooltip = (required: boolean) => <CommandStringOption name="tooltip" required={required} />;
+const makeExistingBadge = (name: string, required = true) => <CommandIntegerOption name={name} required={required} autocomplete />;
 
 registerCommand({
     name: NameAdd,
-    description,
     options: [
         RequiredUser,
-        Tooltip(true),
+        makeTooltip(true),
         ImageUrl,
         Image,
-        ExistingBadge("before", false),
+        makeExistingBadge("before", false),
         Optimize
     ]
 });
 
 registerCommand({
     name: NameEdit,
-    description,
     options: [
         RequiredUser,
-        ExistingBadge("badge"),
-        Tooltip(false),
+        makeExistingBadge("badge"),
+        makeTooltip(false),
         ImageUrl,
         Image,
         Optimize
@@ -390,24 +348,20 @@ registerCommand({
 
 registerCommand({
     name: NameRemove,
-    description,
-    options: [RequiredUser, ExistingBadge("badge")]
+    options: [RequiredUser, makeExistingBadge("badge")]
 });
 
 registerCommand({
     name: NameRemoveAll,
-    description,
     options: [RequiredUser]
 });
 
 registerCommand({
     name: NameMove,
-    description,
     options: [OldUser, NewUser]
 });
 
 registerCommand({
     name: NameCopy,
-    description,
     options: [OldUser, NewUser]
 });
