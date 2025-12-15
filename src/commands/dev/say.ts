@@ -1,12 +1,10 @@
-import { ApplicationCommandOptionTypes, ApplicationCommandTypes, ApplicationIntegrationTypes, CreateMessageOptions, InteractionContextTypes, MessageFlags } from "oceanic.js";
+import { ApplicationCommandOptionTypes, CreateMessageOptions, MessageFlags } from "oceanic.js";
 
 import { Vaius } from "~/Client";
-import Config from "~/config";
-import { handleCommandInteraction } from "~/SlashCommands";
+import { registerChatInputCommand } from "~/SlashCommands";
 
-Vaius.once("ready", () => {
-    Vaius.application.createGuildCommand(Config.homeGuildId, {
-        type: ApplicationCommandTypes.CHAT_INPUT,
+registerChatInputCommand(
+    {
         name: "say",
         description: "say",
         defaultMemberPermissions: "0",
@@ -24,56 +22,33 @@ Vaius.once("ready", () => {
                 required: false
             }
         ]
-    });
+    },
+    {
+        ownerOnly: true,
+        async handle(i) {
+            const content = i.data.options.getString("content", true);
+            const reply = i.data.options.getString("reply-to");
 
-    Vaius.application.createGlobalCommand({
-        integrationTypes: [ApplicationIntegrationTypes.USER_INSTALL],
-        type: ApplicationCommandTypes.CHAT_INPUT,
-        contexts: [InteractionContextTypes.BOT_DM, InteractionContextTypes.GUILD, InteractionContextTypes.PRIVATE_CHANNEL],
-        name: "say",
-        description: "say",
-        options: [
-            {
-                name: "content",
-                description: "content",
-                type: ApplicationCommandOptionTypes.STRING,
-                required: true
-            },
-            {
-                name: "reply-to",
-                description: "reply",
-                type: ApplicationCommandOptionTypes.STRING,
-                required: false
+            const data: CreateMessageOptions = {
+                content,
+                messageReference: reply ? {
+                    messageID: reply
+                } : undefined,
+                allowedMentions: {
+                    everyone: false,
+                    roles: false,
+                    repliedUser: true,
+                    users: true
+                }
+            };
+
+            try {
+                await Vaius.rest.channels.createMessage(i.channelID, data);
+                await i.reply({ content: "done", flags: MessageFlags.EPHEMERAL });
+            } catch {
+                await i.createMessage(data);
             }
-        ]
-    });
-});
-
-handleCommandInteraction({
-    name: "say",
-    ownerOnly: true,
-    async handle(i) {
-        const content = i.data.options.getString("content", true);
-        const reply = i.data.options.getString("reply-to");
-
-        const data: CreateMessageOptions = {
-            content,
-            messageReference: reply ? {
-                messageID: reply
-            } : undefined,
-            allowedMentions: {
-                everyone: false,
-                roles: false,
-                repliedUser: true,
-                users: true
-            }
-        };
-
-        try {
-            await Vaius.rest.channels.createMessage(i.channelID, data);
-            await i.reply({ content: "done", flags: MessageFlags.EPHEMERAL });
-        } catch {
-            await i.createMessage(data);
         }
     }
-});
+);
+

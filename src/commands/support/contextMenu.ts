@@ -1,9 +1,7 @@
-import { AnyTextableChannel, ApplicationCommandTypes, ComponentInteraction, ComponentTypes, InteractionTypes, MessageFlags, SelectMenuTypes } from "oceanic.js";
+import { AnyTextableChannel, ComponentInteraction, ComponentTypes, InteractionTypes, MessageFlags, SelectMenuTypes } from "oceanic.js";
 
-import { Vaius } from "~/Client";
-import { handleCommandInteraction, handleInteraction } from "~/SlashCommands";
+import { handleInteraction, registerMessageCommand } from "~/SlashCommands";
 
-import Config from "~/config";
 import { buildFaqEmbed, fetchFaq } from "./faq";
 import { buildIssueEmbed, findThreads } from "./knownIssues";
 import { SupportInstructions, SupportTagList } from "./support";
@@ -14,24 +12,7 @@ const enum Commands {
     Issue = "Send Known Issue",
 }
 
-Vaius.once("ready", () => {
-    Vaius.application.createGuildCommand(Config.homeGuildId, {
-        type: ApplicationCommandTypes.MESSAGE,
-        name: Commands.Support
-    });
-
-    Vaius.application.createGuildCommand(Config.homeGuildId, {
-        type: ApplicationCommandTypes.MESSAGE,
-        name: Commands.Faq
-    });
-
-    Vaius.application.createGuildCommand(Config.homeGuildId, {
-        type: ApplicationCommandTypes.MESSAGE,
-        name: Commands.Issue
-    });
-});
-
-handleCommandInteraction({
+registerMessageCommand({
     name: Commands.Support,
     async handle(interaction) {
         const options = SupportTagList.map(tags => ({
@@ -54,7 +35,7 @@ handleCommandInteraction({
     }
 });
 
-handleCommandInteraction({
+registerMessageCommand({
     name: Commands.Faq,
     async handle(interaction) {
         const [_, faqs] = await Promise.all([interaction.defer(MessageFlags.EPHEMERAL), fetchFaq()]);
@@ -77,7 +58,7 @@ handleCommandInteraction({
     }
 });
 
-handleCommandInteraction({
+registerMessageCommand({
     name: Commands.Issue,
     async handle(interaction) {
         const [_, issues] = await Promise.all([interaction.defer(MessageFlags.EPHEMERAL), findThreads()]);
