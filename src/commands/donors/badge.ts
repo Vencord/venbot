@@ -10,6 +10,7 @@ import { buffer } from "stream/consumers";
 import Config from "~/config";
 import { spawnP } from "~/util/childProcess";
 import { getHomeGuild } from "~/util/discord";
+import { logBotAuditAction } from "~/util/logAction";
 import { OwnerId } from "../../Client";
 import { PROD } from "../../constants";
 import { fetchBuffer } from "../../util/fetch";
@@ -94,6 +95,7 @@ const handler: CommandInteractionHandler = {
             }));
             saveBadges();
 
+            logBotAuditAction(`Badges copied from ${oldUser.username} (${oldUser.mention}) to ${newUser.username} (${newUser.mention})`);
             return i.createMessage({
                 content: "Done!",
                 flags: MessageFlags.EPHEMERAL
@@ -135,6 +137,8 @@ const handler: CommandInteractionHandler = {
             delete BadgeData[oldUser.id];
             saveBadges();
 
+            logBotAuditAction(`Badges moved from ${oldUser.username} (${oldUser.mention}) to ${newUser.username} (${newUser.mention})`);
+
             return i.createMessage({
                 content: "Done!",
                 flags: MessageFlags.EPHEMERAL
@@ -157,6 +161,8 @@ const handler: CommandInteractionHandler = {
 
             saveBadges();
 
+            logBotAuditAction(`All badges removed from ${user.username} (${user.mention})`);
+
             return i.createMessage({
                 content: "Done!",
                 flags: MessageFlags.EPHEMERAL
@@ -171,19 +177,34 @@ const handler: CommandInteractionHandler = {
             });
 
             const fileName = new URL(existingBadge.badge).pathname.split("/").pop()!;
-            rmSync(`${badgesForUser(user.id)}/${fileName}`, { force: true });
+            const contents = readFileSync(`${badgesForUser(user.id)}/${fileName}`);
 
             BadgeData[user.id].splice(existingBadgeIndex!, 1);
+
+            if (!BadgeData[user.id].some(b => b.badge === existingBadge.badge)) {
+                rmSync(`${badgesForUser(user.id)}/${fileName}`, { force: true });
+            }
+
             if (BadgeData[user.id].length === 0)
                 delete BadgeData[user.id];
 
             saveBadges();
+
+            logBotAuditAction({
+                content: `Badge removed from ${user.username} (${user.mention})`,
+                files: [{
+                    name: fileName,
+                    contents
+                }]
+            });
 
             return i.createMessage({
                 content: "Done!",
                 flags: MessageFlags.EPHEMERAL
             });
         }
+
+        // Add or Edit
 
         let tooltip = data.options.getString("tooltip");
         const image = data.options.getAttachment("image");
@@ -234,7 +255,7 @@ const handler: CommandInteractionHandler = {
             BadgeData[user.id].splice(before, 0, newBadgeData);
         } else {
             const existingBadge = BadgeData[user.id][index];
-            if (existingBadge) {
+            if (existingBadge && BadgeData[user.id].filter(b => b.badge === existingBadge.badge).length === 1) {
                 const fileName = new URL(existingBadge.badge).pathname.split("/").pop()!;
                 rmSync(`${badgesForUser(user.id)}/${fileName}`, { force: true });
             }
@@ -253,6 +274,14 @@ const handler: CommandInteractionHandler = {
                 await member.addRole(Config.roles.donor); {
             }
         }
+
+        logBotAuditAction({
+            content: `Badge ${data.name === NameEdit ? "edited" : "added"} for ${user.username} (${user.mention})`,
+            files: [{
+                name: fileName,
+                contents: imgData
+            }]
+        });
 
         i.createFollowup({
             content: `Done!${footer && "\n\n-# " + footer}`,
