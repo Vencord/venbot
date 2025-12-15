@@ -59,6 +59,7 @@ export async function logUserRestriction(data: {
                     : <TextDisplay>## {title} {`<@${id}>`}</TextDisplay>
                 }
 
+                <TextDisplay>**Reason**</TextDisplay>
                 <TextDisplay>{reason}</TextDisplay>
 
                 <Separator spacing={SeparatorSpacingSize.LARGE} />
