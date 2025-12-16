@@ -141,7 +141,6 @@ const makeTop = (isUserMode: boolean) => async (ctx: CommandContext, type?: stri
 
 defineCommand({
     name: "top",
-    aliases: ["st", "stats"],
     description: "Get stats about most used emojis or stickers",
     usage: "<emojis | stickers | reactions> [--no-deleted]",
     execute: makeTop(false),
