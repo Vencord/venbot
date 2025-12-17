@@ -1,6 +1,9 @@
+import { randomInt } from "crypto";
 import { defineCommand } from "~/Commands";
 import { Emoji } from "~/constants";
+import { USER_MENTION_REGEX } from "~/util/discord";
 import { fetchGoogle } from "~/util/fetch";
+import { sleep } from "~/util/time";
 
 const segmenter = new Intl.Segmenter("en", {
     granularity: "grapheme"
@@ -35,8 +38,18 @@ defineCommand({
     aliases: ["cook", "kitchen", "emojikitchen"],
     usage: "<emoji1> <emoji2>",
     description: "Cook up an emoji",
-    async execute({ react, reply }, emoji1, emoji2) {
+    async execute({ msg, react, reply }, emoji1, emoji2) {
         if (!emoji2 && emoji1) {
+            const userMatch = USER_MENTION_REGEX.exec(emoji1);
+            if (userMatch) {
+                const userId = userMatch[1];
+                await reply(`🧑‍🍳 Cooking <@${userId}>... 🍳`);
+                await msg.channel.sendTyping();
+                await sleep(randomInt(1000, 5000));
+                await reply(`🧑‍🍳 Finished cooking <@${userId}>! 🍽️`);
+                return;
+            }
+
             [emoji1, emoji2] = getEmojiSegments(emoji1);
         }
         if (!emoji1 || !emoji2) return react(Emoji.QuestionMark);

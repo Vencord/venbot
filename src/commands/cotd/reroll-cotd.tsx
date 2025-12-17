@@ -4,7 +4,7 @@ import { defineCommand } from "~/Commands";
 import { Emoji } from "~/constants";
 import { drawBlobCatCozy, rerollCotd } from "~/modules/regularCotd";
 import { handleComponentInteraction } from "~/SlashCommands";
-import { toHexColorString } from "~/util/colors";
+import { toHexColorString } from "~/util/text";
 import { ActionRow, Button, ComponentMessage, Container, MediaGallery, MediaGalleryItem, TextDisplay } from "~components";
 
 async function reroll(hex?: string, interactionUser?: User): Promise<CreateMessageOptions & EditMessageOptions> {

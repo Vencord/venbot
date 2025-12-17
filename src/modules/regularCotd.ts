@@ -4,10 +4,10 @@ import { join } from "path";
 import Config from "~/config";
 
 import { ASSET_DIR } from "~/constants";
-import { randomHexColor } from "~/util/colors";
 import { daily } from "~/util/daily";
 import { getHomeGuild } from "~/util/discord";
 import { fetchJson } from "~/util/fetch";
+import { randomHexColor } from "~/util/random";
 
 interface ColorResponse {
     name: {

@@ -1,7 +1,7 @@
 import { defineCommand } from "~/Commands";
 import Config from "~/config";
 import { drawBlobCatCozy } from "~/modules/regularCotd";
-import { toHexColorString } from "~/util/colors";
+import { toHexColorString } from "~/util/text";
 
 defineCommand({
     name: "cotd",

@@ -1,6 +1,7 @@
 import { defineCommand } from "~/Commands";
 import { drawBlobCatCozy } from "~/modules/regularCotd";
-import { randomHexColor, toHexColorString } from "~/util/colors";
+import { randomHexColor } from "~/util/random";
+import { toHexColorString } from "~/util/text";
 
 defineCommand({
     name: "blobcatcozy",

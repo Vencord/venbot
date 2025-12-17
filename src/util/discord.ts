@@ -6,6 +6,7 @@ import Config from "~/config";
 import { silently } from "./functions";
 
 export const ID_REGEX = /^(?:<@!?)?(\d{17,20})>?$/;
+export const USER_MENTION_REGEX = /<@!?(\d{17,20})>/g;
 
 export function reply(msg: Message, opts: CreateMessageOptions | string): Promise<Message>;
 export function reply(msg: PossiblyUncachedMessage, opts: CreateMessageOptions | string, client: Client): Promise<Message>;

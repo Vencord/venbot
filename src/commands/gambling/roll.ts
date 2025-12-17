@@ -1,3 +1,4 @@
+import { randomInt } from "crypto";
 import { defineCommand } from "~/Commands";
 import { Emoji } from "~/constants";
 
@@ -18,7 +19,7 @@ defineCommand({
             return reply("That's no valid die!");
         }
 
-        const choice = 1 + Math.floor(Math.random() * limit);
+        const choice = randomInt(1, limit);
 
         return reply(`${Emoji.Die} ${choice}`);
     }

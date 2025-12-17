@@ -89,3 +89,7 @@ export function truncateString(s: string, maxLength: number, ellipsis = "…") {
     if (s.length <= maxLength) return s;
     return s.slice(0, maxLength - ellipsis.length) + ellipsis;
 }
+
+export function toHexColorString(color: number): string {
+    return "#" + color.toString(16).padStart(6, "0");
+}
