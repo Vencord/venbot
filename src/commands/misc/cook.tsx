@@ -1,7 +1,7 @@
 import { randomInt } from "crypto";
 import { defineCommand } from "~/Commands";
 import { Emoji } from "~/constants";
-import { USER_MENTION_REGEX } from "~/util/discord";
+import { reply as replyTo, USER_MENTION_REGEX } from "~/util/discord";
 import { fetchGoogle } from "~/util/fetch";
 import { sleep } from "~/util/time";
 
@@ -38,15 +38,15 @@ defineCommand({
     aliases: ["cook", "kitchen", "emojikitchen"],
     usage: "<emoji1> <emoji2>",
     description: "Cook up an emoji",
-    async execute({ msg, react, reply }, emoji1, emoji2) {
+    async execute({ react, reply }, emoji1, emoji2) {
         if (!emoji2 && emoji1) {
             const userMatch = USER_MENTION_REGEX.exec(emoji1);
             if (userMatch) {
                 const userId = userMatch[1];
-                await reply(`🧑‍🍳 Cooking <@${userId}>... 🍳`);
-                await msg.channel.sendTyping();
+                const msg = await reply(`🧑‍🍳 Cooking <@${userId}>... 🍳`);
+                await msg.channel!.sendTyping();
                 await sleep(randomInt(1000, 5000));
-                await reply(`🧑‍🍳 Finished cooking <@${userId}>! 🍽️`);
+                await replyTo(msg, `🧑‍🍳 Finished cooking <@${userId}>! 🍽️`);
                 return;
             }
 

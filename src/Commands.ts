@@ -46,6 +46,8 @@ export class CommandContext<GuildOnly extends boolean = false> {
         const response = await msg.client.rest.channels.createMessage(msg.channelID, opts);
 
         PreviousCommandResponses.set(msg.id, response.id);
+
+        return response;
     }
 
     createMessage = async (opts: string | CommandReplyOptions) => {
