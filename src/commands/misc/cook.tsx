@@ -1,6 +1,6 @@
 import { defineCommand } from "~/Commands";
 import { Emoji } from "~/constants";
-import { fetchBuffer, fetchJson } from "~/util/fetch";
+import { fetchWithCurl } from "~/util/fetch";
 import { ComponentMessage, Container, MediaGallery, MediaGalleryItem, TextDisplay } from "~components";
 
 const segmenter = new Intl.Segmenter("en", {
@@ -20,7 +20,9 @@ async function cook(emoji1: string, emoji2: string) {
         contentfilter: "high"
     });
 
-    const data = await fetchJson(url).catch(() => null);
+    const data = await fetchWithCurl(url)
+        .then(JSON.parse)
+        .catch(() => null);
     const result = data?.results?.[0];
     if (!result) return null;
 
@@ -48,7 +50,7 @@ defineCommand({
             <ComponentMessage
                 files={[{
                     name: "image.png",
-                    contents: await fetchBuffer(data.url)
+                    contents: await fetchWithCurl(data.url, "buffer")
                 }]}
             >
                 <TextDisplay># 🧑‍🍳</TextDisplay>

@@ -4,6 +4,7 @@ import { finished } from "stream/promises";
 
 import { Millis } from "~/constants";
 
+import { execFileP } from "./childProcess";
 import { ttlLazy } from "./lazy";
 
 type Url = string | URL;
@@ -45,4 +46,12 @@ export function makeCachedJsonFetch<T>(url: string, ttl = 5 * Millis.MINUTE) {
         () => doFetch(url).then(res => res.json() as Promise<T>),
         ttl
     );
+}
+
+// Google really hates Node.JS fetch from my VPS ip, but curl works for some reason
+export function fetchWithCurl(url: string, encoding?: "utf-8"): Promise<string>;
+export function fetchWithCurl(url: string, encoding: "buffer"): Promise<Buffer>;
+export function fetchWithCurl(url: string, encoding = "utf-8"): Promise<Buffer | string> {
+    return execFileP("curl", ["-L", "-s", url], { encoding })
+        .then(result => result.stdout);
 }
