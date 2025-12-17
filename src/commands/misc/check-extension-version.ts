@@ -1,6 +1,6 @@
 import { defineCommand } from "~/Commands";
 import { Millis } from "~/constants";
-import { fetchWithCurl, makeCachedJsonFetch } from "~/util/fetch";
+import { fetchGoogle, makeCachedJsonFetch } from "~/util/fetch";
 import { ttlLazy, ttlLazyFailure } from "~/util/lazy";
 
 interface GithubTag {
@@ -12,9 +12,9 @@ const VersionRe = />Version<\/div><div class="[^"]+">(\d+\.\d+\.\d+)<\/div>/;
 const getGithubTags = makeCachedJsonFetch<GithubTag[]>("https://api.github.com/repos/Vendicated/Vencord/tags");
 
 const getChromeVersion = ttlLazy(async () => {
-    const stdout = await fetchWithCurl("https://chromewebstore.google.com/detail/vencord-web/cbghhgpcnddeihccjmnadmkaejncjndb");
+    const res = await fetchGoogle("https://chromewebstore.google.com/detail/vencord-web/cbghhgpcnddeihccjmnadmkaejncjndb").then(res => res.text());
 
-    const version = VersionRe.exec(stdout)?.[1];
+    const version = VersionRe.exec(res)?.[1];
     return version ?? ttlLazyFailure;
 }, 5 * Millis.MINUTE);
 

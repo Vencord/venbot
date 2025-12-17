@@ -1,7 +1,6 @@
 import { defineCommand } from "~/Commands";
 import { Emoji } from "~/constants";
-import { fetchWithCurl } from "~/util/fetch";
-import { ComponentMessage, Container, MediaGallery, MediaGalleryItem, TextDisplay } from "~components";
+import { fetchGoogle } from "~/util/fetch";
 
 const segmenter = new Intl.Segmenter("en", {
     granularity: "grapheme"
@@ -20,9 +19,8 @@ async function cook(emoji1: string, emoji2: string) {
         contentfilter: "high"
     });
 
-    const data = await fetchWithCurl(url)
-        .then(JSON.parse)
-        .catch(() => null);
+    const data = await fetchGoogle(url)
+        .then(res => res.json());
     const result = data?.results?.[0];
     if (!result) return null;
 
@@ -46,20 +44,11 @@ defineCommand({
         const data = await cook(emoji1, emoji2);
         if (!data) return reply("🧑‍🍳 No recipe found 🫨");
 
-        return reply(
-            <ComponentMessage
-                files={[{
-                    name: "image.png",
-                    contents: await fetchWithCurl(data.url, "buffer")
-                }]}
-            >
-                <TextDisplay># 🧑‍🍳</TextDisplay>
-                <Container>
-                    <MediaGallery>
-                        <MediaGalleryItem url={"attachment://image.png"} />
-                    </MediaGallery>
-                </Container>
-            </ComponentMessage>
-        );
+        return reply({
+            content: "🧑‍🍳",
+            embeds: [{
+                image: { url: data.url }
+            }]
+        });
     },
 });

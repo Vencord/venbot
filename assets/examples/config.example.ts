@@ -174,6 +174,14 @@ const Config = {
         "stableMessageId": "1337500395311992954",
         // message id of the canary status message (must be in statusChannelId)
         "canaryMessageId": "1337500381923774544",
+    },
+
+    // Google private APIs seem to throttle non-residential IPs.
+    // If you're experiencing this issue, set up a Cloudflare Worker with the code in assets/googleProxyWorker.js
+    // and fill in the url and secret here.
+    "googleProxy": {
+        "url": "https://example.workers.dev",
+        "secret": "",
     }
 };
 
