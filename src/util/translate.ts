@@ -1,4 +1,4 @@
-import { fetchJson } from "./fetch";
+import { fetchGoogle } from "./fetch";
 import { toInlineCode } from "./text";
 
 interface TranslationData {
@@ -23,8 +23,7 @@ interface GoogleData {
 
 export async function translate(text: string, sourceLang: Locale, targetLang: Locale, useProxy = true): Promise<TranslationValue> {
     // Google seems to throttle non-residential IPs, it becomes soooo slow on my VPS without the proxy
-    const proxy = useProxy ? "https://cors.eu.org/" : "";
-    const url = proxy + "https://translate-pa.googleapis.com/v1/translate?" + new URLSearchParams({
+    const url = "https://translate-pa.googleapis.com/v1/translate?" + new URLSearchParams({
         "params.client": "gtx",
         "dataTypes": "TRANSLATION",
         "key": "AIzaSyDLEeFI5OtFBwYBIoK_jj5m32rZK5CkCXA", // some google API key
@@ -34,7 +33,7 @@ export async function translate(text: string, sourceLang: Locale, targetLang: Lo
     });
 
     try {
-        const { sourceLanguage, translation }: GoogleData = await fetchJson(url);
+        const { sourceLanguage, translation }: GoogleData = await fetchGoogle(url).then(res => res.json());
 
         return {
             src: sourceLanguage,
