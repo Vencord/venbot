@@ -122,6 +122,11 @@ const Config = {
         ],
     },
 
+    // Wolfram Alpha command. Leave appId empty to disable.
+    "wolfram": {
+        "appId": "", // Short Answers API
+    },
+
     "modmail": {
         "enabled": true,
         "channelId": "1161412933050437682",
