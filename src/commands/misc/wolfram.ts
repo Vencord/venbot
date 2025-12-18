@@ -15,9 +15,14 @@ defineCommand({
             appid: Config.wolfram.appId,
         });
 
-        const result = await fetch(url)
+        let result = await fetch(url)
             .then(res => res.text())
+            .then(text => text.replace(/(^"|"$)/g, ""))
             .catch(() => "No result");
+
+        if (result.includes(Config.wolfram.appId)) {
+            result = "No result";
+        }
 
         return reply({
             embeds: [{
