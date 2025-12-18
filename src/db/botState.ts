@@ -1,7 +1,8 @@
-import { readFileSync, writeFileSync } from "fs";
+import { readFileSync } from "fs";
 import { join } from "path";
 
 import { DATA_DIR } from "~/constants";
+import { atomicWriteFileSync } from "~/util/atomicWriteFile";
 import { run } from "~/util/functions";
 
 const StateFile = join(DATA_DIR, "botState.json");
@@ -38,7 +39,7 @@ const savedState = run(() => {
 const state = { ...defaultState, ...savedState };
 
 function saveSettings() {
-    writeFileSync(StateFile, JSON.stringify(state, null, 4));
+    atomicWriteFileSync(StateFile, JSON.stringify(state, null, 4));
 }
 
 function makeProxy(obj: Object) {

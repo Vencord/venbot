@@ -8,6 +8,7 @@ import { run } from "~/util/functions";
 
 import { buffer } from "stream/consumers";
 import Config from "~/config";
+import { atomicWriteFileSync } from "~/util/atomicWriteFile";
 import { spawnP } from "~/util/childProcess";
 import { getHomeGuild } from "~/util/discord";
 import { logBotAuditAction } from "~/util/logAction";
@@ -28,7 +29,7 @@ const BadgeData: Record<string, Array<Record<"tooltip" | "badge", string>>> = ru
     }
 });
 
-const saveBadges = () => writeFileSync(BadgeJson, JSON.stringify(BadgeData));
+const saveBadges = () => atomicWriteFileSync(BadgeJson, JSON.stringify(BadgeData));
 
 const Name = PROD ? "badge" : "devbadge";
 const NameAdd = Name + "-add";

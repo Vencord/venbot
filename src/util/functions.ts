@@ -34,3 +34,11 @@ export function debounce<T extends Function>(func: T, delay = 300): T {
         timeout = setTimeout(() => { func(...args); }, delay);
     } as any;
 }
+
+export function ignoreErrors<F extends () => any>(fn: F): ReturnType<F> | null {
+    try {
+        return fn();
+    } catch {
+        return null;
+    }
+}
