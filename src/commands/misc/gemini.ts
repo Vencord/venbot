@@ -207,9 +207,7 @@ defineCommand({
         const { response, model } = await generateContent({
             contents,
             config: {
-                // Limit to ~500 tokens to encourage concise responses (~2000 chars)
-                // System prompt asks for 200-2000 characters, this helps enforce that
-                maxOutputTokens: 500,
+                maxOutputTokens: 1000,
                 systemInstruction: systemPrompt
             }
         });
