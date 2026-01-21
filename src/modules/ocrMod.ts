@@ -4,7 +4,7 @@ import { Millis } from "~/constants";
 import { fetchBuffer } from "~/util/fetch";
 import { silently } from "~/util/functions";
 import { isTruthy } from "~/util/guards";
-import { logModerationAction } from "~/util/logAction";
+import { logAutoModAction } from "~/util/logAction";
 import { readTextFromImage } from "~/util/ocr";
 import { until } from "~/util/time";
 
@@ -38,7 +38,7 @@ export async function ocrModerate(msg: Message<AnyTextableGuildChannel>): Promis
     silently(msg.delete("Scam message"));
     silently(msg.member.edit({ communicationDisabledUntil: until(1 * Millis.HOUR), reason: "Scam message" }));
 
-    logModerationAction({
+    logAutoModAction({
         content: `${msg.member.mention} posted a scam image in ${msg.channel.mention}`,
         files: [{ contents: flaggedAttachment, name: "flagged.png" }],
         embeds: [{

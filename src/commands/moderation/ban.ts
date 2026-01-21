@@ -5,7 +5,7 @@ import { silently } from "~/util/functions";
 import { toCodeblock } from "~/util/text";
 
 import { getEmoji } from "~/modules/emojiManager";
-import { ID_REGEX, USER_MENTION_REGEX } from "~/util/discord";
+import { USER_MENTION_REGEX } from "~/util/discord";
 import { getHighestRolePosition, logUserRestriction, ModerationColor, parseUserIdsAndReason } from "./utils";
 
 function parseCrap(msg: Message<AnyTextableGuildChannel>, args: string[], isSoft: boolean) {

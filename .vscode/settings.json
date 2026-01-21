@@ -14,11 +14,11 @@
     "typescript.format.semicolons": "insert",
     "typescript.preferences.quoteStyle": "double",
     "javascript.preferences.quoteStyle": "double",
-
     "gitlens.remotes": [
         {
             "domain": "codeberg.org",
             "type": "Gitea"
         }
-    ]
+    ],
+    "prettier.enable": false
 }
