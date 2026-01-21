@@ -207,8 +207,11 @@ defineCommand({
         const { response, model } = await generateContent({
             contents,
             config: {
-                maxOutputTokens: 1000,
-                systemInstruction: systemPrompt
+                maxOutputTokens: 4000,
+                systemInstruction: systemPrompt,
+                thinkingConfig: {
+                    thinkingBudget: -1
+                }
             }
         });
 
