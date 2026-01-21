@@ -28,3 +28,10 @@ export function partition<T>(arr: T[], predicate: (item: T) => boolean): [T[], T
 
     return [truthy, falsy];
 }
+
+export function deleteElement<T>(arr: T[], element: T): boolean {
+    const index = arr.indexOf(element);
+    if (index === -1) return false;
+    arr.splice(index, 1);
+    return true;
+}

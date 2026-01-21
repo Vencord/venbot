@@ -1,30 +1,44 @@
 import { AnyTextableGuildChannel, Message } from "oceanic.js";
 import { Millis } from "~/constants";
+import { deleteElement } from "~/util/arrays";
 import { silently } from "~/util/functions";
 import { logAutoModAction } from "~/util/logAction";
 import { until } from "~/util/time";
+import { ChannelID, MessageID, UserID } from "~/util/types";
 import { makeEmbedForMessage } from "./utils";
 
-const channelsMessagedUserMap = new Map<string, Set<string>>();
+interface TrackedMessage {
+    channelID: ChannelID;
+    messageID: MessageID;
+}
+
+const userMessagesMap = new Map<UserID, TrackedMessage[]>();
 
 export async function moderateMultiChannelSpam(msg: Message<AnyTextableGuildChannel>) {
-    let channelsMessaged = channelsMessagedUserMap.get(msg.author.id);
-    if (!channelsMessaged) {
-        channelsMessaged = new Set();
-        channelsMessagedUserMap.set(msg.author.id, channelsMessaged);
+    let trackedMessages = userMessagesMap.get(msg.author.id);
+    if (!trackedMessages) {
+        trackedMessages = [];
+        userMessagesMap.set(msg.author.id, trackedMessages);
     }
 
-    channelsMessaged.add(msg.channelID);
+    const currentMessageInfo: TrackedMessage = { channelID: msg.channelID, messageID: msg.id };
+    trackedMessages.push(currentMessageInfo);
+
     setTimeout(() => {
-        const channelsMessaged = channelsMessagedUserMap.get(msg.author.id);
-        if (channelsMessaged) {
-            channelsMessaged.delete(msg.channelID);
-            if (!channelsMessaged.size)
-                channelsMessagedUserMap.delete(msg.author.id);
+        const trackedMessages = userMessagesMap.get(msg.author.id);
+        if (trackedMessages) {
+            deleteElement(trackedMessages, currentMessageInfo);
+            if (!trackedMessages.length)
+                userMessagesMap.delete(msg.author.id);
         }
     }, 15 * Millis.SECOND);
 
-    if (channelsMessaged.size < 3) return false;
+    const uniqueChannels = new Set<string>();
+    for (const { channelID } of trackedMessages) {
+        uniqueChannels.add(channelID);
+    }
+
+    if (uniqueChannels.size < 3) return false;
 
     await msg.member.edit({
         communicationDisabledUntil: until(1 * Millis.HOUR),
@@ -36,7 +50,9 @@ export async function moderateMultiChannelSpam(msg: Message<AnyTextableGuildChan
         embeds: [makeEmbedForMessage(msg)]
     });
 
-    await silently(msg.delete());
+    await Promise.all(trackedMessages.map(m =>
+        silently(msg.client.rest.channels.deleteMessage(m.channelID, m.messageID)))
+    );
 
     return true;
 }
