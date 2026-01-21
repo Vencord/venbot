@@ -13,6 +13,7 @@ import { logAutoModAction } from "~/util/logAction";
 import { handleError } from "..";
 import { Vaius } from "../Client";
 import { ASSET_DIR, Millis } from "../constants";
+import { ocrModerate } from "./ocrMod";
 
 // matches nothing
 let imageHostRegex = /^(?!a)a/;
@@ -132,7 +133,8 @@ export async function moderateMessage(msg: Message, isEdit: boolean) {
         !isEdit && moderateMultiChannelSpam,
         moderateInvites,
         moderateImageHosts,
-        moderateSuspiciousFiles
+        moderateSuspiciousFiles,
+        ocrModerate
     ].filter(isTruthy);
 
     for (const moderate of moderationFunctions) {
