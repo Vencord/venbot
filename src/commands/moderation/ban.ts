@@ -5,7 +5,7 @@ import { silently } from "~/util/functions";
 import { toCodeblock } from "~/util/text";
 
 import { getEmoji } from "~/modules/emojiManager";
-import { ID_REGEX } from "~/util/discord";
+import { ID_REGEX, USER_MENTION_REGEX } from "~/util/discord";
 import { getHighestRolePosition, logUserRestriction, ModerationColor, parseUserIdsAndReason } from "./utils";
 
 function parseCrap(msg: Message<AnyTextableGuildChannel>, args: string[], isSoft: boolean) {
@@ -41,13 +41,14 @@ async function banExecutor({ msg, reply }: CommandContext<true>, args: string[],
         const { id } = referencedMessage.author;
 
         const targetId = id === msg.client.user.id
-            ? referencedMessage.content.match(ID_REGEX)?.[1]
+            ? referencedMessage.content.match(USER_MENTION_REGEX)?.[1]
             : id;
 
         if (targetId)
             ids.push(targetId);
     }
 
+    if (!ids.length) return reply("Gimme some users silly");
     if (ids.length > 20) return reply("That's tooooo many users....");
 
     if (!reason) return reply("A reason is required");
