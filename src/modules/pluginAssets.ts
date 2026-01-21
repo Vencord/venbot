@@ -1,6 +1,6 @@
 import { createHash } from "crypto";
 import { createReadStream } from "fs";
-import { copyFile, mkdir, mkdtemp, rmdir, stat } from "fs/promises";
+import { copyFile, mkdir, mkdtemp, rm, stat } from "fs/promises";
 import { Attachment } from "oceanic.js";
 import { tmpdir } from "os";
 import { join } from "path";
@@ -91,7 +91,7 @@ async function optimiseVideo(d: MediaParams) {
 
 async function downloadToTempFile(attachment: Attachment, ext: string) {
     const dir = await mkdtemp(join(tmpdir(), "venbot-"));
-    const cleanup = () => rmdir(dir, { recursive: true });
+    const cleanup = () => rm(dir, { recursive: true });
 
     const filename = `input.${ext}`;
 

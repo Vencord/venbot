@@ -13,7 +13,7 @@ import { PROD } from "./constants";
 import { BotState } from "./db/botState";
 // eslint-disable-next-line no-duplicate-imports
 import Config from "./config";
-import { initModListeners } from "./modules/moderate";
+import { initModListeners } from "./modules/moderation/listeners";
 import { silently } from "./util/functions";
 import { inspect } from "./util/inspect";
 import { toCodeblock } from "./util/text";
