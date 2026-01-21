@@ -5,6 +5,7 @@ import { silently } from "~/util/functions";
 import { toCodeblock } from "~/util/text";
 
 import { getEmoji } from "~/modules/emojiManager";
+import { ID_REGEX } from "~/util/discord";
 import { getHighestRolePosition, logUserRestriction, ModerationColor, parseUserIdsAndReason } from "./utils";
 
 function parseCrap(msg: Message<AnyTextableGuildChannel>, args: string[], isSoft: boolean) {
@@ -33,10 +34,18 @@ async function banExecutor({ msg, reply }: CommandContext<true>, args: string[],
     if (daysToDelete === 0 && isSoft) return reply("softban requires a number of days to delete messages");
 
     if (!ids.length) {
-        if (!msg.referencedMessage)
+        const { referencedMessage } = msg;
+        if (!referencedMessage)
             return reply("Gimme some users silly");
 
-        ids.push(msg.referencedMessage.author.id);
+        const { id } = referencedMessage.author;
+
+        const targetId = id === msg.client.user.id
+            ? referencedMessage.content.match(ID_REGEX)?.[1]
+            : id;
+
+        if (targetId)
+            ids.push(targetId);
     }
 
     if (ids.length > 20) return reply("That's tooooo many users....");
