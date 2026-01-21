@@ -175,7 +175,7 @@ defineCommand({
 
         const contents = [
             createUserContent([
-                content + "\n(Remember to keep your response concise unless explicitly asked for more detail.)",
+                content,
                 ...files.value
             ])
         ];
