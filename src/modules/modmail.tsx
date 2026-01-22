@@ -272,8 +272,8 @@ if (enabled) {
 
             const [images, otherFiles] = partition(files, f => f.contentType?.startsWith("image/") ?? false);
 
-            thread.createMessage({ content: `<@&${modRoleId}>` })
-                .then(m => m.edit({ content: `<@&${modRoleId}>`, allowedMentions: { roles: [modRoleId] } }))
+            thread.createMessage({ content: "Adding mods to thread..." })
+                .then(m => m.edit({ content: `Join, my brethren <@&${modRoleId}>`, allowedMentions: { roles: [modRoleId] } }))
                 .then(m => m.delete());
 
             const msg = await thread.createMessage(
