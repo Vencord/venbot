@@ -1,4 +1,4 @@
-import { ActivityTypes, AnyTextableGuildChannel, ButtonStyles, ChannelTypes, CommandInteraction, ComponentInteraction, ComponentTypes, InteractionTypes, MessageFlags, ModalSubmitInteraction, SeparatorSpacingSize, TextChannel, TextInputStyles } from "oceanic.js";
+import { ActivityTypes, AnyTextableGuildChannel, ButtonStyles, ChannelTypes, CommandInteraction, ComponentInteraction, ComponentTypes, InteractionTypes, MessageFlags, ModalSubmitInteraction, PrivateThreadChannel, SeparatorSpacingSize, TextChannel, TextInputStyles } from "oceanic.js";
 
 import { db } from "~/db";
 import { handleComponentInteraction, handleInteraction, registerChatInputCommand } from "~/SlashCommands";
@@ -244,7 +244,7 @@ if (enabled) {
                     type: ChannelTypes.PRIVATE_THREAD,
                     name: `${channelName}-${id}`,
                     invitable: false
-                });
+                }) as PrivateThreadChannel;
 
                 await t.updateTable("tickets")
                     .set("channelId", thread.id)
@@ -271,6 +271,10 @@ if (enabled) {
             }));
 
             const [images, otherFiles] = partition(files, f => f.contentType?.startsWith("image/") ?? false);
+
+            thread.createMessage({ content: `<@&${modRoleId}>` })
+                .then(m => m.edit({ content: `<@&${modRoleId}>`, allowedMentions: { roles: [modRoleId] } }))
+                .then(m => m.delete());
 
             const msg = await thread.createMessage(
                 <ComponentMessage allowedMentions={{ users: [interaction.user.id] }} files={files}>
@@ -339,15 +343,6 @@ if (enabled) {
                     </ActionRow>
                 </ComponentMessage>
             );
-
-            // @ts-ignore trolley
-            msg.components[0].components[0].content = msg.components[0].components[0].content.replace("moderator", `<@&${modRoleId}>`);
-            await msg.edit({
-                allowedMentions: {
-                    roles: [modRoleId],
-                },
-                components: msg.components
-            });
 
             await interaction.createFollowup({
                 content: `📩 👉 ${thread.mention}`,
