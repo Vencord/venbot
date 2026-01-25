@@ -9,9 +9,10 @@ function logAction(channelId: string, data: string | CreateMessageOptions) {
         data = { content: data };
     }
 
-    Vaius.rest.channels.createMessage(channelId, data);
+    return Vaius.rest.channels.createMessage(channelId, data);
 }
 
+export const logDevDebug = (data: string | CreateMessageOptions) => logAction(Config.channels.dev, data);
 export const logAutoModAction = (data: string | CreateMessageOptions) => logAction(Config.channels.autoModLog, data);
 export const logModerationAction = (data: string | CreateMessageOptions) => logAction(Config.channels.modLog, data);
 export const logBotAuditAction = (data: string | CreateMessageOptions) => logAction(Config.channels.botAuditLog, data);

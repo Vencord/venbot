@@ -16,6 +16,7 @@ import Config from "./config";
 import { initModListeners } from "./modules/moderation/listeners";
 import { silently } from "./util/functions";
 import { inspect } from "./util/inspect";
+import { logDevDebug } from "./util/logAction";
 import { toCodeblock } from "./util/text";
 
 initModListeners();
@@ -31,7 +32,7 @@ export async function handleError(title: string, err: unknown) {
     const stack = err instanceof Error && err.stack;
     const text = stack || inspect(err);
 
-    await Vaius.rest.channels.createMessage(Config.channels.dev, {
+    await logDevDebug({
         embeds: [{
             title,
             description: toCodeblock(text, stack ? "js" : ""),

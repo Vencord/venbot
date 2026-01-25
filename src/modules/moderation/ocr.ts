@@ -17,7 +17,7 @@ const scamTerms = [
 const re = new RegExp(scamTerms.map(term => `\\b${term}\\b`).join("|"), "i");
 
 export async function ocrModerate(msg: Message<AnyTextableGuildChannel>): Promise<boolean> {
-    if (msg.member.roles.includes(Config.roles.regular)) return false;
+    if (!msg.member || msg.member.roles.includes(Config.roles.regular)) return false;
 
     const attachments = msg.attachments.filter(att => att.contentType?.startsWith("image/"));
     if (attachments.length === 0) return false;
