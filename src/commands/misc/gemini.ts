@@ -150,7 +150,7 @@ async function uploadAttachments(msg: Message) {
 defineCommand({
     enabled,
     name: "gemini",
-    aliases: ["gem", "ai", "gen", "genai", "gemma"],
+    aliases: ["gem", "ai", "gen", "genai", "gemma", "dumbai", "artificalstupidity", "as"],
     description: "Chat with Gemini AI",
     guildOnly: true,
     usage: "<message>",
@@ -203,7 +203,12 @@ defineCommand({
             .replace("{{VENCORD_CONTEXT}}", JSON.stringify(await fetchFaq()))
             .replace("{{EMOJI_LIST}}", JSON.stringify(msg.guild.emojis.map(e => `<${e.animated ? "a" : ""}:${e.name}:${e.id}>`)));
 
-        const useGemma = commandName === "gemma";
+        const useGemma = ["gemma", "dumbai", "artificalstupidity", "as"].includes(commandName);
+        const modelOverride = useGemma
+            ? commandName === "gemma"
+                ? "gemma-3-27b-it"
+                : "gemma-3-1b-it"
+            : undefined;
 
         const { response, model } = await generateContent({
             contents,
@@ -216,7 +221,7 @@ defineCommand({
                     }
                 })
             }
-        }, useGemma ? "gemma-3-27b-it" : undefined);
+        }, modelOverride);
 
         let { text } = response;
         text ??= response.promptFeedback?.blockReason !== undefined
