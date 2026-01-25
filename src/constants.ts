@@ -53,6 +53,7 @@ export const Emoji = makeConstants({
     Anger: "💢",
     TrashCan: "🗑️",
     Hammer: "🔨",
+    Boot: "👢",
 
     GreenDot: "🟢",
     RedDot: "🔴",
