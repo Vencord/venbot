@@ -1,15 +1,17 @@
-import { ApiError, createPartFromUri, createUserContent, GenerateContentParameters, GoogleGenAI, HarmBlockThreshold, HarmCategory } from "@google/genai";
+import { ApiError, ContentListUnion, createModelContent, createPartFromUri, createUserContent, GenerateContentParameters, GoogleGenAI, HarmBlockThreshold, HarmCategory } from "@google/genai";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { Message } from "oceanic.js";
+import { Collection, Message } from "oceanic.js";
+import { Vaius } from "~/Client";
 import { defineCommand } from "~/Commands";
 import Config from "~/config";
-import { ASSET_DIR, Bytes, Millis } from "~/constants";
+import { ASSET_DIR, Bytes, Millis, Seconds } from "~/constants";
+import { reply } from "~/util/discord";
 import { silently } from "~/util/functions";
 import { makeLazy } from "~/util/lazy";
 import { Err, Ok } from "~/util/Result";
-import { toInlineCode, truncateString } from "~/util/text";
-import { sleep } from "~/util/time";
+import { stripIndent, toInlineCode, truncateString } from "~/util/text";
+import { sleep, until } from "~/util/time";
 import { fetchFaq } from "../support/faq";
 
 const { apiKey, enabled, allowedRoles, bannedRoles } = Config.gemini;
@@ -55,9 +57,11 @@ async function generateContent(params: Omit<GenerateContentParameters, "model">,
             config: {
                 ...params.config,
                 // Gemma no no support google search
-                tools: models.includes(model)
-                    ? [{ googleSearch: {} }]
-                    : [],
+                tools: params.config!.tools ??
+                    (models.includes(model)
+                        ? [{ googleSearch: {} }]
+                        : []
+                    ),
                 safetySettings: [
                     HarmCategory.HARM_CATEGORY_HATE_SPEECH,
                     HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
@@ -248,5 +252,88 @@ defineCommand({
                 }]
             });
         }
+    }
+});
+
+const isReset = (msg: Message) => msg.content.toLowerCase().startsWith("!reset");
+const shouldIgnore = (msg: Message) => msg.content.startsWith("#") || msg.content.startsWith("// ") || isReset(msg);
+
+Vaius.on("messageCreate", async msg => {
+    try {
+        if (msg.author.bot || !msg.inCachedGuildChannel()) return;
+        if (msg.channelID !== "1465126576550314258") return;
+        if (shouldIgnore(msg)) return;
+
+        msg.channel.sendTyping();
+
+        const messages = (msg.channel.messages as Collection<string, Message>)
+            .filter(m => !shouldIgnore(m))
+            .slice(-10);
+
+        const reset = messages.findLastIndex(isReset);
+        if (reset !== -1) {
+            messages.splice(0, reset + 1);
+        }
+
+        const messageIdMap = Object.fromEntries(messages.map((m, idx) => [m.id, idx + 3]));
+
+        const contents: ContentListUnion = messages.map((m, idx) => {
+            const isAi = m.author.id === Vaius.user.id;
+            const prefix = `#${messageIdMap[m.id]}`;
+            const replyContext = m.referencedMessage && messageIdMap[m.referencedMessage.id]
+                ? `RE: #${messageIdMap[m.referencedMessage.id]}`
+                : "";
+
+            const text = isAi
+                ? `${prefix} <system> ${replyContext}\n${m.content}`
+                : `${prefix} <${msg.member.displayName} (ID ${msg.author.id})>: ${replyContext}\n${m.content}`;
+
+            return {
+                parts: [{ text }],
+                role: isAi ? "model" : "user"
+            };
+        });
+
+        contents.unshift(
+            createUserContent(
+                stripIndent`
+                    #1 <ADMIN (ID 0)> You are Venbot, a Discord chat bot. Respond to the user in a helpful and **SHORT** manner.
+                    The message history is by different users, each message is prefixed by that user's name and id. Only reply to the most recent user's message.
+
+                    If you believe that the latest message (ignore all other messages for moderation purposes) **SEVERELY** breaks the rules (hate speech, illegal content, harassment, bad insults - do not mute for any other reason - NEVER BAN FOR OFF TOPIC, THERE IS NO OFF TOPIC), you can issue a mute for up to 5 minutes,
+                    Before issuing a mute, give the user a verbal warning. If they still continue, respond with just plain text json in this format to issue a mute: {"durationSeconds":30,"reason":"Do not use racial slurs. You have been muted for 60 seconds."}
+                `
+            ),
+            createModelContent("#2 <system> Understood. I will respond concisely and only issue mutes when absolutely necessary. I will only mute if the latest message severely breaks the rules.")
+        );
+
+        let { text } = await ai.models.generateContent({
+            model: "gemma-3-27b-it",
+            contents,
+            config: {
+                maxOutputTokens: 500
+            },
+        });
+
+        if (!text) return;
+
+        text = text.trim().replace(/^#\d+ <system>( RE: #\d+)?/, "").trim();
+
+        if (text.includes('"reason"') && text.includes('"durationSeconds"')) {
+            try {
+                const muteData = JSON.parse(text.replace(/```json|```/g, "").trim());
+                const reason = String(muteData.reason);
+                const durationSeconds = Math.min(Number(muteData.durationSeconds) || 0, 5 * Seconds.MINUTE);
+                if (typeof reason === "string" && reason.length > 0 && durationSeconds > 0) {
+                    reply(msg, truncateString(reason, 2000));
+                    msg.member.edit({ communicationDisabledUntil: until(durationSeconds * Millis.SECOND), reason: `Muted by Dumb AI for reason: ${reason}` });
+                }
+                return;
+            } catch { }
+        }
+
+        reply(msg, truncateString(text, 2000));
+    } catch (e) {
+        // who even cares
     }
 });
