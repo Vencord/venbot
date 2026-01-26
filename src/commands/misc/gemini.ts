@@ -322,7 +322,7 @@ Vaius.on("messageCreate", async msg => {
                 const reason = muteMatch[2];
                 if (typeof reason === "string" && reason.length > 0 && durationSeconds > 0) {
                     reply(msg, truncateString(reason, 2000));
-                    await msg.member.edit({ communicationDisabledUntil: until(durationSeconds * Millis.SECOND), reason: `Muted by Dumb AI for reason: ${reason}` });
+                    await msg.member.edit({ communicationDisabledUntil: until(5 * Millis.SECOND), reason: `Muted by Dumb AI for reason: ${reason}` });
                 }
             } catch { }
 
