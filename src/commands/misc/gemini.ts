@@ -256,13 +256,13 @@ defineCommand({
 });
 
 const isReset = (msg: Message) => msg.content.toLowerCase().startsWith("!reset");
-const shouldIgnore = (msg: Message) => msg.content.startsWith("#") || msg.content.startsWith("// ") || isReset(msg);
+const shouldIgnore = (msg: Message) => msg.content.startsWith("#") || msg.content.startsWith("// ");
 
 Vaius.on("messageCreate", async msg => {
     try {
         if (msg.author.bot || !msg.inCachedGuildChannel()) return;
         if (msg.channelID !== "1465126576550314258") return;
-        if (shouldIgnore(msg)) return;
+        if (shouldIgnore(msg) || isReset(msg)) return;
 
         msg.channel.sendTyping();
 
