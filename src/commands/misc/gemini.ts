@@ -5,9 +5,9 @@ import { Collection, Message } from "oceanic.js";
 import { Vaius } from "~/Client";
 import { defineCommand } from "~/Commands";
 import Config from "~/config";
-import { ASSET_DIR, Bytes, Millis, Seconds } from "~/constants";
+import { ASSET_DIR, Bytes, Millis } from "~/constants";
 import { reply } from "~/util/discord";
-import { silently } from "~/util/functions";
+import { silently, swallow } from "~/util/functions";
 import { makeLazy } from "~/util/lazy";
 import { Err, Ok } from "~/util/Result";
 import { stripIndent, toInlineCode, truncateString } from "~/util/text";
@@ -258,8 +258,9 @@ defineCommand({
 const isReset = (msg: Message) => msg.content.toLowerCase().startsWith("!reset");
 const shouldIgnore = (msg: Message) => msg.content.startsWith("#") || msg.content.startsWith("// ");
 
+let aiQueue = Promise.resolve();
 Vaius.on("messageCreate", async msg => {
-    try {
+    aiQueue = aiQueue.then(async () => {
         if (msg.author.bot || !msg.inCachedGuildChannel()) return;
         if (msg.channelID !== "1465126576550314258") return;
         if (shouldIgnore(msg) || isReset(msg)) return;
@@ -275,18 +276,12 @@ Vaius.on("messageCreate", async msg => {
             messages.splice(0, reset + 1);
         }
 
-        const messageIdMap = Object.fromEntries(messages.map((m, idx) => [m.id, idx + 3]));
-
         const contents: ContentListUnion = messages.map((m, idx) => {
             const isAi = m.author.id === Vaius.user.id;
-            const prefix = `#${messageIdMap[m.id]}`;
-            const replyContext = m.referencedMessage && messageIdMap[m.referencedMessage.id]
-                ? `RE: #${messageIdMap[m.referencedMessage.id]}`
-                : "";
 
             const text = isAi
-                ? `${prefix} <system> ${replyContext}\n${m.content}`
-                : `${prefix} <${msg.member.displayName} (ID ${msg.author.id})>: ${replyContext}\n${m.content}`;
+                ? m.content
+                : `<${msg.member.displayName} (ID ${msg.author.id})>\n${m.content}`;
 
             return {
                 parts: [{ text }],
@@ -297,14 +292,14 @@ Vaius.on("messageCreate", async msg => {
         contents.unshift(
             createUserContent(
                 stripIndent`
-                    #1 <ADMIN (ID 0)> You are Venbot, a Discord chat bot. Respond to the user in a helpful and **SHORT** manner.
+                    <ADMIN (ID 0)> You are Venbot, a Discord chat bot. Respond to the user in a helpful and **SHORT** manner.
                     The message history is by different users, each message is prefixed by that user's name and id. Only reply to the most recent user's message.
 
                     If you believe that the latest message (ignore all other messages for moderation purposes) **SEVERELY** breaks the rules (hate speech, illegal content, harassment, bad insults - do not mute for any other reason - NEVER BAN FOR OFF TOPIC, THERE IS NO OFF TOPIC), you can issue a mute for up to 5 minutes,
-                    Before issuing a mute, give the user a verbal warning. If they still continue, respond with just plain text json in this format to issue a mute: {"durationSeconds":30,"reason":"Do not use racial slurs. You have been muted for 60 seconds."}
+                    Before issuing a mute, give the user a verbal warning. If they still continue, respond with just plain text json with duration and reason in the following format (this is an example, adjust the reason and duration): {"durationSeconds":30,"reason":"Do not use racial slurs. You have been muted for 60 seconds."}
                 `
             ),
-            createModelContent("#2 <system> Understood. I will respond concisely and only issue mutes when absolutely necessary. I will only mute if the latest message severely breaks the rules.")
+            createModelContent("Understood. I will respond concisely and only issue mutes when absolutely necessary. I will only mute if the latest message severely breaks the rules.")
         );
 
         let { text } = await ai.models.generateContent({
@@ -317,23 +312,23 @@ Vaius.on("messageCreate", async msg => {
 
         if (!text) return;
 
-        text = text.trim().replace(/^#\d+ <system>( RE: #\d+)?/, "").trim();
+        text = text.trim();
 
-        if (text.includes('"reason"') && text.includes('"durationSeconds"')) {
+        const muteMatch = text.match(/"durationSeconds":(\d+),"reason":"(.+?)"/); // the ai is too dumb to only respond with the json
+
+        if (muteMatch) {
             try {
-                const muteData = JSON.parse(text.replace(/```json|```/g, "").trim());
-                const reason = String(muteData.reason);
-                const durationSeconds = Math.min(Number(muteData.durationSeconds) || 0, 5 * Seconds.MINUTE);
+                const durationSeconds = parseInt(muteMatch[1], 10);
+                const reason = muteMatch[2];
                 if (typeof reason === "string" && reason.length > 0 && durationSeconds > 0) {
                     reply(msg, truncateString(reason, 2000));
-                    msg.member.edit({ communicationDisabledUntil: until(durationSeconds * Millis.SECOND), reason: `Muted by Dumb AI for reason: ${reason}` });
+                    await msg.member.edit({ communicationDisabledUntil: until(durationSeconds * Millis.SECOND), reason: `Muted by Dumb AI for reason: ${reason}` });
                 }
-                return;
             } catch { }
+
+            return;
         }
 
         reply(msg, truncateString(text, 2000));
-    } catch (e) {
-        // who even cares
-    }
+    }).catch(swallow);
 });
