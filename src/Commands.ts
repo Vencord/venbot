@@ -75,14 +75,22 @@ export class CommandContext<GuildOnly extends boolean = false> {
     reply = async (opts: string | EditMessageOptions & CreateMessageOptions) => {
         opts = this._normalizeOptions(opts);
 
-        return this.createMessage({
-            ...opts,
-            messageReference: {
-                messageID: this.msg.id,
-                channelID: this.msg.channelID,
-                guildID: this.msg.guildID!
+        try {
+            return this.createMessage({
+                ...opts,
+                messageReference: {
+                    messageID: this.msg.id,
+                    channelID: this.msg.channelID,
+                    guildID: this.msg.guildID!
+                }
+            });
+        } catch (err) {
+            if (err instanceof DiscordRESTError && err.message.includes("Unknown message")) { // user deleted the original message before bot could reply
+                return this.createMessage(opts);
             }
-        });
+
+            throw err;
+        }
     };
 
     react = async (emoji: string) => {

@@ -1,4 +1,4 @@
-import { Client, CreateMessageOptions, Member, Message, PossiblyUncachedMessage, Role, User } from "oceanic.js";
+import { Client, CreateMessageOptions, DiscordRESTError, Member, Message, PossiblyUncachedMessage, Role, User } from "oceanic.js";
 
 import { Vaius } from "~/Client";
 
@@ -10,20 +10,29 @@ export const USER_MENTION_REGEX = /<@!?(\d{17,20})>/;
 
 export function reply(msg: Message, opts: CreateMessageOptions | string): Promise<Message>;
 export function reply(msg: PossiblyUncachedMessage, opts: CreateMessageOptions | string, client: Client): Promise<Message>;
-export function reply(msg: Message | PossiblyUncachedMessage, opts: CreateMessageOptions | string, client = (msg as any).client): Promise<Message> {
+export function reply(msg: Message | PossiblyUncachedMessage, opts: CreateMessageOptions | string, client: Client = (msg as any).client): Promise<Message> {
     if (typeof opts === "string")
         opts = {
             content: opts
         };
 
-    return client.rest.channels.createMessage(msg.channelID, {
-        ...opts,
-        messageReference: {
-            messageID: msg.id,
-            channelID: msg.channelID,
-            guildID: msg.guildID!
+    try {
+        return client.rest.channels.createMessage(msg.channelID, {
+            ...opts,
+            messageReference: {
+                messageID: msg.id,
+                channelID: msg.channelID,
+                guildID: msg.guildID!
+            }
+        });
+    } catch (err) {
+        if (err instanceof DiscordRESTError && err.message.includes("Unknown message")) { // user deleted the original message before bot could reply
+            return client.rest.channels.createMessage(msg.channelID, opts);
         }
-    });
+
+        throw err;
+    }
+
 }
 
 export function getHighestRole({ guild, roles }: Member, filter?: (r: Role) => boolean) {

@@ -115,7 +115,7 @@ async function uploadAttachments(msg: Message) {
             let upload = await ai.files.upload({
                 file: await res.blob(),
                 config: {
-                    displayName: `${a.filename} uploaded by ${msg.author.tag} (${a.id})`
+                    displayName: `${a.filename} uploaded by ${msg.author.tag} (${a.id})`,
                 }
             });
 
@@ -260,10 +260,11 @@ const shouldIgnore = (msg: Message) => msg.content.startsWith("#") || msg.conten
 
 const KEVIN_ID = "974297735559806986";
 const DUMB_AI_CHANNEL_ID = "1465126576550314258";
+
 Vaius.on("messageCreate", async msg => {
     try {
         if (!msg.inCachedGuildChannel() || msg.channelID !== DUMB_AI_CHANNEL_ID) return;
-        if (msg.author.bot && msg.author.id !== KEVIN_ID) return;
+        if (msg.author.system || (msg.author.bot && msg.author.id !== KEVIN_ID)) return;
         if (shouldIgnore(msg) || isReset(msg)) return;
 
         msg.channel.sendTyping();
@@ -310,10 +311,10 @@ Vaius.on("messageCreate", async msg => {
                 maxOutputTokens: 500
             },
         });
+        text = text?.trim();
 
         if (!text) return;
 
-        text = text.trim();
 
         const muteMatch = text.match(/"durationSeconds":(\d+),"reason":"(.+?)"/); // the ai is too dumb to only respond with the json
 
@@ -321,8 +322,8 @@ Vaius.on("messageCreate", async msg => {
             try {
                 const durationSeconds = parseInt(muteMatch[1], 10);
                 const reason = muteMatch[2];
-                if (typeof reason === "string" && reason.length > 0 && durationSeconds > 0) {
-                    reply(msg, truncateString(reason, 2000));
+                if (reason.length > 0 && durationSeconds > 0) {
+                    reply(msg, truncateString("🔨 " + reason, 2000));
                     await msg.member.edit({ communicationDisabledUntil: until(5 * Millis.SECOND), reason: `Muted by Dumb AI for reason: ${reason}` });
                 }
             } catch { }
