@@ -7,7 +7,7 @@ import { defineCommand } from "~/Commands";
 import Config from "~/config";
 import { ASSET_DIR, Bytes, Millis } from "~/constants";
 import { reply } from "~/util/discord";
-import { silently, swallow } from "~/util/functions";
+import { silently } from "~/util/functions";
 import { makeLazy } from "~/util/lazy";
 import { Err, Ok } from "~/util/Result";
 import { stripIndent, toInlineCode, truncateString } from "~/util/text";
@@ -258,11 +258,12 @@ defineCommand({
 const isReset = (msg: Message) => msg.content.toLowerCase().startsWith("!reset");
 const shouldIgnore = (msg: Message) => msg.content.startsWith("#") || msg.content.startsWith("// ");
 
-let aiQueue = Promise.resolve();
+const KEVIN_ID = "974297735559806986";
+const DUMB_AI_CHANNEL_ID = "1465126576550314258";
 Vaius.on("messageCreate", async msg => {
-    aiQueue = aiQueue.then(async () => {
-        if (msg.author.bot || !msg.inCachedGuildChannel()) return;
-        if (msg.channelID !== "1465126576550314258") return;
+    try {
+        if (!msg.inCachedGuildChannel() || msg.channelID !== DUMB_AI_CHANNEL_ID) return;
+        if (msg.author.bot && msg.author.id !== KEVIN_ID) return;
         if (shouldIgnore(msg) || isReset(msg)) return;
 
         msg.channel.sendTyping();
@@ -330,5 +331,5 @@ Vaius.on("messageCreate", async msg => {
         }
 
         reply(msg, truncateString(text, 2000));
-    }).catch(swallow);
+    } catch { }
 });
