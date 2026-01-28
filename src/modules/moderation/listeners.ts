@@ -13,8 +13,6 @@ export function initModListeners() {
     Vaius.on("autoModerationActionExecution", async (guild, channel, user, data) => {
         if (data.action.type !== AutoModerationActionTypes.SEND_ALERT_MESSAGE) return;
 
-        console.log("AutoMod Action:", { data });
-
         const includesPing = ["@everyone", "@here"].some(s => data.content.includes(s));
         const includesInvite = ["discord.gg/", "discord.com/invite", "discordapp.com/invite"].some(s => data.content.includes(s));
 
