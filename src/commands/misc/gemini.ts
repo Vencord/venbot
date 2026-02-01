@@ -171,7 +171,16 @@ defineCommand({
 
         silently(msg.channel.sendTyping());
 
-        const files = await uploadAttachments(msg);
+        const useGemma = ["gemma", "dumbai", "artificialstupidity", "as"].includes(commandName);
+        const modelOverride = useGemma
+            ? commandName === "gemma"
+                ? "gemma-3-27b-it"
+                : "gemma-3-1b-it"
+            : undefined;
+
+        const files = modelOverride === "gemma-3-1b-it" // gemma-3-1b-it doesn't support files
+            ? Ok([])
+            : await uploadAttachments(msg);
         if (!files.ok) {
             return reply(files.error);
         }
@@ -206,13 +215,6 @@ defineCommand({
             }))
             .replace("{{VENCORD_CONTEXT}}", JSON.stringify(await fetchFaq()))
             .replace("{{EMOJI_LIST}}", JSON.stringify(msg.guild.emojis.map(e => `<${e.animated ? "a" : ""}:${e.name}:${e.id}>`)));
-
-        const useGemma = ["gemma", "dumbai", "artificialstupidity", "as"].includes(commandName);
-        const modelOverride = useGemma
-            ? commandName === "gemma"
-                ? "gemma-3-27b-it"
-                : "gemma-3-1b-it"
-            : undefined;
 
         const { response, model } = await generateContent({
             contents,
