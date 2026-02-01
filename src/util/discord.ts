@@ -1,4 +1,4 @@
-import { Client, CreateMessageOptions, DiscordRESTError, Member, Message, PossiblyUncachedMessage, Role, User } from "oceanic.js";
+import { Client, CreateMessageOptions, DiscordRESTError, Member, Message, MessageTypes, PossiblyUncachedMessage, Role, User } from "oceanic.js";
 
 import { Vaius } from "~/Client";
 
@@ -7,6 +7,11 @@ import { silently } from "./functions";
 
 export const ID_REGEX = /^(?:<@!?)?(\d{17,20})>?$/;
 export const USER_MENTION_REGEX = /<@!?(\d{17,20})>/;
+
+// search for REPLYABLE: in discord code
+export const ReplyableMessageTypes = new Set<MessageTypes>([0, 7, 19, 20, 23, 24, 25, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 45, 46, 63] as MessageTypes[]);
+
+export const canReplyToMessage = (msg: Message) => ReplyableMessageTypes.has(msg.type);
 
 export async function reply(msg: Message, opts: CreateMessageOptions | string): Promise<Message>;
 export async function reply(msg: PossiblyUncachedMessage, opts: CreateMessageOptions | string, client: Client): Promise<Message>;

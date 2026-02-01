@@ -6,7 +6,7 @@ import { Vaius } from "~/Client";
 import { defineCommand } from "~/Commands";
 import Config from "~/config";
 import { ASSET_DIR, Bytes, Millis } from "~/constants";
-import { reply } from "~/util/discord";
+import { canReplyToMessage, reply } from "~/util/discord";
 import { silently } from "~/util/functions";
 import { makeLazy } from "~/util/lazy";
 import { Err, Ok } from "~/util/Result";
@@ -265,7 +265,7 @@ Vaius.on("messageCreate", async msg => {
     try {
         if (!msg.inCachedGuildChannel() || msg.channelID !== DUMB_AI_CHANNEL_ID) return;
         if (msg.author.system || (msg.author.bot && msg.author.id !== KEVIN_ID)) return;
-        if (shouldIgnore(msg) || isReset(msg)) return;
+        if (shouldIgnore(msg) || isReset(msg) || !canReplyToMessage(msg)) return;
 
         msg.channel.sendTyping();
 
