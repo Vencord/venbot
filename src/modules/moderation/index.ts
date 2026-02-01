@@ -39,6 +39,7 @@ const ChannelRules: Record<string, (m: Message) => string | void> = {
 };
 
 export async function moderateMessage(msg: Message, isEdit: boolean) {
+    if (msg.author.bot) return;
     if (!msg.inCachedGuildChannel()) return;
     if (!msg.channel.permissionsOf(Vaius.user.id).has("MANAGE_MESSAGES")) return;
 
