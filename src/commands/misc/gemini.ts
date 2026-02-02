@@ -177,10 +177,11 @@ defineCommand({
                 ? "gemma-3-27b-it"
                 : "gemma-3-1b-it"
             : undefined;
+        const supportsFiles = modelOverride !== "gemma-3-1b-it";
 
-        const files = modelOverride === "gemma-3-1b-it" // gemma-3-1b-it doesn't support files
-            ? Ok([])
-            : await uploadAttachments(msg);
+        const files = supportsFiles
+            ? await uploadAttachments(msg)
+            : Ok([]);
         if (!files.ok) {
             return reply(files.error);
         }
@@ -193,7 +194,9 @@ defineCommand({
         ];
 
         if (msg.referencedMessage) {
-            const referencedFiles = await uploadAttachments(msg.referencedMessage);
+            const referencedFiles = supportsFiles
+                ? await uploadAttachments(msg.referencedMessage)
+                : Ok([]);
             if (!referencedFiles.ok) {
                 return reply(referencedFiles.error);
             }
