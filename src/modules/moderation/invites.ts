@@ -1,5 +1,5 @@
 import { spawn } from "child_process";
-import { Message } from "oceanic.js";
+import { AnyTextableGuildChannel, Message } from "oceanic.js";
 import { Vaius } from "~/Client";
 import Config from "~/config";
 import { Millis } from "~/constants";
@@ -39,14 +39,14 @@ async function getInviteImage(code: string) {
     });
 }
 
-export async function moderateInvites(msg: Message) {
+export async function moderateInvites(msg: Message<AnyTextableGuildChannel>) {
     for (const [, code] of msg.content.matchAll(inviteRe)) {
         const inviteData = await Vaius.rest.channels.getInvite(code, {}).catch(() => null);
         if (!inviteData?.guildID || !inviteData.guild) continue;
 
         if (!allowedGuilds.has(inviteData.guildID)) {
             silently(msg.delete());
-            silently(msg.member!.edit({ communicationDisabledUntil: until(5 * Millis.MINUTE), reason: "invite" }));
+            silently(msg.guild.editMember(msg.author.id, { communicationDisabledUntil: until(5 * Millis.MINUTE), reason: "invite" }));
 
             const inviteImage = await getInviteImage(code);
             logAutoModAction({

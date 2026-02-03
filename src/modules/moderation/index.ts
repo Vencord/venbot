@@ -3,7 +3,6 @@ import { Vaius } from "~/Client";
 import { sendDm } from "~/util/discord";
 import { silently } from "~/util/functions";
 import { isTruthy } from "~/util/guards";
-import { logDevDebug } from "~/util/logAction";
 import { moderateImageHosts } from "./imageHosts";
 import { moderateInvites } from "./invites";
 import { moderateMultiChannelSpam } from "./multiChannelSpam";
@@ -42,10 +41,6 @@ export async function moderateMessage(msg: Message, isEdit: boolean) {
     if (msg.author.bot) return;
     if (!msg.inCachedGuildChannel()) return;
     if (!msg.channel.permissionsOf(Vaius.user.id).has("MANAGE_MESSAGES")) return;
-
-    if (!msg.member) {
-        logDevDebug(`<moderateMessage> no member: [This Message](${msg.jumpLink}) by ${msg.author.mention}`);
-    }
 
     // FIXME: make this less bad
     if (msg.messageSnapshots?.length)

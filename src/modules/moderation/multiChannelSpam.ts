@@ -40,7 +40,7 @@ export async function moderateMultiChannelSpam(msg: Message<AnyTextableGuildChan
 
     if (uniqueChannels.size < 3) return false;
 
-    await msg.member.edit({
+    await msg.guild.editMember(msg.author.id, {
         communicationDisabledUntil: until(1 * Millis.HOUR),
         reason: "Messaged >=3 different channels within 15 seconds"
     });
