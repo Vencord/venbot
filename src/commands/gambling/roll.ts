@@ -1,6 +1,6 @@
-import { randomInt } from "crypto";
 import { defineCommand } from "~/Commands";
 import { Emoji } from "~/constants";
+import { randomInt } from "~/util/random";
 
 const dieNames = ["d4", "d6", "d8", "d10", "d12", "d20"];
 

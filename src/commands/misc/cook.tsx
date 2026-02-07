@@ -1,8 +1,8 @@
-import { randomInt } from "crypto";
 import { defineCommand } from "~/Commands";
 import { Emoji } from "~/constants";
 import { reply as replyTo, USER_MENTION_REGEX } from "~/util/discord";
 import { fetchGoogle } from "~/util/fetch";
+import { randomInt } from "~/util/random";
 import { sleep } from "~/util/time";
 
 const segmenter = new Intl.Segmenter("en", {
