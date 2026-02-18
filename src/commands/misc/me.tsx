@@ -33,7 +33,7 @@ registerChatInputCommand({
     name: "me",
     description: "Send a message",
     options: <>
-        <CommandStringOption name="content" description="The message content" required />
+        <CommandStringOption name="content" description="The message content" required maxLength={2000} />
         <CommandAttachmentOption name="attachment" description="An optional attachment" />
         <CommandStringOption name="attachment-url" description="A URL to an attachment" />
     </>

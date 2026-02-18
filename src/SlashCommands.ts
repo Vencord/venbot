@@ -101,7 +101,7 @@ Vaius.on("interactionCreate", async interaction => {
         handleError("Error handling interaction", e);
 
         if (interaction.type === InteractionTypes.APPLICATION_COMMAND) {
-            const message = `An error occurred: ${e}`;
+            const message = "oop, that didn't go well 💥";
 
             if (interaction.acknowledged) {
                 await interaction.createFollowup({
