@@ -21,7 +21,11 @@ const BasePath = "/var/www/badges.vencord.dev";
 const BadgeJson = `${BasePath}/badges.json`;
 const badgesForUser = (userId: string) => `${BasePath}/badges/${userId}`;
 
-const BadgeData: Record<string, Array<Record<"tooltip" | "badge", string>>> = run(() => {
+interface BadgeInfo {
+    tooltip?: string;
+    badge: string;
+}
+const BadgeData: Record<string, Array<BadgeInfo>> = run(() => {
     try {
         return JSON.parse(readFileSync(BadgeJson, "utf-8"));
     } catch {
@@ -245,10 +249,11 @@ const handler: CommandInteractionHandler = {
         const index = existingBadgeIndex ?? BadgeData[user.id].length;
         const fileName = `${hash}.${ext}`;
 
-        const newBadgeData = {
+        const newBadgeData: BadgeInfo = {
             tooltip: tooltip,
             badge: `https://badges.vencord.dev/badges/${user.id}/${fileName}`
         };
+        if (!tooltip || tooltip === ZWSP) delete newBadgeData.tooltip;
 
         const before = data.options.getInteger("before");
         if (before != null) {
