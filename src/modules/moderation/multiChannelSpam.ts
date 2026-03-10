@@ -31,7 +31,7 @@ export async function moderateMultiChannelSpam(msg: Message<AnyTextableGuildChan
             if (!trackedMessages.length)
                 userMessagesMap.delete(msg.author.id);
         }
-    }, 15 * Millis.SECOND);
+    }, 5 * Millis.SECOND);
 
     const uniqueChannels = new Set<string>();
     for (const { channelID } of trackedMessages) {
@@ -42,14 +42,14 @@ export async function moderateMultiChannelSpam(msg: Message<AnyTextableGuildChan
 
     const res = await ignoreExpectedErrors(msg.guild.editMember(msg.author.id, {
         communicationDisabledUntil: until(1 * Millis.HOUR),
-        reason: "Messaged >=3 different channels within 15 seconds"
+        reason: "Messaged >=3 different channels within 5 seconds"
     }));
 
     // If this is a scam bot (likely), the ocr mod may already have kicked the member, so editMember will
     // fail with Unknown Member. Safe to ignore
     if (res)
         logAutoModAction({
-            content: `Muted <@${msg.author.id}> for messaging >=3 different channels within 15 seconds`,
+            content: `Muted <@${msg.author.id}> for messaging >=3 different channels within 5 seconds`,
             embeds: [makeEmbedForMessage(msg)]
         });
 
