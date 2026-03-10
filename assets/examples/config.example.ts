@@ -84,6 +84,7 @@ const Config = {
             "1116074561734197270", // dziurwa insane
             "820745488231301210", // ntts
             "603970300668805120", // discord previews
+            "1368145952266911755", // kettu / rain
         ]
     },
 
