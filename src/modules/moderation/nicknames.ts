@@ -2,7 +2,7 @@ import { Member } from "oceanic.js";
 import { Vaius } from "~/Client";
 import { silently } from "~/util/functions";
 
-const HoistCharactersRegex = /^[!"#$%'+,.*-]+/;
+const HoistCharactersRegex = /^[!"#$%'+,.*-\s]+/;
 
 export async function moderateNick(member: Member) {
     if (member.bot || !member.guild.permissionsOf(Vaius.user.id).has("MANAGE_NICKNAMES")) return;
