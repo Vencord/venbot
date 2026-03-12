@@ -26,6 +26,14 @@ defineCommand({
                 `<t:${Math.floor((Date.now() / 1000) - process.uptime())}:R>`
             ],
             [
+                "Gateway Ping",
+                `${client.ws.ping}ms`
+            ],
+            [
+                "Commands Loaded",
+                client.commands.size
+            ],
+            [
                 "Cached Users",
                 client.users.size
             ],
