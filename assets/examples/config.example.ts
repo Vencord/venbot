@@ -33,7 +33,8 @@ const Config = {
     "roles": {
         // anyone with this role can execute moderation commands
         "mod": "1026509424686284924",
-
+        // anyone with this role has limited access to moderation commands like mute
+        "helper": "1244313853357981787",
         // used for github linking and some other things
         "donor": "1042507929485586532",
         // used for github linking and some other things

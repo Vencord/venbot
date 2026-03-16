@@ -8,6 +8,7 @@ defineCommand({
     name: "sticky",
     description: "Set the sticky message",
     modOnly: true,
+    helperOnly: true,
     guildOnly: true,
     usage: "<create/set | delete/remove | on | off | delay | list> [value]",
     rawContent: true,
