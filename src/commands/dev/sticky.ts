@@ -1,4 +1,5 @@
 import { defineCommand } from "~/Commands";
+import Config from "~/config";
 import { Emoji } from "~/constants";
 import { BotState } from "~/db/botState";
 import { StickyState } from "~/modules/sticky";
@@ -7,8 +8,7 @@ import { toCodeblock } from "~/util/text";
 defineCommand({
     name: "sticky",
     description: "Set the sticky message",
-    modOnly: true,
-    helperOnly: true,
+    requiredRoles: [Config.roles.mod, Config.roles.helper],
     guildOnly: true,
     usage: "<create/set | delete/remove | on | off | delay | list> [value]",
     rawContent: true,

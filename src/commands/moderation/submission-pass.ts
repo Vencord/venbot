@@ -32,7 +32,7 @@ defineCommand({
     description: "Allow this user to post one submission",
     usage: "<user>",
     guildOnly: true,
-    modOnly: true,
+    requiredRoles: [Config.roles.mod],
     async execute({ msg, react, reply }, user) {
         const id = resolveUserId(user);
         if (!id)
@@ -52,7 +52,7 @@ defineCommand({
     description: "Remove this user's submission pass",
     usage: "<user>",
     guildOnly: true,
-    modOnly: true,
+    requiredRoles: [Config.roles.mod],
     async execute({ msg, react, reply }, user) {
         const id = resolveUserId(user);
         if (!id)

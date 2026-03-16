@@ -91,16 +91,11 @@ async function handleMessage(msg: Message, isEdit: boolean) {
             return;
     }
 
-    if (cmd.modOnly || cmd.helperOnly) {
+    if (cmd.requiredRoles) {
         if (!msg.inCachedGuildChannel()) return;
 
-        const hasHelper = msg.member.roles.includes(Config.roles.helper);
-        const hasMod = msg.member.roles.includes(Config.roles.mod);
-
-        if (cmd.helperOnly && !(hasHelper || hasMod))
-            return silently(msg.createReaction(Emoji.Anger));
-
-        if (cmd.modOnly && !(hasMod || hasHelper))
+        const memberRoles = msg.member.roles;
+        if (cmd.requiredRoles.every(role => !memberRoles.includes(role)))
             return silently(msg.createReaction(Emoji.Anger));
     }
 

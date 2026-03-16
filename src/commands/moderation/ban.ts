@@ -1,6 +1,7 @@
 import { AnyTextableGuildChannel, Member, Message, MessageTypes } from "oceanic.js";
 
 import { CommandContext, defineCommand } from "~/Commands";
+import Config from "~/config";
 import { silently } from "~/util/functions";
 import { toCodeblock } from "~/util/text";
 
@@ -125,7 +126,7 @@ defineCommand({
     usage: "[daysToDelete] <user> [user...] [reason]",
     aliases: ["yeet", "🍌"],
     guildOnly: true,
-    modOnly: true,
+    requiredRoles: [Config.roles.mod],
     execute: (ctx, ...args) => banExecutor(ctx, args, false)
 });
 
@@ -135,6 +136,6 @@ defineCommand({
     usage: "<daysToDelete> <user> [user...] [reason]",
     aliases: ["sb"],
     guildOnly: true,
-    modOnly: true,
+    requiredRoles: [Config.roles.mod],
     execute: (ctx, ...args) => banExecutor(ctx, args, true)
 });

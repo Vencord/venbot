@@ -118,7 +118,9 @@ function commandHelp(cmd: FullCommand, { prefix }: CommandContext) {
             : ""
         }
         ${cmd.guildOnly ? "`🏠` This command can only be used in servers" : ""}
-        ${cmd.modOnly ? "`🔨` This command can only be used by server moderators" : ""}
+        ${cmd.requiredRoles
+            ? `\`🔨\` This command can only be used by roles: ${cmd.requiredRoles.map(role => `<@&${role}>`).join(", ")}`
+            : ""}
     `;
 
     return (

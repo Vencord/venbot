@@ -106,8 +106,7 @@ export interface Command<GuildOnly extends boolean = false> {
     guildOnly?: GuildOnly;
     permissions?: Array<PermissionName>,
     ownerOnly?: boolean;
-    modOnly?: boolean;
-    helperOnly?: boolean;
+    requiredRoles?: string[];
     enabled?: boolean;
     rawContent?: boolean;
     rateLimit?: number;
