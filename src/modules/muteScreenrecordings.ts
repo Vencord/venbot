@@ -39,8 +39,8 @@ async function muteVideo(file: string, outFile: string) {
 }
 
 function getVideoInfo(msg: Message) {
-    const attachment = msg.attachments.first()!;
-    if (attachment.contentType?.includes("video")) {
+    const attachment = msg.attachments.first();
+    if (attachment?.contentType?.includes("video")) {
         return {
             url: attachment.url,
             filename: attachment.filename
