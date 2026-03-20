@@ -2,7 +2,7 @@ import parseDuration from "parse-duration";
 
 import { defineCommand } from "~/Commands";
 import Config from "~/config";
-import { Millis } from "~/constants";
+import { Millis, SUPPORT_ALLOWED_CHANNELS } from "~/constants";
 import { silently } from "~/util/functions";
 import { msToHumanReadable, toCodeblock } from "~/util/text";
 import { until } from "~/util/time";
@@ -19,16 +19,24 @@ defineCommand({
     async execute({ msg, reply }, durationString, ...args) {
         const duration = parseDuration(durationString);
 
-        const durationLimits = (msg.member.roles.includes(Config.roles.mod))
+        if (
+            msg.member.roles.includes(Config.roles.helper) &&
+            !SUPPORT_ALLOWED_CHANNELS.includes(msg.channelID)
+        ) {
+            return reply("For support helpers, this command can only be used in support channels");
+        }
+
+        const maxDuration = (msg.member.roles.includes(Config.roles.mod))
             ? 28 * Millis.DAY
             : 3 * Millis.HOUR;
 
-        if (duration == null || duration < 1 || duration > durationLimits) {
-            return reply(`Duration must be a valid time span not longer than ${msToHumanReadable(durationLimits)}`);
+        const minDuration = 1 * Millis.HOUR;
+
+        if (duration == null || duration < minDuration || duration > maxDuration) {
+            return reply(`Duration must be between ${msToHumanReadable(minDuration)} and ${msToHumanReadable(maxDuration)}`);
         }
 
         const durationText = msToHumanReadable(duration);
-
 
         let { ids, reason, hasCustomReason } = parseUserIdsAndReason(args);
         if (!ids.length && msg.referencedMessage) {
