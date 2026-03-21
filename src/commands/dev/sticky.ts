@@ -1,6 +1,6 @@
 import { defineCommand } from "~/Commands";
 import Config from "~/config";
-import { Emoji } from "~/constants";
+import { Emoji, SUPPORT_ALLOWED_CHANNELS } from "~/constants";
 import { BotState } from "~/db/botState";
 import { StickyState } from "~/modules/sticky";
 import { toCodeblock } from "~/util/text";
@@ -13,6 +13,14 @@ defineCommand({
     usage: "<create/set | delete/remove | on | off | delay | list> [value]",
     rawContent: true,
     execute({ reply, react, msg, prefix, commandName }, content) {
+
+        if (
+            msg.member.roles.includes(Config.roles.helper) &&
+            !SUPPORT_ALLOWED_CHANNELS.includes(msg.channelID)
+        ) {
+            return reply("For support helpers, this command can only be used in support channels");
+        }
+
         let response: string | undefined;
 
         const [operation, value, ...extra] = content.split(" ");
