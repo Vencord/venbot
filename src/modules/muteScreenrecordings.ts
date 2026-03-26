@@ -1,5 +1,5 @@
 import { mkdtemp, readFile, rm } from "fs/promises";
-import { Message } from "oceanic.js";
+import { Message, MessageFlags } from "oceanic.js";
 import { tmpdir } from "os";
 import { join } from "path";
 
@@ -8,7 +8,7 @@ import { execFileP } from "~/util/childProcess";
 import { reply } from "~/util/discord";
 import { downloadToFile } from "~/util/fetch";
 
-const UsersToMute = ["521819891141967883"];
+const UsersToMute = ["521819891141967883", "343383572805058560"];
 
 async function hasAudio(file: string) {
     const res = await execFileP("ffprobe", ["-i", file, "-show_streams", "-select_streams", "a", "-loglevel", "error"]);
@@ -75,7 +75,8 @@ Vaius.on("messageCreate", async msg => {
         await muteVideo(file, mutedFile);
 
         await reply(msg, {
-            content: `From ${msg.author.mention} (video muted):\n\n${msg.content.replaceAll(video.url, "<$&>")}`,
+            content: `From ${msg.author.mention} (video muted):\n\n${msg.content}`,
+            flags: MessageFlags.SUPPRESS_EMBEDS,
             files: [{
                 contents: await readFile(mutedFile),
                 name: video.filename
