@@ -47,8 +47,8 @@ function getVideoInfo(msg: Message) {
         };
     }
 
-    const embed = msg.embeds[0];
-    if (embed?.type === "video" && embed.video?.url) {
+    const embed = msg.embeds.find(e => e.type === "video" && e.video?.url);
+    if (embed?.video?.url) {
         const filename = new URL(embed.video.url).pathname.split("/").pop() || "video.mp4";
         return {
             url: embed.video.url,
@@ -71,8 +71,6 @@ Vaius.on("messageCreate", async msg => {
         const mutedFile = join(tempDir, "muted-" + video.filename);
 
         await downloadToFile(video.url, file);
-
-        if (!await hasAudio(file)) return;
 
         await muteVideo(file, mutedFile);
 
