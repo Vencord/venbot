@@ -1,7 +1,8 @@
 import parseDuration from "parse-duration";
 
 import { defineCommand } from "~/Commands";
-import { Millis } from "~/constants";
+import Config from "~/config";
+import { Millis, SUPPORT_ALLOWED_CHANNELS } from "~/constants";
 import { silently } from "~/util/functions";
 import { msToHumanReadable, toCodeblock } from "~/util/text";
 import { until } from "~/util/time";
@@ -14,14 +15,28 @@ defineCommand({
     description: "Mute one or more users",
     usage: "<duration> <user> [user...] [reason]",
     guildOnly: true,
-    modOnly: true,
+    requiredRoles: [Config.roles.mod, Config.roles.helper],
     async execute({ msg, reply }, durationString, ...args) {
         const duration = parseDuration(durationString);
-        if (duration == null || duration < 1 || duration > 28 * Millis.DAY) {
-            return reply("Duration must be a valid time span not longer than 28 days");
-        }
-        const durationText = msToHumanReadable(duration);
 
+        if (
+            msg.member.roles.includes(Config.roles.helper) &&
+            !SUPPORT_ALLOWED_CHANNELS.includes(msg.channelID)
+        ) {
+            return reply("For support helpers, this command can only be used in support channels");
+        }
+
+        const maxDuration = (msg.member.roles.includes(Config.roles.mod))
+            ? 28 * Millis.DAY
+            : 3 * Millis.HOUR;
+
+        const minDuration = 1 * Millis.HOUR;
+
+        if (duration == null || duration < minDuration || duration > maxDuration) {
+            return reply(`Duration must be between ${msToHumanReadable(minDuration)} and ${msToHumanReadable(maxDuration)}`);
+        }
+
+        const durationText = msToHumanReadable(duration);
 
         let { ids, reason, hasCustomReason } = parseUserIdsAndReason(args);
         if (!ids.length && msg.referencedMessage) {

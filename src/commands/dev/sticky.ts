@@ -1,5 +1,6 @@
 import { defineCommand } from "~/Commands";
-import { Emoji } from "~/constants";
+import Config from "~/config";
+import { Emoji, SUPPORT_ALLOWED_CHANNELS } from "~/constants";
 import { BotState } from "~/db/botState";
 import { StickyState } from "~/modules/sticky";
 import { toCodeblock } from "~/util/text";
@@ -7,11 +8,19 @@ import { toCodeblock } from "~/util/text";
 defineCommand({
     name: "sticky",
     description: "Set the sticky message",
-    modOnly: true,
+    requiredRoles: [Config.roles.mod, Config.roles.helper],
     guildOnly: true,
     usage: "<create/set | delete/remove | on | off | delay | list> [value]",
     rawContent: true,
     execute({ reply, react, msg, prefix, commandName }, content) {
+
+        if (
+            msg.member.roles.includes(Config.roles.helper) &&
+            !SUPPORT_ALLOWED_CHANNELS.includes(msg.channelID)
+        ) {
+            return reply("For support helpers, this command can only be used in support channels");
+        }
+
         let response: string | undefined;
 
         const [operation, value, ...extra] = content.split(" ");
