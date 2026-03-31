@@ -8,7 +8,7 @@ import { execFileP } from "~/util/childProcess";
 import { reply } from "~/util/discord";
 import { downloadToFile } from "~/util/fetch";
 
-const UsersToMute = ["521819891141967883", "343383572805058560"];
+const UsersToMute = ["521819891141967883"];
 
 async function hasAudio(file: string) {
     const res = await execFileP("ffprobe", ["-i", file, "-show_streams", "-select_streams", "a", "-loglevel", "error"]);
