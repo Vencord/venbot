@@ -1,5 +1,6 @@
 import { defineCommand } from "~/Commands";
 
+import Config from "~/config";
 import { logUserRestriction, ModerationColor, parseUserIdsAndReason } from "./utils";
 
 defineCommand({
@@ -8,7 +9,7 @@ defineCommand({
     usage: "<user> [user...] [reason]",
     aliases: ["unyeet", "🍌💥"],
     guildOnly: true,
-    modOnly: true,
+    requiredRoles: [Config.roles.mod],
     async execute({ msg, reply }, ...args) {
         const { ids, reason } = parseUserIdsAndReason(args);
 

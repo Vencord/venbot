@@ -8,7 +8,7 @@ import Config from "./config";
 interface BaseInteractionHandler {
     ownerOnly?: boolean;
     guildOnly?: boolean;
-    modOnly?: boolean;
+    requiredRoles?: string[];
 }
 interface AnyInteractionHandler extends BaseInteractionHandler {
     handle(interaction: AnyInteractionGateway): any;
@@ -85,10 +85,12 @@ Vaius.on("interactionCreate", async interaction => {
     if (!handler) return;
     if (handler.ownerOnly && interaction.user.id !== OwnerId) return;
     if (handler.guildOnly && !interaction.inCachedGuildChannel()) return;
-    if (handler.modOnly) {
-        if (!interaction.inCachedGuildChannel()) return;
+    if (handler.requiredRoles && !interaction.inCachedGuildChannel()) return;
 
-        if (!interaction.member.roles.includes(Config.roles.mod))
+    if (handler.requiredRoles) {
+        const memberRoles = interaction.member?.roles;
+
+        if (handler.requiredRoles.every(r => !memberRoles?.includes(r)))
             return;
     }
 

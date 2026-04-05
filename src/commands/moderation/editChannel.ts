@@ -1,4 +1,5 @@
 import { defineCommand } from "~/Commands";
+import Config from "~/config";
 import { Emoji } from "~/constants";
 import { reply } from "~/util/discord";
 
@@ -8,7 +9,7 @@ defineCommand({
     usage: "<value>",
     aliases: ["setname", "sn", "rename"],
     guildOnly: true,
-    modOnly: true,
+    requiredRoles: [Config.roles.mod],
     rawContent: true,
     async execute({ msg, react }, value) {
         if (!value)
@@ -28,7 +29,7 @@ defineCommand({
     usage: "<value>",
     aliases: ["settopic"],
     guildOnly: true,
-    modOnly: true,
+    requiredRoles: [Config.roles.mod],
     rawContent: true,
     async execute({ msg, react, reply }, value) {
         if (!value)
