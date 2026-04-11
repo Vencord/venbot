@@ -16,6 +16,7 @@ defineCommand({
 
         if (
             msg.member.roles.includes(Config.roles.helper) &&
+            !msg.member.roles.includes(Config.roles.mod) &&
             !SUPPORT_ALLOWED_CHANNELS.includes(msg.channelID)
         ) {
             return reply("For support helpers, this command can only be used in support channels");

@@ -5,3 +5,5 @@ data
 
 .env
 config.ts
+
+.DS_Store
