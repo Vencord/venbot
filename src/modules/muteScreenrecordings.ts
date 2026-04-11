@@ -1,5 +1,5 @@
 import { mkdtemp, readFile, rm } from "fs/promises";
-import { Message } from "oceanic.js";
+import { Message, MessageFlags } from "oceanic.js";
 import { tmpdir } from "os";
 import { join } from "path";
 
@@ -47,8 +47,8 @@ function getVideoInfo(msg: Message) {
         };
     }
 
-    const embed = msg.embeds[0];
-    if (embed?.type === "video" && embed.video?.url) {
+    const embed = msg.embeds.find(e => e.type === "video" && e.video?.url);
+    if (embed?.video?.url) {
         const filename = new URL(embed.video.url).pathname.split("/").pop() || "video.mp4";
         return {
             url: embed.video.url,
@@ -72,12 +72,11 @@ Vaius.on("messageCreate", async msg => {
 
         await downloadToFile(video.url, file);
 
-        if (!await hasAudio(file)) return;
-
         await muteVideo(file, mutedFile);
 
         await reply(msg, {
-            content: `From ${msg.author.mention} (video muted):\n\n${msg.content.replaceAll(video.url, "<$&>")}`,
+            content: `From ${msg.author.mention} (video muted):\n\n${msg.content}`,
+            flags: MessageFlags.SUPPRESS_EMBEDS,
             files: [{
                 contents: await readFile(mutedFile),
                 name: video.filename
