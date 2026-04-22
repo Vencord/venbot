@@ -3,7 +3,9 @@ import { Client, CreateMessageOptions, DiscordRESTError, Member, Message, Messag
 import { Vaius } from "~/Client";
 
 import Config from "~/config";
+import { Millis } from "~/constants";
 import { silently } from "./functions";
+import { sleep, until } from "./time";
 
 export const ID_REGEX = /^(?:<@!?)?(\d{17,20})>?$/;
 export const USER_MENTION_REGEX = /<@!?(\d{17,20})>/;
@@ -69,4 +71,18 @@ export async function sendDm(user: User, data: CreateMessageOptions) {
 
 export function formatEmoji(emoji: { id: string; name: string; animated: boolean; }) {
     return `<${emoji.animated ? "a" : ""}:${emoji.name}:${emoji.id}>`;
+}
+
+export async function softBan(member: Member, deleteMessageSeconds: number, reason: string) {
+    // Discord is bad at actually deleting messages when you ban
+    // Possibly because of a race condition when the member is banned at the same time as sending more messages.
+    // Muting then sleeping for a few seconds before banning to make sure no more messages are sending might help.
+
+    await silently(
+        member.edit({ communicationDisabledUntil: until(1 * Millis.HOUR), reason })
+            .then(() => sleep(5 * Millis.SECOND))
+    );
+
+    await member.ban({ reason: `Soft-ban: ${reason}`, deleteMessageSeconds });
+    await member.unban(`Soft-ban removal: ${reason}`);
 }

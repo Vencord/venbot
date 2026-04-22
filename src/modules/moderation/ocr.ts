@@ -1,6 +1,7 @@
 import { AnyTextableGuildChannel, Message } from "oceanic.js";
 import Config from "~/config";
 import { Emoji, Seconds } from "~/constants";
+import { softBan } from "~/util/discord";
 import { fetchBuffer } from "~/util/fetch";
 import { checkPromise, silently } from "~/util/functions";
 import { isTruthy } from "~/util/guards";
@@ -36,10 +37,7 @@ export async function ocrModerate(msg: Message<AnyTextableGuildChannel>): Promis
 
     silently(msg.delete("Scam message"));
 
-    const didKick = await checkPromise(
-        msg.member.ban({ reason: "Posted a scam message (soft-ban)", deleteMessageSeconds: 1 * Seconds.DAY })
-            .then(() => msg.member.unban("Soft-ban removal"))
-    );
+    const didKick = await checkPromise(softBan(msg.member, 1 * Seconds.DAY, "Posted a scam message"));
 
     let message = `${msg.member.mention} posted a scam image in ${msg.channel.mention}`;
     if (didKick) {
