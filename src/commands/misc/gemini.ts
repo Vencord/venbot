@@ -309,13 +309,13 @@ Vaius.on("messageCreate", async msg => {
 
     try {
         if (!msg.inCachedGuildChannel()) return;
+        if (msg.author.system || (msg.author.bot && msg.author.id !== KEVIN_ID)) return;
 
         const isClydeMention = msg.content.includes("<@1081004946872352958>") || (msg.referencedMessage?.webhookID && msg.referencedMessage.author.username === CLYDE_NAME);
         if (isClydeMention && msg.channelID !== DUMB_AI_CHANNEL_ID)
             return await respondWithClyde(msg);
 
         if (msg.channelID !== DUMB_AI_CHANNEL_ID) return;
-        if (msg.author.system || (msg.author.bot && msg.author.id !== KEVIN_ID)) return;
         if (shouldIgnore(msg) || isReset(msg) || !canReplyToMessage(msg)) return;
 
         msg.channel.sendTyping();
