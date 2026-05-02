@@ -312,7 +312,7 @@ Vaius.on("messageCreate", async msg => {
         if (msg.author.system || (msg.author.bot && msg.author.id !== KEVIN_ID)) return;
 
         const isClydeMention = msg.content.includes("<@1081004946872352958>") || (msg.referencedMessage?.webhookID && msg.referencedMessage.author.username === CLYDE_NAME);
-        if (isClydeMention && msg.channelID !== DUMB_AI_CHANNEL_ID)
+        if (isClydeMention && msg.channelID !== "1026504914131759104")
             return await respondWithClyde(msg);
 
         if (msg.channelID !== DUMB_AI_CHANNEL_ID) return;
