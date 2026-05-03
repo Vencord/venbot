@@ -41,11 +41,6 @@ export const enum Millis {
     WEEK = 7 * 24 * 60 * 60 * 1000
 }
 
-export const enum Bytes {
-    KB = 1024,
-    MB = 1024 * 1024
-}
-
 export const Emoji = makeConstants({
     X: "❌",
     CheckMark: "✅",

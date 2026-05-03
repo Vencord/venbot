@@ -107,22 +107,6 @@ const Config = {
         "passRoleId": "1257065526019231945"
     },
 
-    // gemini ai command
-    "gemini": {
-        "enabled": false,
-        "apiKey": "",
-        "allowedRoles": [
-            "1026509424686284924", // mod
-            "1042507929485586532", // donor
-            "1026534353167208489", // contributor
-            "1026504932959977532", // regular
-        ],
-        "bannedRoles": [
-            "1427368278866792669", // no ai
-            "1018310742874791977"  // brain rot
-        ],
-    },
-
     // Wolfram Alpha command. Leave appId empty to disable.
     "wolfram": {
         "appId": "", // Short Answers API
