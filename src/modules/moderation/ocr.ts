@@ -11,9 +11,19 @@ import { readTextFromImage } from "~/util/ocr";
 const scamTerms = [
     "casino",
     "rakeback",
-    "withdrawal",
+    "withdraw",
     "bitcoin",
-    "crypto"
+    "cryptocurrency",
+    "usdt",
+    "promotion",
+    "promo code",
+    "bonus",
+    "deposit",
+    "exclusive",
+    "mrbeast",
+    "prize",
+    "funds",
+    "wallet"
 ];
 const re = new RegExp(scamTerms.map(term => `\\b${term}\\b`).join("|"), "i");
 
