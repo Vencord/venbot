@@ -53,7 +53,7 @@ defineCommand({
             silently(
                 member.user.createDM()
                     .then(dm => dm.createMessage({
-                        content: `You have been muted on the Vencord Server for ${durationText} by ${msg.author.tag}.\n## Reason:\n${toCodeblock(reasonWithMod)}`
+                        content: `You have been muted on the Vencord Server for ${durationText} by ${msg.author.tag.replaceAll("_", "\\_")}.\n## Reason:\n${toCodeblock(reasonWithMod)}`
                     }))
             );
 

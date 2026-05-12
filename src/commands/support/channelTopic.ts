@@ -39,7 +39,7 @@ defineCommand({
 
         const isReply = !!msg.referencedMessage;
         if (isReply) {
-            footer = `Auto-response invoked by ${msg.author.tag}`;
+            footer = `Auto-response invoked by ${msg.author.tag.replaceAll("_", "\\_")}`;
             silently(msg.delete());
         }
 

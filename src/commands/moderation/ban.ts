@@ -103,7 +103,7 @@ async function banExecutor({ msg, reply }: CommandContext<true>, args: string[],
             await silently(
                 member.user.createDM()
                     .then(dm => dm.createMessage({
-                        content: `You have been ${isSoft ? "kicked" : "banned"} from the Vencord Server by ${msg.author.tag}.\n## Reason:\n${toCodeblock(reasonWithMod)}`
+                        content: `You have been ${isSoft ? "kicked" : "banned"} from the Vencord Server by ${msg.author.tag.replaceAll("_", "\\_")}.\n## Reason:\n${toCodeblock(reasonWithMod)}`
                     }))
             );
 
