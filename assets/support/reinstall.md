@@ -3,14 +3,13 @@ aliases: r, corrupt
 emoji: 🔄
 ---
 
-Do a clean reinstall using the guide below (its completely different to a normal reinstall)   
-https://support.discord.com/hc/en-us/articles/115004307527--Windows-Corrupt-Installation      
+Do a clean reinstall using Discord's guide for your platform (completely different from a normal reinstall)
+**[Windows](https://support.discord.com/hc/articles/115004307527) – [macOS](https://support.discord.com/hc/articles/360022082931)**
 
-tldr:      
-- press `windows+r`   
-- paste `%AppData%`   
-- delete `Discord`     
+TLDR for Windows:
+- Press `Windows key + R`
+- Paste `%AppData%`
+- Delete `Discord` folder
+- Repeat for `%LocalAppData%`
 
-- repeat for `%LocalAppData%`     
-
-- Install discord
+- [Reinstall Discord](<https://discord.com/download>)

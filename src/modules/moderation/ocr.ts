@@ -11,11 +11,23 @@ import { readTextFromImage } from "~/util/ocr";
 const scamTerms = [
     "casino",
     "rakeback",
-    "withdrawal",
+    "withdraw",
     "bitcoin",
-    "crypto"
+    "cryptocurrency",
+    "usdt",
+    "promotion",
+    "promo code",
+    "bonus",
+    "deposit",
+    "exclusive",
+    "mrbeast",
+    "prize",
+    "funds",
+    "wallet"
 ];
 const re = new RegExp(scamTerms.map(term => `\\b${term}\\b`).join("|"), "i");
+
+const currentlySoftBanning = new Set<string>();
 
 export async function ocrModerate(msg: Message<AnyTextableGuildChannel>): Promise<boolean> {
     if (!msg.member || msg.member.roles.includes(Config.roles.regular)) return false;
@@ -36,6 +48,10 @@ export async function ocrModerate(msg: Message<AnyTextableGuildChannel>): Promis
     if (!flaggedAttachment) return false;
 
     silently(msg.delete("Scam message"));
+
+    if (currentlySoftBanning.has(msg.member.id)) return true;
+    currentlySoftBanning.add(msg.member.id);
+    setTimeout(() => currentlySoftBanning.delete(msg.member.id), 10 * Seconds.SECOND);
 
     const didKick = await checkPromise(softBan(msg.member, 1 * Seconds.DAY, "Posted a scam message"));
 

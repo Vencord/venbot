@@ -3,10 +3,10 @@ aliases: keybinds, mf
 emoji: 🛠️
 ---
 
-If global keybinds and possibly some more features aren't working for you, it's likely you installed the Vencord Desktop app.
+If global keybinds and possibly some more features aren't working for you, it's likely you installed the Vencord Desktop app, "Vesktop".
 
-Vencord Desktop is a standalone independent app that is missing some features from the regular Discord app.
+Vesktop is a standalone independent app that is missing some features from the regular Discord app.
 
-To fix it, stop using Vencord Desktop and switch to regular Discord patched with Vencord. To do so, head over to https://vencord.dev/download for Download options!
+If you need such features, stop using Vesktop, and switch to the regular Discord app patched with Vencord. Head over to https://vencord.dev/download for download options!
 
 This is well documented in the README, so please pay more attention in the future.

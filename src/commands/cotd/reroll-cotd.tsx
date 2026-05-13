@@ -49,6 +49,8 @@ defineCommand({
     guildOnly: true,
     requiredRoles: [Config.roles.mod],
     async execute({ reply }, hex?: string) {
+        if (hex === "#ffbce0") return;
+
         if (hex) {
             const parsed = Number(hex.replace(/^#/, "0x"));
 

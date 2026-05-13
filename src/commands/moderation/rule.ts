@@ -54,7 +54,7 @@ defineCommand({
         const isReply = !!msg.referencedMessage;
 
         const options = run(() => {
-            const footer = isReply ? { text: `Auto-response invoked by ${msg.author.tag}` } : undefined;
+            const footer = isReply ? { text: `Auto-response invoked by ${msg.author.tag.replaceAll("_", "\\_")}` } : undefined;
 
             if (results.length > 3) {
                 return {
