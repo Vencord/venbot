@@ -31,10 +31,8 @@ defineCommand({
             ? 28 * Millis.DAY
             : 3 * Millis.HOUR;
 
-        const minDuration = 1 * Millis.HOUR;
-
-        if (duration == null || duration < minDuration || duration > maxDuration) {
-            return reply(`Duration must be between ${msToHumanReadable(minDuration)} and ${msToHumanReadable(maxDuration)}`);
+        if (duration == null || duration < 1 || duration > maxDuration) {
+            return reply(`Duration must be ${msToHumanReadable(maxDuration)} or less`);
         }
 
         const durationText = msToHumanReadable(duration);
