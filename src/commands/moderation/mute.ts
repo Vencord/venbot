@@ -2,11 +2,12 @@ import parseDuration from "parse-duration";
 
 import { defineCommand } from "~/Commands";
 import Config from "~/config";
-import { Millis, SUPPORT_ALLOWED_CHANNELS } from "~/constants";
+import { Millis } from "~/constants";
 import { silently } from "~/util/functions";
 import { msToHumanReadable, toCodeblock } from "~/util/text";
 import { until } from "~/util/time";
 
+import { isSupportHelperOutsideSupport } from "~/util/discord";
 import { getHighestRolePosition, logUserRestriction, ModerationColor, parseUserIdsAndReason } from "./utils";
 
 defineCommand({
@@ -17,17 +18,13 @@ defineCommand({
     guildOnly: true,
     allowedRoles: [Config.roles.mod, Config.roles.helper],
     async execute({ msg, reply }, durationString, ...args) {
-        const duration = parseDuration(durationString);
-
-        if (
-            msg.member.roles.includes(Config.roles.helper) &&
-            !msg.member.roles.includes(Config.roles.mod) &&
-            !SUPPORT_ALLOWED_CHANNELS.includes(msg.channelID)
-        ) {
+        if (isSupportHelperOutsideSupport(msg.member, msg.channelID)) {
             return reply("For support helpers, this command can only be used in support channels");
         }
 
-        const maxDuration = (msg.member.roles.includes(Config.roles.mod))
+        const duration = parseDuration(durationString);
+
+        const maxDuration = msg.member.roles.includes(Config.roles.mod)
             ? 28 * Millis.DAY
             : 3 * Millis.HOUR;
 

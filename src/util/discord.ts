@@ -3,7 +3,7 @@ import { Client, CreateMessageOptions, DiscordRESTError, Member, Message, Messag
 import { Vaius } from "~/Client";
 
 import Config from "~/config";
-import { Millis } from "~/constants";
+import { Millis, SUPPORT_ALLOWED_CHANNELS } from "~/constants";
 import { silently } from "./functions";
 import { sleep, until } from "./time";
 
@@ -50,6 +50,12 @@ export function getHighestRole({ guild, roles }: Member, filter?: (r: Role) => b
     if (filter) resolvedRoles = resolvedRoles.filter(filter);
 
     return resolvedRoles.reduce((a, b) => a.position > b.position ? a : b);
+}
+
+export function isSupportHelperOutsideSupport({ roles }: Member, channelId: string) {
+    return !SUPPORT_ALLOWED_CHANNELS.includes(channelId)
+        && roles.includes(Config.roles.helper)
+        && !roles.includes(Config.roles.mod);
 }
 
 export const getHomeGuild = () => Vaius.guilds.get(Config.homeGuildId);
