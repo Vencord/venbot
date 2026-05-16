@@ -91,10 +91,10 @@ async function handleMessage(msg: Message, isEdit: boolean) {
             return;
     }
 
-    if (cmd.modOnly) {
+    if (cmd.allowedRoles) {
         if (!msg.inCachedGuildChannel()) return;
 
-        if (!msg.member.roles.includes(Config.roles.mod))
+        if (!cmd.allowedRoles.some(role => msg.member.roles.includes(role)))
             return silently(msg.createReaction(Emoji.Anger));
     }
 

@@ -25,6 +25,7 @@ const enum Ids {
     REASON_MONKEY = "modmail:iamamonkey",
     REASON_MOD = "modmail:mod",
     REASON_DONOR = "modmail:donor",
+    REASON_ACCESS = "modmail:access",
     REASON_PLUGIN = "modmail:plugin",
     REASON_CSS = "modmail:css",
     REASON_JS = "modmail:js"
@@ -32,9 +33,10 @@ const enum Ids {
 
 const ChannelNameAndPrompt: Record<string, [string, string]> = {
     [Ids.REASON_MOD]: ["ticket", "Please post any supporting media or information that you have."],
+    [Ids.REASON_ACCESS]: ["dev-access", "Please post the reason why you want access to development channels."],
     [Ids.REASON_PLUGIN]: ["plugin-submission", "Please post the full message + image(s) that you would like to post in the plugin channel."],
     [Ids.REASON_CSS]: ["css-submission", "Please post the full message + image(s) that you would like to post in the css snippet channel."],
-    [Ids.REASON_JS]: ["js-submission", "Please post the full message + image(s) that you would like to post in the js snippet channel."]
+    [Ids.REASON_JS]: ["js-submission", "Please post the full message + image(s) that you would like to post in the js snippet channel."],
 };
 
 const COMMAND_NAME = PROD ? "modmail" : "devmodmail";
@@ -82,6 +84,11 @@ async function createModmailModal(interaction: GuildInteraction) {
             label: "I need to talk to a moderator",
             value: Ids.REASON_MOD,
             emoji: { name: "👥" }
+        },
+        {
+            label: "I want to access the development channels",
+            value: Ids.REASON_ACCESS,
+            emoji: { name: "👾" }
         },
         {
             label: "I want to submit my css snippet",

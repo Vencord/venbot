@@ -1,6 +1,7 @@
 import { ButtonStyles, CreateMessageOptions, EditMessageOptions, User } from "oceanic.js";
 
 import { defineCommand } from "~/Commands";
+import Config from "~/config";
 import { Emoji } from "~/constants";
 import { drawBlobCatCozy, rerollCotd } from "~/modules/regularCotd";
 import { handleComponentInteraction } from "~/SlashCommands";
@@ -46,9 +47,9 @@ defineCommand({
     description: "Rerolls the current cozy of the day",
     usage: "[hex]",
     guildOnly: true,
-    modOnly: true,
-    async execute({ msg, reply }, hex?: string) {
-        if (msg.author.id === "400482410279469056" || hex === "#ffbce0") return;
+    allowedRoles: [Config.roles.mod],
+    async execute({ reply }, hex?: string) {
+        if (hex === "#ffbce0") return;
 
         if (hex) {
             const parsed = Number(hex.replace(/^#/, "0x"));
@@ -68,7 +69,7 @@ defineCommand({
 handleComponentInteraction({
     customID: "reroll-cotd",
     guildOnly: true,
-    modOnly: true,
+    allowedRoles: [Config.roles.mod],
     async handle(interaction) {
         const result = await reroll(undefined, interaction.user);
         await interaction.editParent(result);
