@@ -47,7 +47,7 @@ defineCommand({
     description: "Rerolls the current cozy of the day",
     usage: "[hex]",
     guildOnly: true,
-    requiredRoles: [Config.roles.mod],
+    allowedRoles: [Config.roles.mod],
     async execute({ reply }, hex?: string) {
         if (hex === "#ffbce0") return;
 
@@ -69,7 +69,7 @@ defineCommand({
 handleComponentInteraction({
     customID: "reroll-cotd",
     guildOnly: true,
-    requiredRoles: [Config.roles.mod],
+    allowedRoles: [Config.roles.mod],
     async handle(interaction) {
         const result = await reroll(undefined, interaction.user);
         await interaction.editParent(result);

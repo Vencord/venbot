@@ -13,7 +13,7 @@ defineCommand({
     description: "Watches your threads to make sure they always stay open! Specify a channel to watch all threads in that channel.",
     usage: "<[w]atch|[u]nwatch|[l]ist> [thread|channel]",
     guildOnly: true,
-    requiredRoles: [Config.roles.mod],
+    allowedRoles: [Config.roles.mod],
 
     async execute({ reply, react, msg }, action = "list", threadOrChannelResolvable = msg.channelID) {
         action = action.toLowerCase();

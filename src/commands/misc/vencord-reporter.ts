@@ -12,7 +12,7 @@ defineCommand({
     description: "Run the Vencord reporter workflow",
     usage: "[ref = dev] [branch = both]",
     aliases: ["report", "vencord-reporter", "test-patches", "test"],
-    requiredRoles: [Config.roles.mod],
+    allowedRoles: [Config.roles.mod],
 
     async execute({ msg }, ref = DefaultReporterBranch, branch = "both") {
         testDiscordVersion(

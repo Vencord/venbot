@@ -126,7 +126,7 @@ defineCommand({
     usage: "[daysToDelete] <user> [user...] [reason]",
     aliases: ["yeet", "🍌"],
     guildOnly: true,
-    requiredRoles: [Config.roles.mod],
+    allowedRoles: [Config.roles.mod],
     execute: (ctx, ...args) => banExecutor(ctx, args, false)
 });
 
@@ -136,6 +136,6 @@ defineCommand({
     usage: "<daysToDelete> <user> [user...] [reason]",
     aliases: ["sb"],
     guildOnly: true,
-    requiredRoles: [Config.roles.mod],
+    allowedRoles: [Config.roles.mod],
     execute: (ctx, ...args) => banExecutor(ctx, args, true)
 });

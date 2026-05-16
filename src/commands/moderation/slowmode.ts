@@ -9,7 +9,7 @@ defineCommand({
     description: "Set the slowmode for the channel",
     usage: "<seconds>",
     guildOnly: true,
-    requiredRoles: [Config.roles.mod],
+    allowedRoles: [Config.roles.mod],
     async execute({ msg, react }, secondsArg) {
         if (secondsArg === "off") secondsArg = "0";
 

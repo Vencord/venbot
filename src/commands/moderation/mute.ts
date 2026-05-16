@@ -15,7 +15,7 @@ defineCommand({
     description: "Mute one or more users",
     usage: "<duration> <user> [user...] [reason]",
     guildOnly: true,
-    requiredRoles: [Config.roles.mod, Config.roles.helper],
+    allowedRoles: [Config.roles.mod, Config.roles.helper],
     async execute({ msg, reply }, durationString, ...args) {
         const duration = parseDuration(durationString);
 

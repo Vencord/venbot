@@ -8,7 +8,7 @@ import { toCodeblock } from "~/util/text";
 defineCommand({
     name: "sticky",
     description: "Set the sticky message",
-    requiredRoles: [Config.roles.mod, Config.roles.helper],
+    allowedRoles: [Config.roles.mod, Config.roles.helper],
     guildOnly: true,
     usage: "<create/set | delete/remove | on | off | delay | list> [value]",
     rawContent: true,

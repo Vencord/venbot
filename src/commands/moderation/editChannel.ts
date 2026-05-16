@@ -9,7 +9,7 @@ defineCommand({
     usage: "<value>",
     aliases: ["setname", "sn", "rename"],
     guildOnly: true,
-    requiredRoles: [Config.roles.mod],
+    allowedRoles: [Config.roles.mod],
     rawContent: true,
     async execute({ msg, react }, value) {
         if (!value)
@@ -29,7 +29,7 @@ defineCommand({
     usage: "<value>",
     aliases: ["settopic"],
     guildOnly: true,
-    requiredRoles: [Config.roles.mod],
+    allowedRoles: [Config.roles.mod],
     rawContent: true,
     async execute({ msg, react, reply }, value) {
         if (!value)

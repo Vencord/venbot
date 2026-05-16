@@ -9,7 +9,7 @@ defineCommand({
     usage: "<user> [user...] [reason]",
     aliases: ["unyeet", "🍌💥"],
     guildOnly: true,
-    requiredRoles: [Config.roles.mod],
+    allowedRoles: [Config.roles.mod],
     async execute({ msg, reply }, ...args) {
         const { ids, reason } = parseUserIdsAndReason(args);
 
