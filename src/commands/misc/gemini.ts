@@ -334,7 +334,7 @@ Vaius.on("messageCreate", async msg => {
 
             const text = isAi
                 ? m.content
-                : `<${msg.member.displayName} (ID ${msg.author.id})>\n${m.content}`;
+                : `<${m.member?.displayName ?? m.author.globalName ?? m.author.username} (ID ${m.author.id})>\n${m.content}`;
 
             return {
                 parts: [{ text }],
