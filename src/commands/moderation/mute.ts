@@ -29,7 +29,7 @@ defineCommand({
             : 3 * Millis.HOUR;
 
         if (duration == null || duration < 1 || duration > maxDuration) {
-            return reply(`Duration must be ${msToHumanReadable(maxDuration)} or less`);
+            return reply(`Duration must be a valid time span not longer than ${msToHumanReadable(maxDuration)}`);
         }
 
         const durationText = msToHumanReadable(duration);
