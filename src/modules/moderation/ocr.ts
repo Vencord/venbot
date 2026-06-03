@@ -1,6 +1,6 @@
 import { AnyTextableGuildChannel, Message } from "oceanic.js";
 import Config from "~/config";
-import { Emoji, Seconds } from "~/constants";
+import { Emoji, Millis, Seconds } from "~/constants";
 import { softBan } from "~/util/discord";
 import { fetchBuffer } from "~/util/fetch";
 import { checkPromise, silently } from "~/util/functions";
@@ -51,7 +51,7 @@ export async function ocrModerate(msg: Message<AnyTextableGuildChannel>): Promis
 
     if (currentlySoftBanning.has(msg.member.id)) return true;
     currentlySoftBanning.add(msg.member.id);
-    setTimeout(() => currentlySoftBanning.delete(msg.member.id), 10 * Seconds.SECOND);
+    setTimeout(() => currentlySoftBanning.delete(msg.member.id), 10 * Millis.SECOND);
 
     const didKick = await checkPromise(softBan(msg.member, 1 * Seconds.DAY, "Posted a scam message"));
 
