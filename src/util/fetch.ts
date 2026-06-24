@@ -84,18 +84,15 @@ export const fetchGoogle: typeof doFetch = async (url, init?) => {
     const finalUrl = new URL(proxyUrl);
     finalUrl.searchParams.set("url", url.toString());
 
-    init = {
+    return doFetch(finalUrl, {
         ...init,
         headers: {
             ...init?.headers,
             "Secret": secret,
         }
-    };
-
-    return doFetch(finalUrl, init)
-        .catch(err =>
-            err instanceof FetchError && err.code === 429
-                ? doFetch(url, init) // fall back to direct fetch if Proxy is rate limited (either by Cloudflare limit reached or Google)
-                : Promise.reject(err)
-        );
+    }).catch(err =>
+        err instanceof FetchError && err.code === 429
+            ? doFetch(url, init) // fall back to direct fetch if Proxy is rate limited (either by Cloudflare limit reached or Google)
+            : Promise.reject(err)
+    );
 };
