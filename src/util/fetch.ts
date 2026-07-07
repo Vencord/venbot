@@ -10,7 +10,9 @@ import { sleep } from "./time";
 
 type Url = string | URL;
 
-class FetchError extends Error {
+export class FetchError extends Error {
+    name = this.constructor.name;
+
     constructor(message: string, public readonly code: number, public readonly response: Response) {
         super(message);
     }
