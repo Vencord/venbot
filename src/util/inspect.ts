@@ -15,18 +15,19 @@ class MultilineString {
     }
 }
 
-function cloneAndReplace(obj: any) {
-    if (obj && typeof obj === "object") {
+function cloneAndReplace(obj: any, seen = new WeakSet) {
+    if (obj && typeof obj === "object" && !seen.has(obj)) {
+        seen.add(obj);
         if (Array.isArray(obj) && obj.constructor === Array) {
             const o = [] as any[];
             obj.map((el, i) => {
-                o[i] = cloneAndReplace(el);
+                o[i] = cloneAndReplace(el, seen);
             });
             return o;
         } else if (obj.constructor === Object) {
             const o = {} as any;
             Object.entries(obj).map(([k, v]) => {
-                o[k] = cloneAndReplace(v);
+                o[k] = cloneAndReplace(v, seen);
             });
             return o;
         }
