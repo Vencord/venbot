@@ -2,12 +2,10 @@ import { AnyTextableGuildChannel, Message } from "oceanic.js";
 import { logUserRestriction } from "~/commands/moderation/utils";
 import Config from "~/config";
 import { Emoji, Millis, Seconds } from "~/constants";
-import { deduplicate } from "~/util/arrays";
 import { softBan } from "~/util/discord";
 import { fetchBuffer } from "~/util/fetch";
 import { checkPromise, silently } from "~/util/functions";
 import { readTextFromImage } from "~/util/ocr";
-import { toInlineCode } from "~/util/text";
 import { MediaGallery, MediaGalleryItem } from "~components";
 
 const scamTerms = [
@@ -68,12 +66,6 @@ export async function ocrModerate(msg: Message<AnyTextableGuildChannel>): Promis
     if (didKick) {
         message = `${Emoji.Boot} ${message} and has been kicked`;
     }
-
-    const matchedKeywords =
-        deduplicate(matchedAttachments.flatMap(a => a?.matchedKeywords ?? []))
-            .sort((a, b) => a.localeCompare(b))
-            .map(toInlineCode)
-            .join(", ");
 
     const fileData = matchedAttachments
         .filter(a => a?.isMatch)
