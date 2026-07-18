@@ -23,8 +23,7 @@ const scamTerms = [
     "mrbeast",
     "prize",
     "funds",
-    "wallet",
-    "baller"
+    "wallet"
 ];
 const re = new RegExp(scamTerms.map(term => `\\b${term}\\b`).join("|"), "ig");
 
