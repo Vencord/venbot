@@ -2,7 +2,7 @@ import { ButtonStyles, Member, SeparatorSpacingSize, User } from "oceanic.js";
 
 import { getHighestRole, ID_REGEX } from "~/util/discord";
 import { logModerationAction } from "~/util/logAction";
-import { ActionRow, Button, ComponentMessage, Container, Section, Separator, TextDisplay, Thumbnail } from "~components";
+import { ActionRow, Button, ComponentMessage, ComponentMessageProps, Container, Section, Separator, TextDisplay, Thumbnail } from "~components";
 
 export function hasHigherRoleThan(roleId: string, member: Member) {
     const g = member.guild;
@@ -39,14 +39,16 @@ export async function logUserRestriction(data: {
     id: string;
     reason: string;
     moderator: User;
-    jumpLink: string;
+    jumpLink: string | null;
     color?: ModerationColor;
     expires?: Date;
+    extraContext?: any;
+    messageProps?: Omit<ComponentMessageProps, "children">;
 }) {
-    const { title, user, id, reason, moderator, jumpLink, color, expires } = data;
+    const { title, user, id, reason, moderator, jumpLink, color, expires, extraContext, messageProps } = data;
 
     logModerationAction(
-        <ComponentMessage>
+        <ComponentMessage {...messageProps}>
             <Container accentColor={color}>
                 {user
                     ? (
@@ -61,15 +63,18 @@ export async function logUserRestriction(data: {
 
                 <TextDisplay>**Reason**</TextDisplay>
                 <TextDisplay>{reason}</TextDisplay>
+                {extraContext}
 
                 <Separator spacing={SeparatorSpacingSize.LARGE} />
 
                 {expires && <TextDisplay>**Expires:** {`<t:${Math.floor(expires.getTime() / 1000)}:R>`}</TextDisplay>}
                 <TextDisplay>-# by {moderator.tag}</TextDisplay>
 
-                <ActionRow>
-                    <Button style={ButtonStyles.LINK} url={jumpLink}>Jump to context</Button>
-                </ActionRow>
+                {!!jumpLink &&
+                    <ActionRow>
+                        <Button style={ButtonStyles.LINK} url={jumpLink}>Jump to context</Button>
+                    </ActionRow>
+                }
             </Container>
         </ComponentMessage>
     );
