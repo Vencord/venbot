@@ -19,11 +19,9 @@ const scamTerms = [
     "promo code",
     "bonus",
     "deposit",
-    "exclusive",
     "mrbeast",
     "prize",
-    "funds",
-    "wallet"
+    "funds"
 ];
 const re = new RegExp(scamTerms.map(term => `\\b${term}\\b`).join("|"), "ig");
 
