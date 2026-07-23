@@ -26,6 +26,19 @@ interface ReportData {
     submitCount: number;
 }
 
+export type ReporterOptions = Partial<Pick<ReportData, "shouldLog" | "shouldUpdateStatus" | "onSubmit">> & {
+    ref?: string;
+    inputRepository?: string;
+    inputRef?: string;
+};
+
+interface DispatchInputs {
+    discord_branch: Branch;
+    webhook_url?: string;
+    repository?: string;
+    ref?: string;
+}
+
 export const DefaultReporterBranch = "dev";
 
 const { canaryMessageId, enabled, logChannelId, pat, stableMessageId, statusChannelId, webhookSecret } = Config.reporter;
@@ -37,7 +50,7 @@ const pendingReports = new TTLMap<string, ReportData>(
     })
 );
 
-export async function triggerReportWorkflow({ ref, inputs }: { ref: string, inputs: { discord_branch: Branch; webhook_url?: string; }; }) {
+export async function triggerReportWorkflow({ ref, inputs }: { ref: string, inputs: DispatchInputs; }) {
     return await doFetch("https://api.github.com/repos/Vendicated/Vencord/actions/workflows/reportBrokenPlugins.yml/dispatches", {
         method: "POST",
         headers: {
@@ -77,13 +90,14 @@ async function checkVersions() {
     }
 }
 
-type Options = Partial<Pick<ReportData, "shouldLog" | "shouldUpdateStatus" | "onSubmit">> & { ref?: string; };
 
-export async function testDiscordVersion<B extends Branch>(branch: B, hash: Record<B extends "both" ? "stable" | "canary" : B, string>, options: Options = {}) {
+export async function testDiscordVersion<B extends Branch>(branch: B, hash: Record<B extends "both" ? "stable" | "canary" : B, string>, options: ReporterOptions = {}) {
     const {
         shouldLog = true,
         shouldUpdateStatus = true,
         ref = DefaultReporterBranch,
+        inputRef,
+        inputRepository,
         onSubmit
     } = options;
 
@@ -98,13 +112,17 @@ export async function testDiscordVersion<B extends Branch>(branch: B, hash: Reco
         submitCount: 0
     });
 
-    await triggerReportWorkflow({
-        ref,
-        inputs: {
-            discord_branch: branch,
-            webhook_url: `${Config.httpServer.domain}/reporter/webhook?runId=${runId}`
-        }
-    });
+    const inputs: DispatchInputs = {
+        discord_branch: branch,
+        webhook_url: `${Config.httpServer.domain}/reporter/webhook?runId=${runId}`
+    };
+
+    if (inputRef && inputRepository) {
+        inputs.ref = inputRef;
+        inputs.repository = inputRepository;
+    }
+
+    await triggerReportWorkflow({ ref, inputs });
 }
 
 async function handleReportSubmit(report: ReportData, data: any) {

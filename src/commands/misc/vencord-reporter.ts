@@ -1,9 +1,11 @@
 import { defineCommand } from "~/Commands";
 import Config from "~/config";
 import { BotState } from "~/db/botState";
-import { DefaultReporterBranch, testDiscordVersion } from "~/modules/discordTracker";
+import { DefaultReporterBranch, ReporterOptions, testDiscordVersion } from "~/modules/discordTracker";
 import { getEmoji } from "~/modules/emojiManager";
 import { reply } from "~/util/discord";
+
+const PrRegex = /#(\d+)/;
 
 defineCommand({
     enabled: Config.reporter.enabled,
@@ -15,6 +17,16 @@ defineCommand({
     allowedRoles: [Config.roles.mod],
 
     async execute({ msg }, ref = DefaultReporterBranch, branch = "both") {
+        const options: ReporterOptions = { ref };
+
+        if (PrRegex.test(ref)) {
+            const prNumber = parseInt(ref.match(PrRegex)![1]);
+
+            options.ref = DefaultReporterBranch;
+            options.inputRepository = "Vencord/Vencord";
+            options.inputRef = `refs/pull/${prNumber}/head`;
+        }
+
         testDiscordVersion(
             branch as any,
             {
@@ -22,9 +34,9 @@ defineCommand({
                 canary: BotState.discordTracker?.canaryHash!
             },
             {
-                ref,
+                ...options,
                 shouldLog: false,
-                shouldUpdateStatus: ref === DefaultReporterBranch,
+                shouldUpdateStatus: options.ref === DefaultReporterBranch,
                 onSubmit: (_report, data) => {
                     reply(msg, data);
                 }
