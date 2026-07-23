@@ -6,7 +6,7 @@ import { softBan } from "~/util/discord";
 import { fetchBuffer } from "~/util/fetch";
 import { checkPromise, silently } from "~/util/functions";
 import { readTextFromImage } from "~/util/ocr";
-import { ComponentMessage, MediaGallery, MediaGalleryItem, TextDisplay } from "~components";
+import { ComponentMessage, Container, MediaGallery, MediaGalleryItem, TextDisplay } from "~components";
 
 const scamTerms = [
     "casino",
@@ -60,10 +60,14 @@ export async function ocrModerate(msg: Message<AnyTextableGuildChannel>): Promis
         .map((a, i) => ({ file: { contents: a!.buffer, name: `image${i + 1}.png` }, matchedKeywords: a!.matchedKeywords }));
 
     const files = fileData.map(({ file }) => file);
-    const mediaGallery = (
+    const renderMediaGallery = (useSpoiler: boolean) => (
         <MediaGallery>
             {fileData.map(({ file, matchedKeywords }) =>
-                <MediaGalleryItem url={`attachment://${file.name}`} description={`Matched Keywords: ${matchedKeywords?.join(", ") ?? "None"}`} />
+                <MediaGalleryItem
+                    url={`attachment://${file.name}`}
+                    description={`Matched Keywords: ${matchedKeywords?.join(", ") ?? "None"}`}
+                    spoiler={useSpoiler}
+                />
             )}
         </MediaGallery>
     );
@@ -77,7 +81,9 @@ export async function ocrModerate(msg: Message<AnyTextableGuildChannel>): Promis
                 You can find the flagged {files.length === 1 ? "image that was" : "images that were"} posted from your account below. After securing your account, you may rejoin the server.
             </TextDisplay>
 
-            {mediaGallery}
+            <Container>
+                {renderMediaGallery(true)}
+            </Container>
         </ComponentMessage>
     );
 
@@ -98,7 +104,7 @@ export async function ocrModerate(msg: Message<AnyTextableGuildChannel>): Promis
         moderator: msg.client.user,
         jumpLink: null,
         messageProps: { files },
-        extraContext: mediaGallery
+        extraContext: renderMediaGallery(false)
     });
 
     return true;
