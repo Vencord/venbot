@@ -79,15 +79,16 @@ export function formatEmoji(emoji: { id: string; name: string; animated: boolean
     return `<${emoji.animated ? "a" : ""}:${emoji.name}:${emoji.id}>`;
 }
 
-export async function softBan(member: Member, deleteMessageSeconds: number, reason: string) {
+export async function softBan(member: Member, deleteMessageSeconds: number, reason: string, dmNotification?: CreateMessageOptions) {
     // Discord is bad at actually deleting messages when you ban
     // Possibly because of a race condition when the member is banned at the same time as sending more messages.
     // Muting then sleeping for a few seconds before banning to make sure no more messages are sending might help.
 
-    await silently(
-        member.edit({ communicationDisabledUntil: until(1 * Millis.HOUR), reason })
-            .then(() => sleep(5 * Millis.SECOND))
-    );
+    await Promise.allSettled([
+        member.edit({ communicationDisabledUntil: until(1 * Millis.HOUR), reason }),
+        sleep(5 * Millis.SECOND), // Sometimes ban with deleteMessageSeconds fails to delete messages. Sleeping for a bit may help, to ensure no more messages are sent before banning.
+        dmNotification && sendDm(member.user, dmNotification)
+    ]);
 
     await member.ban({ reason: `Soft-ban: ${reason}`, deleteMessageSeconds });
     await member.unban(`Soft-ban removal: ${reason}`);

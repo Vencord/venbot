@@ -6,7 +6,7 @@ import { softBan } from "~/util/discord";
 import { fetchBuffer } from "~/util/fetch";
 import { checkPromise, silently } from "~/util/functions";
 import { readTextFromImage } from "~/util/ocr";
-import { MediaGallery, MediaGalleryItem } from "~components";
+import { ComponentMessage, MediaGallery, MediaGalleryItem, TextDisplay } from "~components";
 
 const scamTerms = [
     "casino",
@@ -55,16 +55,40 @@ export async function ocrModerate(msg: Message<AnyTextableGuildChannel>): Promis
     currentlySoftBanning.add(msg.member.id);
     setTimeout(() => currentlySoftBanning.delete(msg.member.id), 10 * Millis.SECOND);
 
-    const didKick = await checkPromise(softBan(msg.member, 1 * Seconds.DAY, "Posted a scam message"));
+    const fileData = matchedAttachments
+        .filter(a => a?.isMatch)
+        .map((a, i) => ({ file: { contents: a!.buffer, name: `image${i + 1}.png` }, matchedKeywords: a!.matchedKeywords }));
+
+    const files = fileData.map(({ file }) => file);
+    const mediaGallery = (
+        <MediaGallery>
+            {fileData.map(({ file, matchedKeywords }) =>
+                <MediaGalleryItem url={`attachment://${file.name}`} description={`Matched Keywords: ${matchedKeywords?.join(", ") ?? "None"}`} />
+            )}
+        </MediaGallery>
+    );
+
+    const dmNotification = (
+        <ComponentMessage files={files}>
+            <TextDisplay>## Kicked for suspected scam</TextDisplay>
+            <TextDisplay>
+                You have been kicked from the Vencord server for posting a suspected scam image.
+                <br /><br />
+                You can find the flagged {files.length === 1 ? "image that was" : "images that were"} posted from your account below. After securing your account, you may rejoin the server.
+            </TextDisplay>
+
+            {mediaGallery}
+        </ComponentMessage>
+    );
+
+    const didKick = await checkPromise(
+        softBan(msg.member, 1 * Seconds.DAY, "Posted a scam message", dmNotification)
+    );
 
     let message = `${msg.member.mention} posted a scam image in ${msg.channel.mention}`;
     if (didKick) {
         message = `${Emoji.Boot} ${message} and has been kicked`;
     }
-
-    const fileData = matchedAttachments
-        .filter(a => a?.isMatch)
-        .map((a, i) => ({ file: { contents: a!.buffer, name: `image${i + 1}.png` }, matchedKeywords: a!.matchedKeywords }));
 
     logUserRestriction({
         id: msg.member.id,
@@ -73,16 +97,8 @@ export async function ocrModerate(msg: Message<AnyTextableGuildChannel>): Promis
         reason: `Posted a suspected scam image in ${msg.channel.mention}`,
         moderator: msg.client.user,
         jumpLink: null,
-        messageProps: {
-            files: fileData.map(({ file }) => file),
-        },
-        extraContext: (
-            <MediaGallery>
-                {fileData.map(({ file, matchedKeywords }) =>
-                    <MediaGalleryItem url={`attachment://${file.name}`} description={`Matched Keywords: ${matchedKeywords?.join(", ") ?? "None"}`} />
-                )}
-            </MediaGallery>
-        )
+        messageProps: { files },
+        extraContext: mediaGallery
     });
 
     return true;
