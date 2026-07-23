@@ -14,7 +14,7 @@ defineCommand({
     description: "Run the Vencord reporter workflow",
     usage: "[ref = dev] [branch = both]",
     aliases: ["report", "vencord-reporter", "test-patches", "test"],
-    allowedRoles: [Config.roles.mod],
+    allowedRoles: [Config.roles.mod, Config.roles.helper],
 
     async execute({ msg }, ref = DefaultReporterBranch, branch = "both") {
         const options: ReporterOptions = { ref };
@@ -23,7 +23,7 @@ defineCommand({
             const prNumber = parseInt(ref.match(PrRegex)![1]);
 
             options.ref = DefaultReporterBranch;
-            options.inputRepository = "Vencord/Vencord";
+            options.inputRepository = "Vendicated/Vencord";
             options.inputRef = `refs/pull/${prNumber}/head`;
         }
 
