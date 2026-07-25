@@ -4,6 +4,7 @@ import { BotState } from "~/db/botState";
 import { DefaultReporterBranch, ReporterOptions, testDiscordVersion } from "~/modules/discordTracker";
 import { getEmoji } from "~/modules/emojiManager";
 import { reply } from "~/util/discord";
+import { isOneOf } from "~/util/guards";
 
 const PrRegex = /#(\d+)/;
 
@@ -17,6 +18,9 @@ defineCommand({
     allowedRoles: [Config.roles.mod, Config.roles.helper],
 
     async execute({ msg }, ref = DefaultReporterBranch, branch = "both") {
+        if (!isOneOf(branch, "stable", "canary", "both"))
+            return reply(msg, "Invalid branch. Must be one of: stable, canary, both");
+
         const options: ReporterOptions = { ref };
 
         if (PrRegex.test(ref)) {
@@ -28,7 +32,7 @@ defineCommand({
         }
 
         testDiscordVersion(
-            branch as any,
+            branch,
             {
                 stable: BotState.discordTracker?.stableHash!,
                 canary: BotState.discordTracker?.canaryHash!
@@ -36,7 +40,7 @@ defineCommand({
             {
                 ...options,
                 shouldLog: false,
-                shouldUpdateStatus: options.ref === DefaultReporterBranch,
+                shouldUpdateStatus: ref === DefaultReporterBranch,
                 onSubmit: (_report, data) => {
                     reply(msg, data);
                 }
