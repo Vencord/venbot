@@ -75,3 +75,9 @@ export const Emoji = makeConstants({
 });
 
 export const ZWSP = "\u200B";
+
+export const Colors = makeConstants({
+    Pink: 0xffb3ba,
+    Green: 0xbaffc9,
+    Banana: 0xffffba,
+});

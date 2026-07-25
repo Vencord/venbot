@@ -1,4 +1,5 @@
 import { ButtonStyles, Member, SeparatorSpacingSize, User } from "oceanic.js";
+import { Colors } from "~/constants";
 
 import { getHighestRole, ID_REGEX } from "~/util/discord";
 import { logModerationAction } from "~/util/logAction";
@@ -81,7 +82,7 @@ export async function logUserRestriction(data: {
 }
 
 export enum ModerationColor {
-    Severe = 0xffb3ba,
-    Light = 0xffffba,
-    Positive = 0xbaffc9
+    Severe = Colors.Pink,
+    Light = Colors.Banana,
+    Positive = Colors.Green
 }

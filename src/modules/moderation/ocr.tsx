@@ -1,7 +1,7 @@
 import { AnyTextableGuildChannel, Message } from "oceanic.js";
 import { logUserRestriction } from "~/commands/moderation/utils";
 import Config from "~/config";
-import { Emoji, Millis, Seconds } from "~/constants";
+import { Colors, Emoji, Millis, Seconds } from "~/constants";
 import { softBan } from "~/util/discord";
 import { fetchBuffer } from "~/util/fetch";
 import { checkPromise, silently } from "~/util/functions";
@@ -104,7 +104,8 @@ export async function ocrModerate(msg: Message<AnyTextableGuildChannel>): Promis
         moderator: msg.client.user,
         jumpLink: null,
         messageProps: { files },
-        extraContext: renderMediaGallery(false)
+        extraContext: renderMediaGallery(false),
+        color: Colors.Pink
     });
 
     return true;
