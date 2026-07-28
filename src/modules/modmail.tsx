@@ -154,24 +154,54 @@ defineCommand({
     description: "Post the modmail message",
     usage: null,
     execute() {
-        return Vaius.rest.channels.createMessage(channelId, {
-            embeds: [{
-                title: "Get in touch",
-                description: "Got a question or problem regarding this server? Get in touch with our moderators by opening a ticket!\n\n# WARNING\nThis form is NOT FOR VENCORD SUPPORT. To get Vencord support, use <#1026515880080842772>.",
-            }],
-            components: [{
-                type: ComponentTypes.ACTION_ROW,
-                components: [{
-                    type: ComponentTypes.BUTTON,
-                    label: "Open a ticket",
-                    style: ButtonStyles.PRIMARY,
-                    customID: Ids.OPEN_TICKET,
-                    emoji: {
-                        name: "📩"
-                    }
-                }]
-            }]
-        });
+        return Vaius.rest.channels.createMessage(channelId,
+            <ComponentMessage>
+                <Container>
+                    <TextDisplay># Modmail</TextDisplay>
+
+                    <TextDisplay>Do you need to talk to a moderator? Get in touch by opening a ticket!</TextDisplay>
+
+                    <Separator spacing={SeparatorSpacingSize.LARGE} />
+
+                    <TextDisplay>## Get Support</TextDisplay>
+                    <TextDisplay>Do you need help with Vencord or have a question about it? Ask in our support channel!</TextDisplay>
+                    <ActionRow>
+                        <Button
+                            style={ButtonStyles.LINK}
+                            emoji={{ name: "🫂" }}
+                            url="https://discord.com/channels/1015060230222131221/1026515880080842772"
+                        >
+                            Get help with Vencord
+                        </Button>
+                    </ActionRow>
+
+                    <Separator spacing={SeparatorSpacingSize.LARGE} />
+
+                    <TextDisplay>## Open a Ticket</TextDisplay>
+                    <TextDisplay>
+                        - To claim or manage Donor Perks, send a private message to {"<@343383572805058560>"}.<br />
+                        - Only for matters that require a moderator. For Vencord support or general questions, see above.<br />
+                        - We only moderate things that happen **in this server**. Don't report anything that happens in DMs or other servers/platforms.
+                    </TextDisplay>
+                    <ActionRow>
+                        <Button
+                            style={ButtonStyles.SECONDARY}
+                            customID={Ids.OPEN_TICKET}
+                            emoji={{ name: "🗣️" }}
+                        >
+                            Talk to a Mod
+                        </Button>
+                        <Button
+                            style={ButtonStyles.LINK}
+                            emoji={{ name: "❤️" }}
+                            url="https://discord.com/users/343383572805058560"
+                        >
+                            Claim Donor Perks
+                        </Button>
+                    </ActionRow>
+                </Container>
+            </ComponentMessage>
+        );
     }
 });
 
