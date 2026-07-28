@@ -116,7 +116,7 @@ async function createModmailModal(interaction: GuildInteraction) {
                     Before submitting your ticket, please make sure it follows the rules:
                     - Tickets are **only for issues regarding this server** that require moderator attention
                     - Tickets are **not for Vencord support or questions**! Use <#1026515880080842772>
-                    - We only moderate things that happen in this server. **Don't report users for things that happened elsewhere**. This includes DMs, unless it's a scam or ad. Block users to stop them from messaging you.
+                    - We only moderate things that happen in this server. **Don't report users for things that happened elsewhere**. This includes DMs! Block users to stop them from messaging you.
                 `}
             </TextDisplay>
 
