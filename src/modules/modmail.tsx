@@ -1,8 +1,8 @@
-import { ActivityTypes, AnyTextableGuildChannel, ButtonStyles, ChannelTypes, CommandInteraction, ComponentInteraction, ComponentTypes, InteractionTypes, MessageFlags, ModalSubmitInteraction, PrivateThreadChannel, SeparatorSpacingSize, TextChannel, TextInputStyles } from "oceanic.js";
+import { ActivityTypes, AnyTextableGuildChannel, ButtonStyles, ChannelTypes, CommandInteraction, ComponentInteraction, ComponentTypes, InteractionTypes, MessageFlags, ModalSubmitInteraction, PrivateThreadChannel, SeparatorSpacingSize, TextChannel, TextInputStyles, User } from "oceanic.js";
 
 import { db } from "~/db";
 import { handleComponentInteraction, handleInteraction, registerChatInputCommand } from "~/SlashCommands";
-import { stripIndent } from "~/util/text";
+import { stripIndent, toTitle } from "~/util/text";
 
 import { grantSubmissionPass } from "~/commands/moderation/submission-pass";
 import Config from "~/config";
@@ -11,10 +11,10 @@ import { sendDm } from "~/util/discord";
 import { fetchBuffer } from "~/util/fetch";
 import { run } from "~/util/functions";
 import { isNonNullish } from "~/util/guards";
-import { ActionRow, Button, ComponentMessage, Container, File, FileUpload, MediaGallery, MediaGalleryItem, ModalLabel, Separator, StringOption, StringSelect, TextDisplay, TextInput } from "~components";
+import { ActionRow, Button, ComponentMessage, Container, File, FileUpload, MediaGallery, MediaGalleryItem, ModalLabel, Section, Separator, StringOption, StringSelect, TextDisplay, TextInput, Thumbnail } from "~components";
 import { Vaius } from "../Client";
 import { defineCommand } from "../Commands";
-import { Emoji, MANAGEABLE_ROLES, PROD } from "../constants";
+import { Colors, Emoji, MANAGEABLE_ROLES, PROD } from "../constants";
 
 const { banRoleId, channelId, enabled, logChannelId, modRoleId } = Config.modmail;
 
@@ -43,10 +43,35 @@ const COMMAND_NAME = PROD ? "modmail" : "devmodmail";
 
 type GuildInteraction = ComponentInteraction<ComponentTypes.BUTTON, AnyTextableGuildChannel> | CommandInteraction<AnyTextableGuildChannel>;
 
-async function log(content: string) {
-    return Vaius.rest.channels.createMessage(logChannelId, {
-        content
-    });
+async function log(data: {
+    color: number;
+    user: User;
+    title: string;
+    viewLink: string;
+    footer?: any;
+}) {
+    const { color, user, title, viewLink, footer } = data;
+
+    return Vaius.rest.channels.createMessage(logChannelId,
+        <ComponentMessage>
+            <Container accentColor={color}>
+                <Section accessory={<Thumbnail url={user.avatarURL(undefined, 128)} />}>
+                    <TextDisplay>## {title}</TextDisplay>
+                    <TextDisplay>**{user.tag}**</TextDisplay>
+                    <TextDisplay>-# {`<@${user.id}>`} - {user.id}</TextDisplay>
+                </Section>
+
+
+                <Separator spacing={footer ? SeparatorSpacingSize.SMALL : SeparatorSpacingSize.SMALL} />
+
+                {footer && <TextDisplay>-# {footer}</TextDisplay>}
+
+                <ActionRow>
+                    <Button style={ButtonStyles.LINK} url={viewLink}>View</Button>
+                </ActionRow>
+            </Container>
+        </ComponentMessage>
+    );
 }
 
 function getThreadParent() {
@@ -386,7 +411,12 @@ if (enabled) {
                 flags: MessageFlags.EPHEMERAL
             });
 
-            await log(`${interaction.user.mention} opened ${channelName.replace("-", " ")} ${thread.mention}`);
+            await log({
+                color: Colors.Green,
+                user: interaction.user,
+                title: `${toTitle(channelName.replace("-", " "))} opened`,
+                viewLink: `https://discord.com/channels/${interaction.guild.id}/${thread.id}`,
+            });
         }
     });
 
@@ -421,7 +451,13 @@ if (enabled) {
                 .where("id", "=", res.id)
                 .execute();
 
-            await log(`Ticket ${interaction.channel.mention} has been closed by ${interaction.user.mention}!`);
+            await log({
+                color: Colors.Pink,
+                user: interaction.client.users.get(res.userId) ?? await interaction.client.rest.users.get(res.userId),
+                title: `${toTitle(interaction.channel.name)} closed`,
+                viewLink: `https://discord.com/channels/${interaction.guild.id}/${interaction.channel.id}`,
+                footer: `${isBan ? "Banned from Modmail - " : ""}Closed by ${interaction.user.tag}`
+            });
 
             await interaction.createFollowup({
                 content: "Ticket closed.",
