@@ -3,3 +3,4 @@ DROP TABLE IF EXISTS expressions;
 DROP TABLE IF EXISTS expressionUses;
 DROP TABLE IF EXISTS stickyRoles;
 DROP TABLE IF EXISTS linkedGitHubs;
+DROP TABLE IF EXISTS userAvatarEmojis;

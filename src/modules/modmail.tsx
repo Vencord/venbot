@@ -10,11 +10,12 @@ import { partition } from "~/util/arrays";
 import { sendDm } from "~/util/discord";
 import { fetchBuffer } from "~/util/fetch";
 import { run } from "~/util/functions";
-import { isNonNullish } from "~/util/guards";
+import { isNonNullish, isTruthy } from "~/util/guards";
 import { ActionRow, Button, ComponentMessage, Container, File, FileUpload, MediaGallery, MediaGalleryItem, ModalLabel, Section, Separator, StringOption, StringSelect, TextDisplay, TextInput, Thumbnail } from "~components";
 import { Vaius } from "../Client";
 import { defineCommand } from "../Commands";
 import { Colors, Emoji, MANAGEABLE_ROLES, PROD } from "../constants";
+import { getUserEmoji } from "./userEmojis";
 
 const { banRoleId, channelId, enabled, logChannelId, modRoleId } = Config.modmail;
 
@@ -430,7 +431,6 @@ if (enabled) {
                 return;
 
             const isBan = interaction.data.customID.startsWith("modmail:close-ban:");
-
             const isModAction = interaction.member.roles.includes(modRoleId);
 
             if (isBan && !isModAction) return;
@@ -451,12 +451,19 @@ if (enabled) {
                 .where("id", "=", res.id)
                 .execute();
 
+            const footer = [
+                isBan && "Banned from Modmail -",
+                "Closed by",
+                isModAction && await getUserEmoji(interaction.user),
+                interaction.user.tag
+            ].filter(isTruthy).join(" ");
+
             await log({
                 color: Colors.Pink,
                 user: interaction.client.users.get(res.userId) ?? await interaction.client.rest.users.get(res.userId),
                 title: `${toTitle(interaction.channel.name)} closed`,
                 viewLink: `https://discord.com/channels/${interaction.guild.id}/${interaction.channel.id}`,
-                footer: `${isBan ? "Banned from Modmail - " : ""}Closed by ${interaction.user.tag}`
+                footer
             });
 
             await interaction.createFollowup({

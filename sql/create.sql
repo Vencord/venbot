@@ -33,3 +33,9 @@ CREATE TABLE IF NOT EXISTS linkedGitHubs (
 );
 
 CREATE INDEX IF NOT EXISTS discordIdIndex on linkedGitHubs (discordId);
+
+CREATE TABLE IF NOT EXISTS userAvatarEmojis (
+    userId      TEXT NOT NULL PRIMARY KEY,
+    emojiId     TEXT NOT NULL,
+    avatarHash  TEXT NOT NULL
+)

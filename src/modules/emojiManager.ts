@@ -11,21 +11,21 @@ import { ASSET_DIR } from "~/constants";
 
 const EMOJI_DIR = join(ASSET_DIR, "emojis");
 
-const emojiCache = new Map<string, ApplicationEmoji>();
+export const emojiCache = new Map<string, ApplicationEmoji>();
 const { promise: emojiCacheReady, resolve: resolveEmojiCacheReady } = Promise.withResolvers<void>();
 export { emojiCacheReady };
 
 const getEmojiName = (fileName: string) => fileName.replace(/\.[^/.]+$/, "");
 
-async function uploadEmoji(fileName: string) {
-    const name = getEmojiName(fileName);
+async function uploadEmojiFromFile(fileName: string) {
+    await uploadEmoji(getEmojiName(fileName), await readFile(join(EMOJI_DIR, fileName)));
+}
 
-    const e = await Vaius.application.createEmoji({
-        name,
-        image: await readFile(join(EMOJI_DIR, fileName))
-    });
-
+export async function uploadEmoji(name: string, image: Buffer) {
+    const e = await Vaius.application.createEmoji({ name, image });
     emojiCache.set(name, e);
+
+    return e;
 }
 
 export async function ensureEmojis() {
@@ -41,7 +41,7 @@ export async function ensureEmojis() {
 
     if (emojisToUpload.length) {
         console.log(`EmojiManager: (${emojisToUpload.length} emojis to upload)`);
-        await Promise.all(emojisToUpload.map(uploadEmoji));
+        await Promise.all(emojisToUpload.map(uploadEmojiFromFile));
         console.log("EmojiManager: Uploaded all emojis");
     }
 
