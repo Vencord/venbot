@@ -46,11 +46,11 @@ const supportedMimeTypes = new Set([
     "audio/flac"
 ]);
 
-const ai = new GoogleGenAI({ apiKey });
+export const ai = new GoogleGenAI({ apiKey });
 
 const getSystemPrompt = makeLazy(() => readFile(join(ASSET_DIR, "gemini-system-prompt.txt"), "utf-8"));
 
-async function generateContent(params: Omit<GenerateContentParameters, "model">, model = models[0]) {
+export async function generateContent(params: Omit<GenerateContentParameters, "model">, model = models[0]) {
     try {
         const response = await ai.models.generateContent({
             ...params,
