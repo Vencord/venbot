@@ -12,7 +12,7 @@ async function uploadUserEmoji(user: User) {
 
     const emoji = await uploadEmoji(
         getEmojiName(user),
-        await fetchBuffer(user.avatarURL(user.avatar!.startsWith("a_") ? "gif" : "jpeg", 128))
+        await fetchBuffer(user.avatarURL(user.avatar!.startsWith("a_") ? "gif" : "png", 128))
     );
 
     await db
