@@ -1,5 +1,11 @@
+allowBuilds:
+  '@google/genai': false
+  better-sqlite3: true
+  esbuild: true
+  protobufjs: false
+  tesseract.js: true
 onlyBuiltDependencies:
   - better-sqlite3
   - canvas
   - esbuild
-  - sharp
+  - tesseract.js

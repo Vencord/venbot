@@ -6,10 +6,9 @@ import { ZWSP } from "~/constants";
 import { ChatInputCommandOptions, CommandInteractionHandler, registerChatInputCommand } from "~/SlashCommands";
 import { run } from "~/util/functions";
 
-import { buffer } from "stream/consumers";
+import sharp from "sharp";
 import Config from "~/config";
 import { atomicWriteFileSync } from "~/util/atomicWriteFile";
-import { spawnP } from "~/util/childProcess";
 import { getHomeGuild } from "~/util/discord";
 import { logBotAuditAction } from "~/util/logAction";
 import { CommandAttachmentOption, CommandBooleanOption, CommandIntegerOption, CommandStringOption, CommandUserOption } from "~components";
@@ -44,17 +43,34 @@ const NameMove = Name + "-move";
 const NameCopy = Name + "-copy";
 
 async function optimizeImage(imgData: Buffer, ext: string) {
-    const { child } = ext === "gif"
-        ? spawnP("gifsicle", ["-O3", "--colors", "256", "--resize", "64x64"], {})
-        : spawnP("convert", ["-", "-resize", "64x64", "-quality", "75", "WEBP:-"], {});
+    const img = await sharp(imgData, {
+        animated: true,
+        autoOrient: true
+    });
 
-    child.stdin!.end(imgData);
+    const { width, height } = await img.metadata();
+    const size = Math.min(width, height, 64);
 
-    const res = await buffer(child.stdout!);
+    const res = await img
+        .resize(size, size, {
+            fit: "cover",
+            position: "centre",
+            kernel: "lanczos3",
+        })
+        .webp({
+            quality: 30,
+            alphaQuality: 90,
+            effort: 6,
+            mixed: true,
+            loop: 0
+        })
+        .toBuffer();
+
+    const isGiga = res.byteLength < imgData.byteLength;
 
     return [
-        res.byteLength < imgData.byteLength ? res : imgData,
-        ext === "gif" ? "gif" : "webp",
+        isGiga ? res : imgData,
+        isGiga ? "webp" : ext,
         imgData.byteLength,
         res.byteLength
     ] as const;
