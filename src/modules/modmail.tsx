@@ -2,7 +2,7 @@ import { ActivityTypes, AnyTextableGuildChannel, ButtonStyles, ChannelTypes, Com
 
 import { db } from "~/db";
 import { handleComponentInteraction, handleInteraction, registerChatInputCommand } from "~/SlashCommands";
-import { stripIndent, toTitle } from "~/util/text";
+import { kebabToTitle, stripIndent } from "~/util/text";
 
 import { grantSubmissionPass } from "~/commands/moderation/submission-pass";
 import Config from "~/config";
@@ -415,7 +415,7 @@ if (enabled) {
             await log({
                 color: Colors.Green,
                 user: interaction.user,
-                title: `${toTitle(channelName.replace("-", " "))} opened`,
+                title: `${kebabToTitle(thread.name)} opened`,
                 viewLink: `https://discord.com/channels/${interaction.guild.id}/${thread.id}`,
             });
         }
@@ -461,7 +461,7 @@ if (enabled) {
             await log({
                 color: Colors.Pink,
                 user: interaction.client.users.get(res.userId) ?? await interaction.client.rest.users.get(res.userId),
-                title: `${toTitle(interaction.channel.name)} closed`,
+                title: `${kebabToTitle(interaction.channel.name)} closed`,
                 viewLink: `https://discord.com/channels/${interaction.guild.id}/${interaction.channel.id}`,
                 footer
             });

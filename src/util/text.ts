@@ -28,12 +28,8 @@ export function toTitle(s: string, separator: string | RegExp = " ") {
         .join(" ");
 }
 
-export function snakeToTitle(s: string) {
-    return s
-        .split("_")
-        .map(w => w[0].toUpperCase() + w.slice(1).toLowerCase())
-        .join(" ");
-}
+export const snakeToTitle = (s: string) => toTitle(s, "_");
+export const kebabToTitle = (s: string) => toTitle(s, "-");
 
 const BACKTICKS = "```";
 export const toCodeblock = (s: string, lang = "") => `${BACKTICKS}${lang}\n${s.replaceAll("`", "`" + ZWSP)}${BACKTICKS}`;
