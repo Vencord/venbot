@@ -35,11 +35,12 @@ Vaius.once("ready", async () => {
     console.log(`I am in ${Vaius.guilds.size} guilds`);
     console.log(`https://discord.com/oauth2/authorize?client_id=${Vaius.user.id}&permissions=8&scope=bot+applications.commands`);
 
-    if (BotState.helloChannelId) {
-        await Vaius.rest.channels.createMessage(BotState.helloChannelId, {
-            content: "I'm back !!! :DDD"
-        });
-        delete BotState.helloChannelId;
+    if (BotState.restartData) {
+        const { channelId, messageId } = BotState.restartData;
+        delete BotState.restartData;
+
+        await Vaius.rest.channels.editMessage(channelId, messageId, { content: "hiiii :3" })
+            .catch(() => Vaius.rest.channels.createMessage(channelId, { content: "hiiii :3" }));
     }
 });
 

@@ -10,9 +10,7 @@ import {
 
 import { Vaius } from "./Client";
 import { PROD } from "./constants";
-import { BotState } from "./db/botState";
-// eslint-disable-next-line no-duplicate-imports
-import Config from "./config";
+
 import { initModListeners } from "./modules/moderation/listeners";
 import { silently } from "./util/functions";
 import { inspect } from "./util/inspect";
@@ -45,11 +43,6 @@ process.on("unhandledRejection", err => handleError("Unhandled Rejection", err))
 
 process.on("uncaughtException", async err => {
     await silently(handleError("Uncaught Exception. Restarting process", err));
-    try {
-        // proxy shouldn't throw but uncaughtException means anything could have happened so just in case
-        BotState.helloChannelId = Config.channels.dev;
-    } catch { }
-
     process.exit(1);
 });
 

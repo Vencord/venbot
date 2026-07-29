@@ -5,11 +5,14 @@ import { debounce, silently } from "~/util/functions";
 
 const StickyStates = new Map<string, StickyState>();
 
-export class StickyState {
-    private lastMessageId: string | null = null;
-    private isDestroyed = false;
+if (BotState.restartData?.stickyStates) {
+    restoreStickyStates(BotState.restartData.stickyStates);
+}
 
-    constructor(public channelId: string) {
+export class StickyState {
+    isDestroyed = false;
+
+    constructor(public channelId: string, public lastMessageId: string | null = null) {
         if (BotState.stickies[channelId]?.enabled)
             this.createDebouncer();
     }
@@ -76,3 +79,17 @@ Vaius.on("messageCreate", async msg => {
 
     sticky.repostMessage();
 });
+
+export function backupStickyStates() {
+    return Object.fromEntries(
+        StickyStates.entries()
+            .filter(([, sticky]) => !sticky.isDestroyed && sticky.lastMessageId)
+            .map(([channelId, sticky]) => [channelId, sticky.lastMessageId!])
+    );
+}
+
+export function restoreStickyStates(stickyStates: Record<string, string>) {
+    for (const [channelId, messageId] of Object.entries(stickyStates)) {
+        StickyStates.set(channelId, new StickyState(channelId, messageId));
+    }
+}

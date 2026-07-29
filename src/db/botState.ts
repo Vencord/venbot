@@ -8,8 +8,6 @@ import { run } from "~/util/functions";
 const StateFile = join(DATA_DIR, "botState.json");
 
 interface BotState {
-    helloChannelId?: string;
-
     stickies: Record<string, {
         message: string;
         delayMs: number;
@@ -22,6 +20,12 @@ interface BotState {
     },
 
     stickyThreads: string[];
+
+    restartData?: {
+        channelId: string;
+        messageId: string;
+        stickyStates: Record<string, string>;
+    };
 }
 
 const defaultState: BotState = {
