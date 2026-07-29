@@ -6,7 +6,7 @@ import { db } from "~/db";
 import { run } from "~/util/functions";
 import { inspect } from "~/util/inspect";
 import stringWidth from "~/util/stringWidth";
-import { countOccurrences, toCodeblock } from "~/util/text";
+import { countOccurrences, pluralise, toCodeblock } from "~/util/text";
 
 defineCommand({
     name: "sql",
@@ -31,7 +31,7 @@ defineCommand({
                     return markdownTable(lines, { stringLength: stringWidth });
                 }
 
-                if (numAffectedRows) return `Affected rows: ${numAffectedRows}`;
+                if (numAffectedRows != null) return pluralise(Number(numAffectedRows), "affected row");
 
                 return "No output";
             } catch (e) {
