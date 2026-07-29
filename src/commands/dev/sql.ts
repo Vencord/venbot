@@ -3,6 +3,7 @@ import { CreateMessageOptions } from "oceanic.js";
 
 import { defineCommand } from "~/Commands";
 import { db } from "~/db";
+import { run } from "~/util/functions";
 import { inspect } from "~/util/inspect";
 import stringWidth from "~/util/stringWidth";
 import { countOccurrences, toCodeblock } from "~/util/text";
@@ -18,20 +19,25 @@ defineCommand({
 
         const param: TemplateStringsArray = Object.assign([query], { raw: [query] });
 
-        let result: string;
-        try {
-            const { rows } = await sql(param).execute(db) as { rows: Record<string | number, any>[] };
+        const result = await run(async () => {
+            try {
+                const { rows, numAffectedRows, numChangedRows } = await sql<Record<string | number, any>[]>(param).execute(db);
 
-            const lines = rows.map(r => Object.values(r).map(String));
-            lines.unshift(Object.keys(rows[0]));
+                if (rows.length) {
+                    const lines = rows.map(r => Object.values(r).map(String));
+                    lines.unshift(Object.keys(rows[0]));
 
-            const { markdownTable } = await import("markdown-table");
-            result = markdownTable(lines, {
-                stringLength: stringWidth
-            });
-        } catch (e) {
-            result = inspect(e);
-        }
+                    const { markdownTable } = await import("markdown-table");
+                    return markdownTable(lines, { stringLength: stringWidth });
+                }
+
+                if (numAffectedRows) return `Affected rows: ${numAffectedRows}`;
+
+                return "No output";
+            } catch (e) {
+                return inspect(e);
+            }
+        });
 
         const maxLength = 2000 - 10 - countOccurrences(result, "`");
         const sendAsFile = result.length > maxLength || result.indexOf("\n") >= 120;
