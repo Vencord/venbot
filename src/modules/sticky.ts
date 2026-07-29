@@ -5,10 +5,6 @@ import { debounce, silently } from "~/util/functions";
 
 const StickyStates = new Map<string, StickyState>();
 
-if (BotState.restartData?.stickyStates) {
-    restoreStickyStates(BotState.restartData.stickyStates);
-}
-
 export class StickyState {
     isDestroyed = false;
 
@@ -92,4 +88,8 @@ export function restoreStickyStates(stickyStates: Record<string, string>) {
     for (const [channelId, messageId] of Object.entries(stickyStates)) {
         StickyStates.set(channelId, new StickyState(channelId, messageId));
     }
+}
+
+if (BotState.restartData?.stickyStates) {
+    restoreStickyStates(BotState.restartData.stickyStates);
 }
