@@ -87,11 +87,7 @@ function normaliseCdnUrl(rawUrl: string) {
     return url.toString();
 }
 
-/**
- * Fetches, optionally optimizes, hashes and writes a single badge image to disk.
- * Shared by both the single add/edit path and the bulk-add path.
- */
-async function processBadgeImage(rawUrl: string, userId: string, optimize: boolean) {
+async function fetchAndProcessBadgeImage(rawUrl: string, userId: string, optimize: boolean) {
     const url = normaliseCdnUrl(rawUrl);
 
     let imgData: Buffer = await fetchBuffer(url);
@@ -101,15 +97,11 @@ async function processBadgeImage(rawUrl: string, userId: string, optimize: boole
     let after = imgData.byteLength;
 
     if (optimize) {
-        let sizes: [number, number];
         ([imgData, ext, before, after] = await optimizeImage(imgData, ext));
     }
 
     const hash = createHash("sha1").update(imgData).digest("hex");
     const fileName = `${hash}.${ext}`;
-
-    mkdirSync(badgesForUser(userId), { recursive: true });
-    writeFileSync(`${badgesForUser(userId)}/${fileName}`, imgData);
 
     return {
         fileName,
@@ -118,6 +110,12 @@ async function processBadgeImage(rawUrl: string, userId: string, optimize: boole
         after,
         badgeUrl: `https://badges.vencord.dev/badges/${userId}/${fileName}`
     };
+}
+
+/** Writes a processed badge image to disk. Kept separate so writes can be done in order. */
+function writeBadgeImage(userId: string, fileName: string, imgData: Buffer) {
+    mkdirSync(badgesForUser(userId), { recursive: true });
+    writeFileSync(`${badgesForUser(userId)}/${fileName}`, imgData);
 }
 
 const handler: CommandInteractionHandler = {
@@ -270,26 +268,38 @@ const handler: CommandInteractionHandler = {
 
             BadgeData[user.id] ??= [];
 
-            const addedFiles: Array<{ name: string; contents: Buffer; }> = [];
+            const results = await Promise.all(parsed.map(async ([rawUrl, tooltip]) => {
+                try {
+                    const processed = await fetchAndProcessBadgeImage(rawUrl, user.id, optimize);
+                    return { ok: true as const, tooltip, ...processed };
+                } catch {
+                    return { ok: false as const };
+                }
+            }));
+
+            let addedCount = 0;
             let totalBefore = 0;
             let totalAfter = 0;
             let failCount = 0;
 
-            for (const [rawUrl, tooltip] of parsed) {
-                try {
-                    const { fileName, imgData, before, after, badgeUrl } = await processBadgeImage(rawUrl, user.id, optimize);
-
-                    totalBefore += before;
-                    totalAfter += after;
-
-                    const newBadgeData: BadgeInfo = { tooltip, badge: badgeUrl };
-                    if (!tooltip || tooltip === ZWSP) delete newBadgeData.tooltip;
-
-                    BadgeData[user.id].push(newBadgeData);
-                    addedFiles.push({ name: fileName, contents: imgData });
-                } catch {
+            for (const result of results) {
+                if (!result.ok) {
                     failCount++;
+                    continue;
                 }
+
+                const { fileName, imgData, before, after, badgeUrl, tooltip } = result;
+
+                writeBadgeImage(user.id, fileName, imgData);
+
+                totalBefore += before;
+                totalAfter += after;
+
+                const newBadgeData: BadgeInfo = { tooltip, badge: badgeUrl };
+                if (!tooltip || tooltip === ZWSP) delete newBadgeData.tooltip;
+
+                BadgeData[user.id].push(newBadgeData);
+                addedCount++;
             }
 
             if (BadgeData[user.id].length === 0)
@@ -297,22 +307,21 @@ const handler: CommandInteractionHandler = {
 
             saveBadges();
 
-            if (guild && addedFiles.length) {
+            if (guild && addedCount) {
                 const member = await guild.getMember(user.id).catch(() => null);
                 if (member && !member.roles.includes(Config.roles.donor))
                     await member.addRole(Config.roles.donor);
             }
 
-            if (addedFiles.length)
-                logBotAuditAction({
-                    content: `${addedFiles.length} badge(s) bulk-added for ${user.username} (${user.mention})${failCount ? ` (${failCount} failed)` : ""}`,
-                    files: addedFiles
-                });
+            if (addedCount)
+                logBotAuditAction(
+                    `${addedCount} badge(s) bulk-added for ${user.username} (${user.mention})${failCount ? ` (${failCount} failed)` : ""}`
+                );
 
             const footer = optimize ? `${(totalBefore / 1024).toFixed(2)}k -> ${(totalAfter / 1024).toFixed(2)}k\n` : "";
 
             return i.createFollowup({
-                content: `Done! Added ${addedFiles.length} badge(s).${failCount ? ` ${failCount} failed.` : ""}${footer && "\n\n-# " + footer}`,
+                content: `Done! Added ${addedCount} badge(s).${failCount ? ` ${failCount} failed.` : ""}${footer && "\n\n-# " + footer}`,
                 flags: MessageFlags.EPHEMERAL
             });
         }
