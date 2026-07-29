@@ -21,7 +21,7 @@ export async function parseBulkBadges(text: string) {
         ["https://example.com/badge2.png", "Another Badge Name"],
         ["https://example.com/badge3.png", "\u200B"]
     ]
-    Respond only with the JSON array, and do not include any other text or formatting.
+    Respond only with the JSON array, and do not include any other text or formatting. Do not wrap the output in code blocks or quotes.
     `;
 
     const result = await ai.models.generateContent({
