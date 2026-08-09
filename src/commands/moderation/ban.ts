@@ -71,6 +71,10 @@ async function banExecutor({ msg, reply }: CommandContext<true>, args: string[],
 
     const doBan = async (id: string, member?: Member) => {
         try {
+            if (daysToDelete > 0) {
+                await silently(msg.guild.removeBan(id, "This user is being re-banned."));
+            }
+
             await msg.guild.createBan(id, { reason: reasonWithMod, deleteMessageDays: daysToDelete as 0 });
 
             bannedUsers.push(`**<@${id}>**`);
