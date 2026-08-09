@@ -5,6 +5,7 @@ import { Colors, Emoji, Millis, Seconds } from "~/constants";
 import { softBan } from "~/util/discord";
 import { fetchBuffer } from "~/util/fetch";
 import { checkPromise, silently } from "~/util/functions";
+import { logAutoModAction } from "~/util/logAction";
 import { readTextFromImage } from "~/util/ocr";
 import { ComponentMessage, Container, MediaGallery, MediaGalleryItem, TextDisplay } from "~components";
 
@@ -106,7 +107,7 @@ export async function ocrModerate(msg: Message<AnyTextableGuildChannel>): Promis
         messageProps: { files },
         extraContext: renderMediaGallery(false),
         color: Colors.Pink
-    });
+    }, logAutoModAction);
 
     return true;
 }

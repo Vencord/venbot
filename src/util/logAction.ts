@@ -12,7 +12,11 @@ function logAction(channelId: string, data: string | CreateMessageOptions) {
     return Vaius.rest.channels.createMessage(channelId, data);
 }
 
-export const logDevDebug = (data: string | CreateMessageOptions) => logAction(Config.channels.dev, data);
-export const logAutoModAction = (data: string | CreateMessageOptions) => logAction(Config.channels.autoModLog, data);
-export const logModerationAction = (data: string | CreateMessageOptions) => logAction(Config.channels.modLog, data);
-export const logBotAuditAction = (data: string | CreateMessageOptions) => logAction(Config.channels.botAuditLog, data);
+const makeLogger = (channelId: string): ActionLogger => logAction.bind(null, channelId);
+
+export type ActionLogger = (data: string | CreateMessageOptions) => ReturnType<typeof logAction>;
+
+export const logDevDebug = makeLogger(Config.channels.dev);
+export const logAutoModAction = makeLogger(Config.channels.autoModLog);
+export const logBotAuditAction = makeLogger(Config.channels.botAuditLog);
+export const logModerationAction = makeLogger(Config.channels.modLog);

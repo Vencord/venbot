@@ -46,10 +46,10 @@ export async function logUserRestriction(data: {
     expires?: Date;
     extraContext?: any;
     messageProps?: Omit<ComponentMessageProps, "children">;
-}) {
+}, logger = logModerationAction) {
     const { title, user, id, reason, moderator, jumpLink, color, expires, extraContext, messageProps } = data;
 
-    logModerationAction(
+    logger(
         <ComponentMessage {...messageProps}>
             <Container accentColor={color}>
                 {user
