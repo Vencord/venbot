@@ -154,6 +154,12 @@ const handler: CommandInteractionHandler = {
             const oldUser = data.options.getUser("old-user", true);
             const newUser = data.options.getUser("new-user", true);
 
+            if (oldUser.id === newUser.id)
+                return i.createMessage({
+                    content: "Cannot move badges to the same user",
+                    flags: MessageFlags.EPHEMERAL
+                });
+
             if (!BadgeData[oldUser.id]?.length)
                 return i.createMessage({
                     content: "Badge not found",
