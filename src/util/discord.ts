@@ -39,7 +39,6 @@ export async function reply(msg: Message | PossiblyUncachedMessage, opts: Create
 
         throw err;
     }
-
 }
 
 export function getHighestRole({ guild, roles }: Member, filter?: (r: Role) => boolean) {

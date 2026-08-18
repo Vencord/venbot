@@ -76,7 +76,7 @@ export class CommandContext<GuildOnly extends boolean = false> {
         opts = this._normalizeOptions(opts);
 
         try {
-            return this.createMessage({
+            return await this.createMessage({
                 ...opts,
                 messageReference: {
                     messageID: this.msg.id,
