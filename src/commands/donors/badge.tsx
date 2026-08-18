@@ -51,7 +51,7 @@ async function optimizeImage(imgData: Buffer, ext: string) {
     });
 
     const { width, height } = await img.metadata();
-    const size = Math.min(width, height, 64);
+    const size = Math.min(width, height, 128);
 
     const res = await img
         .resize(size, size, {
