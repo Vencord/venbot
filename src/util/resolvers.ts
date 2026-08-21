@@ -4,7 +4,7 @@ import { Vaius } from "~/Client";
 
 const idRegex = /\d{17,20}/;
 
-export function resolveUserId(input: string) {
+export function resolveUserId(input?: string) {
     if (!input) return null;
 
     const match = input.match(idRegex);
@@ -14,7 +14,7 @@ export function resolveUserId(input: string) {
     return Vaius.users.find(u => u.username === input)?.id ?? null;
 }
 
-export async function resolveUser(input: string) {
+export async function resolveUser(input?: string) {
     const id = resolveUserId(input);
     if (!id) return null;
 
@@ -22,7 +22,7 @@ export async function resolveUser(input: string) {
         ?? Vaius.rest.users.get(id).catch(() => null);
 }
 
-export function resolveChannelId(input: string, guild?: Guild) {
+export function resolveChannelId(input?: string, guild?: Guild) {
     if (!input) return null;
 
     const match = input.match(idRegex);
@@ -35,7 +35,7 @@ export function resolveChannelId(input: string, guild?: Guild) {
     return null;
 }
 
-export async function resolveChannel(input: string, guild?: Guild) {
+export async function resolveChannel(input?: string, guild?: Guild) {
     const id = resolveChannelId(input, guild);
     if (!id) return null;
 
