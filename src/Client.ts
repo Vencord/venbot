@@ -13,7 +13,7 @@ import { silently } from "./util/functions";
 
 export const Vaius = new Client({
     auth: "Bot " + Config.token,
-    gateway: { intents: ["ALL"] },
+    gateway: { intents: ["ALL_NON_PRIVILEGED", "MESSAGE_CONTENT", "GUILD_MEMBERS"] },
     allowedMentions: {
         everyone: false,
         repliedUser: false,
