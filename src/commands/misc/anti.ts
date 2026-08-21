@@ -32,6 +32,7 @@ defineCommand({
         function processFrame(avatarIdx: number) {
             const { frame, delay } = avatarProvider.getFrame(avatarIdx);
 
+            ctx.clearRect(0, 0, width, height);
             ctx.drawImage(frame, 0, 0, width, height);
             ctx.strokeStyle = "red";
             ctx.lineWidth = strokeWidth;
@@ -44,10 +45,22 @@ defineCommand({
 
             const { data } = ctx.getImageData(0, 0, width, height);
 
-            palette ??= quantize(data, 256);
+            palette ??= quantize(data, 256, {
+                format: "rgba4444",
+                oneBitAlpha: true,
+            });
 
-            const index = applyPalette(data, palette);
-            gif.writeFrame(index, width, height, { palette, delay });
+            const index = applyPalette(data, palette, "rgba4444");
+
+            // Find which palette entry represents "transparent" (alpha === 0)
+            const transparentIndex = palette.findIndex(([, , , a]) => a === 0);
+
+            gif.writeFrame(index, width, height, {
+                palette,
+                delay,
+                transparent: transparentIndex !== -1,
+                transparentIndex: transparentIndex !== -1 ? transparentIndex : undefined,
+            });
         }
 
         for (let i = 0; i < avatarProvider.frames; i++) {
