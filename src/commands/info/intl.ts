@@ -1,15 +1,9 @@
 import { hash as h64 } from "@intrnl/xxhash64";
-import { readFile } from "node:fs/promises";
-import { join } from "node:path";
 import { defineCommand } from "~/Commands";
-import { ASSET_DIR } from "~/constants";
-import { makeLazy } from "~/util/lazy";
+import { Millis } from "~/constants";
+import { makeCachedJsonFetch } from "~/util/fetch";
 
-
-const getIntlMap = makeLazy(() =>
-    readFile(join(ASSET_DIR, "discord-intl-map.json"), "utf-8")
-        .then(data => JSON.parse(data) as Record<string, string>)
-);
+const getIntlMap = makeCachedJsonFetch<Record<string, string>>("https://sadan.zip/assets/key-mappings.json", 1 * Millis.HOUR);
 
 defineCommand({
     name: "intl",
