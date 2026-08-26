@@ -21,6 +21,7 @@
     "author": "Vendicated <vendicated+npm@riseup.net>",
     "dependencies": {
         "@google/genai": "^2.13.0",
+        "@intrnl/xxhash64": "^0.1.2",
         "@napi-rs/canvas": "^1.0.2",
         "better-sqlite3": "^12.5.0",
         "fastify": "^5.6.2",
