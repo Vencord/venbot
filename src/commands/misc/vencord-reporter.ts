@@ -15,7 +15,7 @@ defineCommand({
     description: "Run the Vencord reporter workflow",
     usage: "[ref = dev] [branch = both]",
     aliases: ["report", "vencord-reporter", "test-patches", "test"],
-    allowedRoles: [Config.roles.mod, Config.roles.helper],
+    allowedRoles: [Config.roles.mod, Config.roles.helper, "1542169906290630829"],
 
     async execute({ msg }, ref = DefaultReporterBranch, branch = "both") {
         if (!isOneOf(branch, "stable", "canary", "both"))

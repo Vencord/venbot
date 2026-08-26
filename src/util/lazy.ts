@@ -15,7 +15,7 @@ export function makeLazy<T>(factory: () => T): () => T {
 }
 
 /**
- * Return this value from the factory to skip caching the result and make this call return `null
+ * Return this value from the factory to skip caching the result and make this call return `null`
  */
 export const ttlLazyFailure = Symbol("TtlLazySkip");
 type TtlLazyFailure = typeof ttlLazyFailure;
