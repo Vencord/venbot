@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { Collection, Message } from "oceanic.js";
 import { Vaius } from "~/Client";
-import { Command, defineCommand } from "~/Commands";
+import { defineCommand } from "~/Commands";
 import Config from "~/config";
 import { ASSET_DIR, Bytes, Millis, PROD } from "~/constants";
 import { canReplyToMessage, reply } from "~/util/discord";
@@ -90,7 +90,7 @@ export async function generateContent(params: Omit<GenerateContentParameters, "m
     }
 }
 
-async function uploadAttachments(msg: Message, useFable = false) {
+async function uploadAttachments(msg: Message) {
     // Validate attachment sizes and types first
     for (const a of msg.attachments.values()) {
         if (a.size > 5 * Bytes.MB) {
@@ -99,10 +99,6 @@ async function uploadAttachments(msg: Message, useFable = false) {
 
         if (a.contentType && !supportedMimeTypes.has(a.contentType)) {
             return Err(`Attachment ${toInlineCode(a.filename)} has unsupported type ${toInlineCode(a.contentType)}.`);
-        }
-
-        if (useFable && !["image/png", "image/jpeg", "image/jpg", "image/gif", "image/webp"].includes(a.contentType ?? "")) {
-            return Err(`Attachment ${toInlineCode(a.filename)} is not supported by Fable. Only PNG, JPEG, GIF and WebP images are supported.`);
         }
     }
 
@@ -114,15 +110,6 @@ async function uploadAttachments(msg: Message, useFable = false) {
             if (!res.ok) {
                 errors.push(`Failed to fetch attachment ${toInlineCode(a.filename)}: ${toInlineCode(`${res.status} ${res.statusText}`)}`);
                 return null as never; // we early return so this will never be consumed
-            }
-
-            if (useFable) {
-                return {
-                    inlineData: {
-                        data: Buffer.from(await res.arrayBuffer()).toString("base64"),
-                        mimeType: a.contentType === "image/jpg" ? "image/jpeg" : a.contentType
-                    }
-                };
             }
 
             let upload = await ai.files.upload({
@@ -149,7 +136,6 @@ async function uploadAttachments(msg: Message, useFable = false) {
     }));
 
     if (errors.length) return Err(errors.join("\n"));
-    if (useFable) return Ok(files);
 
     // Extract and add YouTube videos from message content
     for (const youtubeMatch of msg.content.matchAll(youtubeVideoRegex)) {
@@ -165,7 +151,7 @@ async function uploadAttachments(msg: Message, useFable = false) {
     return Ok(files);
 }
 
-const geminiCommand = {
+defineCommand({
     enabled,
     name: "gemini",
     aliases: ["gem", "ai", "gen", "genai", "gemma"],
@@ -186,10 +172,9 @@ const geminiCommand = {
         silently(msg.channel.sendTyping());
 
         const useGemma = commandName === "gemma";
-        const useFable = commandName === "fable";
         const modelOverride = useGemma ? "gemma-4-31b-it" : undefined;
 
-        const files = await uploadAttachments(msg, useFable);
+        const files = await uploadAttachments(msg);
         if (!files.ok) {
             return reply(files.error);
         }
@@ -202,7 +187,7 @@ const geminiCommand = {
         ];
 
         if (msg.referencedMessage) {
-            const referencedFiles = await uploadAttachments(msg.referencedMessage, useFable);
+            const referencedFiles = await uploadAttachments(msg.referencedMessage);
             if (!referencedFiles.ok) {
                 return reply(referencedFiles.error);
             }
@@ -225,68 +210,31 @@ const geminiCommand = {
             .replace("{{VENCORD_CONTEXT}}", JSON.stringify(await fetchFaq()))
             .replace("{{EMOJI_LIST}}", JSON.stringify(msg.guild.emojis.map(e => `<${e.animated ? "a" : ""}:${e.name}:${e.id}>`)));
 
-        let text: string | undefined;
-        let model: string;
-        let blockReason: string | undefined;
-
-        if (useFable) {
-            model = "claude-fable-5";
-            const res = await fetch("https://api.anthropic.com/v1/messages", {
-                method: "POST",
-                headers: {
-                    "content-type": "application/json",
-                    "x-api-key": Config.anthropic.apiKey,
-                    "anthropic-version": "2023-06-01"
-                },
-                signal: AbortSignal.timeout(120 * Millis.SECOND),
-                body: JSON.stringify({
-                    model,
-                    max_tokens: 4000,
-                    output_config: { effort: "low" },
-                    system: systemPrompt,
-                    messages: contents.map(c => ({
-                        role: "user",
-                        content: c.parts!.map(p => p.inlineData
-                            ? { type: "image", source: { type: "base64", media_type: p.inlineData.mimeType, data: p.inlineData.data } }
-                            : { type: "text", text: p.text })
-                    }))
+        const { response, model } = await generateContent({
+            contents,
+            config: {
+                maxOutputTokens: 4000,
+                ...(!useGemma && {
+                    systemInstruction: systemPrompt,
+                    thinkingConfig: {
+                        thinkingBudget: -1
+                    }
                 })
-            });
-
-            if (!res.ok) throw new Error(`Anthropic API returned HTTP ${res.status}`);
-
-            const response = await res.json() as { content: { type: string; text?: string; }[]; stop_reason: string; };
-            text = response.content.filter(p => p.type === "text").map(p => p.text).join("").trim() || undefined;
-            if (response.stop_reason === "refusal") blockReason = "Fable declined this request.";
-        } else {
-            const result = await generateContent({
-                contents,
-                config: {
-                    maxOutputTokens: 4000,
-                    ...(!useGemma && {
-                        systemInstruction: systemPrompt,
-                        thinkingConfig: {
-                            thinkingBudget: -1
-                        }
-                    })
-                }
-            }, modelOverride);
-
-            model = result.model;
-            text = result.response.text;
-            if (result.response.promptFeedback?.blockReason !== undefined) {
-                blockReason = `Blocked because: ${result.response.promptFeedback.blockReasonMessage ?? result.response.promptFeedback.blockReason}`;
             }
-        }
+        }, modelOverride);
 
-        const disclaimer = text ? `\n\n-# Response generated by ${model}. AI may be incorrect or misleading.` : "";
-        text ??= blockReason ?? "Bro didn't say anything";
+        let { text } = response;
+        text ??= response.promptFeedback?.blockReason !== undefined
+            ? `Blocked because: ${response.promptFeedback.blockReasonMessage ?? response.promptFeedback.blockReason}`
+            : "Bro didn't say anything";
 
         // Prevent JS codeblocks in support category (Vencord adds Execute button)
         const supportCategoryId = "1108135649699180705";
         if (msg.channel.parentID === supportCategoryId) {
             text = text.replace(/```js\b/g, "```ts");
         }
+
+        const disclaimer = response.text ? `\n\n-# Response generated by ${model}. AI may be incorrect or misleading.` : "";
 
         const finalText = text.trim();
         if (finalText.length <= 2000 - disclaimer.length) {
@@ -301,15 +249,6 @@ const geminiCommand = {
             });
         }
     }
-} satisfies Command<true>;
-
-defineCommand(geminiCommand);
-defineCommand({
-    ...geminiCommand,
-    enabled: !!Config.anthropic?.apiKey,
-    name: "fable",
-    aliases: [],
-    description: "Chat with Claude Fable"
 });
 
 const isReset = (msg: Message) => msg.content.toLowerCase().startsWith("!reset");
