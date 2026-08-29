@@ -31,6 +31,8 @@ const Config = {
     },
 
     "roles": {
+        // anyone with this role can execute manager-only commands like xpadd
+        "manager": "1093506400853950525",
         // anyone with this role can execute moderation commands
         "mod": "1026509424686284924",
         // anyone with this role has limited access to moderation commands like mute

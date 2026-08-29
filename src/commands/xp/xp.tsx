@@ -47,7 +47,7 @@ defineCommand({
     description: "Add XP to a user",
     usage: "<user> <amount>",
     guildOnly: true,
-    allowedRoles: [Config.roles.mod],
+    allowedRoles: [Config.roles.manager],
     async execute({ reply, react }, userResolvable, amount) {
         const user = await resolveUser(userResolvable).catch(() => null);
         if (!user) return reply("Invalid user!");
@@ -66,7 +66,7 @@ defineCommand({
     description: "Reset a user's XP",
     usage: "<user>",
     guildOnly: true,
-    allowedRoles: [Config.roles.mod],
+    allowedRoles: [Config.roles.manager],
     async execute({ reply, react }, userResolvable) {
         const user = await resolveUser(userResolvable).catch(() => null);
         if (!user) return reply("Invalid user!");
