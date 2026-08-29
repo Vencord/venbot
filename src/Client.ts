@@ -59,7 +59,7 @@ Vaius.on("messageUpdate", (msg, oldMsg) => {
     handleMessage(msg, true);
 });
 
-const IntroRegex = /^(?:hi|hello|hey|sup|yo)? ?i['’ʼʹ´]?m (.{1,32}?)$/i;
+const IntroRegex = /^(?:hi|hello|hey|sup|yo)? ?(?:i['’ʼʹ´]?m|i am) (.{1,32}?)$/i;
 
 async function handleIntroduction(msg: Message) {
     if (msg.inCachedGuildChannel() && msg.content && IntroRegex.test(msg.content)) {
