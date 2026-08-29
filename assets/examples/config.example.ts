@@ -124,6 +124,11 @@ const Config = {
         ],
     },
 
+    // vfable command. Uses gemini's allowedRoles and bannedRoles. Leave apiKey empty to disable.
+    "anthropic": {
+        "apiKey": "", // Anthropic Platform API key
+    },
+
     // Wolfram Alpha command. Leave appId empty to disable.
     "wolfram": {
         "appId": "", // Short Answers API
