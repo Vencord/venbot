@@ -4,8 +4,8 @@ import Config from "~/config";
 import { Emoji } from "~/constants";
 import { db } from "~/db";
 import { getEmoji } from "~/modules/emojiManager";
+import { getLevelForXp, getRequiredXpForNextLevel, getXpForUser, setXpForUser } from "~/modules/xp";
 import { resolveUser } from "~/util/resolvers";
-import { getLevelForXp, getRequiredXpForNextLevel, getXpForUser, setXpForUser } from "~/util/xpMath";
 import { ComponentMessage, Container, Section, Separator, TextDisplay, Thumbnail } from "~components";
 
 async function buildXpEmbed(level: number, xp: number, requiredXp: number, targetUser: User, commandUser: User) {
@@ -31,7 +31,7 @@ defineCommand({
     usage: null,
     guildOnly: true,
     async execute({ msg, reply }, userResolvable) {
-        const user = await resolveUser(userResolvable).catch(() => null) || msg.author;
+        const user = await resolveUser(userResolvable) ?? msg.author;
 
         const userXp = await getXpForUser(user);
         const level = getLevelForXp(userXp.xp);
@@ -48,7 +48,7 @@ defineCommand({
     guildOnly: true,
     allowedRoles: [Config.roles.manager],
     async execute({ reply, react }, userResolvable, amount) {
-        const user = await resolveUser(userResolvable).catch(() => null);
+        const user = await resolveUser(userResolvable);
         if (!user) return reply("Invalid user!");
 
         const xpAmount = Number(amount);
@@ -67,7 +67,7 @@ defineCommand({
     guildOnly: true,
     allowedRoles: [Config.roles.manager],
     async execute({ reply, react }, userResolvable) {
-        const user = await resolveUser(userResolvable).catch(() => null);
+        const user = await resolveUser(userResolvable);
         if (!user) return reply("Invalid user!");
 
         await db.deleteFrom("userXpLevel")

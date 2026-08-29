@@ -1,7 +1,49 @@
-import type { Message } from "oceanic.js";
+import type { Message, User } from "oceanic.js";
 import { Vaius } from "~/Client";
 import Config from "~/config";
-import { getLevelForXp, getXpForMessage, setXpForUser } from "~/util/xpMath";
+import { db } from "~/db";
+
+export function getXpForLevel(level: number): number {
+    return Math.ceil((5 / 2) * (-1 + 20 * Math.pow(level, 2)));
+}
+
+export function getLevelForXp(xp: number): number {
+    return Math.floor(Math.sqrt(2 * xp + 5) / 10);
+}
+
+export function getRequiredXpForNextLevel(xp: number): number {
+    return getXpForLevel(getLevelForXp(xp) + 1);
+}
+
+export function getXpForMessage(message: Message) {
+    return Math.min(Math.ceil((message.content.length / 10) ** 2), 30);
+}
+
+export async function getXpForUser(user: User) {
+    return await db.selectFrom("userXpLevel")
+        .selectAll()
+        .where("userId", "=", user.id)
+        .executeTakeFirst() ?? { xp: 0 };
+}
+
+export async function setXpForUser(user: User, xp: number): Promise<number> {
+    const result = await db
+        .insertInto("userXpLevel")
+        .values({
+            userId: user.id,
+            xp,
+        })
+        .onConflict((oc) =>
+            oc.column("userId").doUpdateSet({
+                xp: (eb) => eb("userXpLevel.xp", "+", xp),
+            }),
+        )
+        .returning("xp")
+        .executeTakeFirstOrThrow();
+
+    return result.xp;
+}
+
 const cooldowns: Record<string, number> = {};
 
 async function updateXpForMessage(msg: Message): Promise<number> {
