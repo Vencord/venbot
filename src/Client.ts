@@ -65,7 +65,7 @@ const IntroCooldown = new Deduper(30 * Millis.MINUTE);
 async function handleIntroduction(msg: Message) {
     if (!msg.inCachedGuildChannel() || msg.channel.parentID === "1108135649699180705" /* support */) return;
 
-    if (msg.content && IntroRegex.test(msg.content) && !IntroCooldown.getOrAdd(msg.author.id)) {
+    if (msg.content && Math.random() > 0.9 && IntroRegex.test(msg.content) && !IntroCooldown.getOrAdd(msg.author.id)) {
         const [, name] = msg.content.match(IntroRegex)!;
         if (await silently(msg.member.edit({ nick: name }))) {
             reply(msg, { content: `Hi ${name}!` });
