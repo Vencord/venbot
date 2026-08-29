@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS userAvatarEmojis (
     avatarHash  TEXT NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS userXpLevel (
+CREATE TABLE IF NOT EXISTS xp (
     userId  TEXT PRIMARY KEY NOT NULL,
     xp      INTEGER NOT NULL
 );

@@ -20,7 +20,7 @@ export function getXpForMessage(message: Message) {
 }
 
 export async function getXpForUser(user: User) {
-    return await db.selectFrom("userXpLevel")
+    return await db.selectFrom("xp")
         .selectAll()
         .where("userId", "=", user.id)
         .executeTakeFirst() ?? { xp: 0 };
@@ -28,14 +28,14 @@ export async function getXpForUser(user: User) {
 
 export async function setXpForUser(user: User, xp: number): Promise<number> {
     const result = await db
-        .insertInto("userXpLevel")
+        .insertInto("xp")
         .values({
             userId: user.id,
             xp,
         })
         .onConflict((oc) =>
             oc.column("userId").doUpdateSet({
-                xp: (eb) => eb("userXpLevel.xp", "+", xp),
+                xp: (eb) => eb("xp.xp", "+", xp),
             }),
         )
         .returning("xp")
