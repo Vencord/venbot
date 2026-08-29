@@ -39,8 +39,8 @@ const Config = {
         "donor": "1042507929485586532",
         // used for github linking and some other things
         "contributor": "1026534353167208489",
-        // used for cotd
-        "regular": "1543060346317836310",
+        // used for regular cotd
+        "regular": "1026504932959977532",
 
         // roles that can be added or removed using the role management commands.
         // always includes roles.donor, roles.regular, and roles.contributor
