@@ -10,12 +10,12 @@ async function buildXpEmbed(level: number, xp: number, requiredXp: number, targe
         <ComponentMessage>
             <Container>
                 <Section accessory={<Thumbnail url={targetUser.avatarURL(undefined, 128)} />}>
-                    <TextDisplay>## Level Statistics</TextDisplay>
-                    <TextDisplay>` level `   {level}</TextDisplay>
-                    <TextDisplay>` xp    `   {xp} / {requiredXp}</TextDisplay>
+                    <TextDisplay>## User XP </TextDisplay>
+                    <TextDisplay>**` Level `**   {level}</TextDisplay>
+                    <TextDisplay>**` XP    `**   {xp.toLocaleString()} / {requiredXp.toLocaleString()}</TextDisplay>
                 </Section>
                 <Separator spacing={SeparatorSpacingSize.LARGE} />
-                <TextDisplay>{getEmoji("vennie")} {targetUser.id === commandUser.id ? "You" : targetUser.username} will need `{requiredXp - xp}` more XP to level up!</TextDisplay>
+                <TextDisplay>-# {getEmoji("vennie")} {targetUser.id === commandUser.id ? "You" : targetUser.username} will need `{(requiredXp - xp).toLocaleString()}` more XP to level up!</TextDisplay>
             </Container>
         </ComponentMessage>
     );
