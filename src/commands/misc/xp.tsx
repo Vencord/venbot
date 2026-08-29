@@ -1,10 +1,7 @@
 import { SeparatorSpacingSize, User } from "oceanic.js";
 import { defineCommand } from "~/Commands";
-import Config from "~/config";
-import { Emoji } from "~/constants";
-import { db } from "~/db";
 import { getEmoji } from "~/modules/emojiManager";
-import { getLevelForXp, getRequiredXpForNextLevel, getXpForUser, setXpForUser } from "~/modules/xp";
+import { getLevelForXp, getRequiredXpForNextLevel, getXpForUser } from "~/modules/xp";
 import { resolveUser } from "~/util/resolvers";
 import { ComponentMessage, Container, Section, Separator, TextDisplay, Thumbnail } from "~components";
 
@@ -38,42 +35,5 @@ defineCommand({
         const requiredXp = getRequiredXpForNextLevel(userXp.xp);
 
         return reply(await buildXpEmbed(level, userXp.xp, requiredXp, user, msg.author));
-    },
-});
-
-defineCommand({
-    name: "xp-add",
-    description: "Add XP to a user",
-    usage: "<user> <amount>",
-    guildOnly: true,
-    allowedRoles: [Config.roles.manager],
-    async execute({ reply, react }, userResolvable, amount) {
-        const user = await resolveUser(userResolvable);
-        if (!user) return reply("Invalid user!");
-
-        const xpAmount = Number(amount);
-        if (isNaN(xpAmount) || xpAmount <= 0) return reply("Invalid amount!");
-
-        await setXpForUser(user, xpAmount);
-
-        return void react(Emoji.CheckMark);
-    },
-});
-
-defineCommand({
-    name: "xp-reset",
-    description: "Reset a user's XP",
-    usage: "<user>",
-    guildOnly: true,
-    allowedRoles: [Config.roles.manager],
-    async execute({ reply, react }, userResolvable) {
-        const user = await resolveUser(userResolvable);
-        if (!user) return reply("Invalid user!");
-
-        await db.deleteFrom("userXpLevel")
-            .where("userId", "=", user.id)
-            .execute();
-
-        return void react(Emoji.CheckMark);
     },
 });

@@ -31,8 +31,6 @@ const Config = {
     },
 
     "roles": {
-        // anyone with this role can execute manager-only commands like xpadd
-        "manager": "1093506400853950525",
         // anyone with this role can execute moderation commands
         "mod": "1026509424686284924",
         // anyone with this role has limited access to moderation commands like mute
@@ -91,12 +89,11 @@ const Config = {
         ]
     },
 
-    // xp
     "xp": {
-        // categories where xp is allowed
         "eligibleCategories": [
             "1015060231060983889", // chat
             "1216095839848501338", // vencord development
+            "1108135649699180705" // support
         ],
         "rewards": {
             5: "1136687385434918992", // image sender
