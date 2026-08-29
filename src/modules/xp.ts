@@ -28,7 +28,7 @@ export async function getXpForUser(user: User) {
         .executeTakeFirst() ?? { xp: 0 };
 }
 
-export async function setXpForUser(user: User, xp: number): Promise<number> {
+export async function addXpForUser(user: User, xp: number): Promise<number> {
     const result = await db
         .insertInto("xp")
         .values({
@@ -50,7 +50,7 @@ const cooldowns = new Deduper(1 * Millis.MINUTE);
 
 async function updateXpForMessage(msg: Message): Promise<number> {
     const gainedXp = getXpForMessage(msg);
-    const currentXp = await setXpForUser(msg.author, gainedXp);
+    const currentXp = await addXpForUser(msg.author, gainedXp);
     const xpLevel = getLevelForXp(currentXp);
     return xpLevel;
 }
