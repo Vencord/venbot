@@ -34,7 +34,7 @@ defineCommand({
     async execute({ msg, reply }, userResolvable) {
         const user = await resolveUser(userResolvable).catch(() => null) || msg.author;
 
-        const userXp = await getXpForUser(user.id);
+        const userXp = await getXpForUser(user);
         const level = getLevelForXp(userXp.xp);
         const requiredXp = getRequiredXpForNextLevel(userXp.xp);
 
@@ -55,7 +55,7 @@ defineCommand({
         const xpAmount = Number(amount);
         if (isNaN(xpAmount) || xpAmount <= 0) return reply("Invalid amount!");
 
-        await setXpForUser(user.id, xpAmount);
+        await setXpForUser(user, xpAmount);
 
         return void react(Emoji.CheckMark);
     },

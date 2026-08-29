@@ -1,4 +1,4 @@
-import { Message } from "oceanic.js";
+import { Message, User } from "oceanic.js";
 import { db } from "~/db";
 
 export function getXpForLevel(level: number): number {
@@ -17,19 +17,19 @@ export function getXpForMessage(message: Message) {
     return Math.min(Math.ceil((message.content.length / 10) ** 2), 30);
 }
 
-export async function getXpForUser(userId: string) {
+export async function getXpForUser(user: User) {
     return await db.selectFrom("userXpLevel")
         .selectAll()
-        .where("userId", "=", userId)
+        .where("userId", "=", user.id)
         .executeTakeFirst() ?? { xp: 0 };
 }
 
-export async function setXpForUser(userId: string, xp: number): Promise<number> {
-    const currentXp = await getXpForUser(userId);
+export async function setXpForUser(user: User, xp: number): Promise<number> {
+    const currentXp = await getXpForUser(user);
     const newXp = currentXp.xp + xp;
 
     await db.insertInto("userXpLevel")
-        .values({ userId, xp: newXp })
+        .values({ userId: user.id, xp: newXp })
         .onConflict(oc => oc.column("userId").doUpdateSet({ xp: newXp }))
         .execute();
 

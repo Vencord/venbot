@@ -6,7 +6,7 @@ const cooldowns: Record<string, number> = {};
 
 async function updateXpForMessage(msg: Message): Promise<number> {
     const gainedXp = getXpForMessage(msg);
-    const currentXp = await setXpForUser(msg.author.id, gainedXp);
+    const currentXp = await setXpForUser(msg.author, gainedXp);
     const xpLevel = getLevelForXp(currentXp);
     return xpLevel;
 }
