@@ -3,11 +3,10 @@ import { defineCommand } from "~/Commands";
 import Config from "~/config";
 import { Emoji } from "~/constants";
 import { db } from "~/db";
+import { getEmoji } from "~/modules/emojiManager";
 import { resolveUser } from "~/util/resolvers";
 import { getLevelForXp, getRequiredXpForNextLevel, getXpForUser, setXpForUser } from "~/util/xpMath";
 import { ComponentMessage, Container, Section, Separator, TextDisplay, Thumbnail } from "~components";
-
-const vennieCatCozy = "<:venniecozycat:1216803437162004561>";
 
 async function buildXpEmbed(level: number, xp: number, requiredXp: number, targetUser: User, commandUser: User) {
     return (
@@ -19,7 +18,7 @@ async function buildXpEmbed(level: number, xp: number, requiredXp: number, targe
                     <TextDisplay>` xp    `   {xp} / {requiredXp}</TextDisplay>
                 </Section>
                 <Separator spacing={SeparatorSpacingSize.LARGE} />
-                <TextDisplay>{vennieCatCozy} {targetUser.id === commandUser.id ? "You" : targetUser.username} will need `{requiredXp - xp}` more XP to level up!</TextDisplay>
+                <TextDisplay>{getEmoji("vennie")} {targetUser.id === commandUser.id ? "You" : targetUser.username} will need `{requiredXp - xp}` more XP to level up!</TextDisplay>
             </Container>
         </ComponentMessage>
     );
