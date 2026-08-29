@@ -99,8 +99,7 @@ const Config = {
             "1216095839848501338", // vencord development
         ],
         "rewards": {
-            10: "1136687385434918992", // image sender
-            30: "1543060346317836310" // cozy of the day
+            5: "1136687385434918992", // image sender
         }
     },
 
