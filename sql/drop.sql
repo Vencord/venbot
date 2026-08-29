@@ -4,3 +4,4 @@ DROP TABLE IF EXISTS expressionUses;
 DROP TABLE IF EXISTS stickyRoles;
 DROP TABLE IF EXISTS linkedGitHubs;
 DROP TABLE IF EXISTS userAvatarEmojis;
+DROP INDEX IF EXISTS userXpLevel;

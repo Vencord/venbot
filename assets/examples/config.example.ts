@@ -39,8 +39,8 @@ const Config = {
         "donor": "1042507929485586532",
         // used for github linking and some other things
         "contributor": "1026534353167208489",
-        // used for regular cotd
-        "regular": "1026504932959977532",
+        // used for cotd
+        "regular": "1543060346317836310",
 
         // roles that can be added or removed using the role management commands.
         // always includes roles.donor, roles.regular, and roles.contributor
@@ -87,6 +87,19 @@ const Config = {
             "603970300668805120", // discord previews
             "1368145952266911755", // kettu / rain
         ]
+    },
+
+    // xp
+    "xp": {
+        // categories where xp is allowed
+        "eligibleCategories": [
+            "1015060231060983889", // chat
+            "1216095839848501338", // vencord development
+        ],
+        "rewards": {
+            10: "1136687385434918992", // image sender
+            30: "1543060346317836310" // cozy of the day
+        }
     },
 
     // rule command
