@@ -11,7 +11,7 @@ async function buildXpEmbed(level: number, xp: number, requiredXp: number, targe
             <Container>
                 <Section accessory={<Thumbnail url={targetUser.avatarURL(undefined, 128)} />}>
                     <TextDisplay>## User XP </TextDisplay>
-                    <TextDisplay>**` Level `**   {level}</TextDisplay>
+                    <TextDisplay>**` Level `**   {level} {level === 67 ? "<a:Mika67:1499544593182490777>" : ""}</TextDisplay>
                     <TextDisplay>**` XP    `**   {xp.toLocaleString()} / {requiredXp.toLocaleString()}</TextDisplay>
                 </Section>
                 <Separator spacing={SeparatorSpacingSize.LARGE} />
