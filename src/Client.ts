@@ -62,7 +62,9 @@ Vaius.on("messageUpdate", (msg, oldMsg) => {
 const IntroRegex = /^(?:hi|hello|hey|sup|yo)? ?(?:i['’ʼʹ´]?m|i am) (.{1,32}?)$/i;
 
 async function handleIntroduction(msg: Message) {
-    if (msg.inCachedGuildChannel() && msg.content && IntroRegex.test(msg.content)) {
+    if (!msg.inCachedGuildChannel() || msg.channel.parentID === "1108135649699180705" /* support */) return;
+
+    if (msg.content && IntroRegex.test(msg.content)) {
         const [, name] = msg.content.match(IntroRegex)!;
         if (await silently(msg.member.edit({ nick: name }))) {
             reply(msg, { content: `Hi ${name}!` });
