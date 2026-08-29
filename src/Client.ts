@@ -8,6 +8,7 @@ import { BotState } from "./db/botState";
 import { emojiCacheReady, ensureEmojis, getEmojiForReaction } from "./modules/emojiManager";
 import { moderateMessage } from "./modules/moderation";
 import { lobotomiseMaybe } from "./modules/moderation/lobotomy";
+import { Deduper } from "./util/Deduper";
 import { reply } from "./util/discord";
 import { silently } from "./util/functions";
 
@@ -60,11 +61,11 @@ Vaius.on("messageUpdate", (msg, oldMsg) => {
 });
 
 const IntroRegex = /^(?:hi|hello|hey|sup|yo)? ?(?:i['’ʼʹ´]?m|i am) (.{1,32}?)$/i;
-
+const IntroCooldown = new Deduper(30 * Millis.MINUTE);
 async function handleIntroduction(msg: Message) {
     if (!msg.inCachedGuildChannel() || msg.channel.parentID === "1108135649699180705" /* support */) return;
 
-    if (msg.content && IntroRegex.test(msg.content)) {
+    if (msg.content && IntroRegex.test(msg.content) && !IntroCooldown.getOrAdd(msg.author.id)) {
         const [, name] = msg.content.match(IntroRegex)!;
         if (await silently(msg.member.edit({ nick: name }))) {
             reply(msg, { content: `Hi ${name}!` });
