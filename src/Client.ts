@@ -59,10 +59,23 @@ Vaius.on("messageUpdate", (msg, oldMsg) => {
     handleMessage(msg, true);
 });
 
+const IntroRegex = /^(?:hi|hello|hey|sup|yo)? ?i['’ʼʹ´]?m (.{1,32}?)$/i;
+
+async function handleIntroduction(msg: Message) {
+    if (msg.inCachedGuildChannel() && msg.content && IntroRegex.test(msg.content)) {
+        const [, name] = msg.content.match(IntroRegex)!;
+        if (await silently(msg.member.edit({ nick: name }))) {
+            reply(msg, { content: `Hi ${name}!` });
+        }
+    }
+}
+
 async function handleMessage(msg: Message, isEdit: boolean) {
     if (msg.inCachedGuildChannel() && await lobotomiseMaybe(msg)) return;
     if (msg.author.bot && msg.author.id !== GEN_AI_ID) return;
+
     moderateMessage(msg, isEdit);
+    handleIntroduction(msg);
 
     await emojiCacheReady;
 
