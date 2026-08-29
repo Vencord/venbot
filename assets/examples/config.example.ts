@@ -89,6 +89,17 @@ const Config = {
         ]
     },
 
+    "xp": {
+        "eligibleCategories": [
+            "1015060231060983889", // chat
+            "1216095839848501338", // vencord development
+            "1108135649699180705" // support
+        ],
+        "rewards": {
+            5: "1136687385434918992", // image sender
+        }
+    },
+
     // rule command
     "rules": {
         "enabled": true,

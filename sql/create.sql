@@ -38,4 +38,9 @@ CREATE TABLE IF NOT EXISTS userAvatarEmojis (
     userId      TEXT NOT NULL PRIMARY KEY,
     emojiId     TEXT NOT NULL,
     avatarHash  TEXT NOT NULL
-)
+);
+
+CREATE TABLE IF NOT EXISTS xp (
+    userId  TEXT PRIMARY KEY NOT NULL,
+    xp      INTEGER NOT NULL
+);
