@@ -12,6 +12,7 @@ const ignoreRoles = new Set([
     "1017523851342663783", // Server Booster
     "1093506400853950525", // manager
     "1026509424686284924", // mod perms
+    "1244313853357981787", // support perms
 ]);
 
 const shouldIgnoreRole = (roleId: string, guild: Guild) => ignoreRoles.has(roleId) || !!guild.roles.get(roleId)?.managed;
@@ -26,7 +27,12 @@ Vaius.on("guildMemberAdd", async member => {
         .executeTakeFirst();
 
     if (!sticky) return;
-    await member.edit({ roles: sticky.roleIds.split(","), reason: "Sticky Roles" });
+
+    const roles = sticky.roleIds
+        .split(",")
+        .filter(roleId => !shouldIgnoreRole(roleId, member.guild));
+
+    await member.edit({ roles, reason: "Sticky Roles" });
 });
 
 Vaius.on("guildAuditLogEntryCreate", async (maybeUncachedGuild, entry) => {
