@@ -57,20 +57,20 @@ async function getDiscordStatusIncidents(): Promise<DiscordIncidentsResponse | n
         .catch(e => handleError("Error fetching Discord incidents:", e));
 }
 
-async function buildStatusEmbed(components: DiscordComponentsResponse, incidents: DiscordIncidentsResponse) {
+async function buildStatusEmbed(components: DiscordComponentsResponse, { incidents }: DiscordIncidentsResponse) {
     const systemStatus = components.components
         .filter(c => c.status !== "operational")
-        .map(c => `### ${getStatusEmoji(c.status)} ${snakeToTitle(c.status)}`)
+        .map(c => `### ${getStatusEmoji(c.status)} ${c.name}: ${snakeToTitle(c.status)}`)
         .join("\n") || `### ${getStatusEmoji("operational")} All Systems Operational`;
 
-    const systemOutages = incidents.incidents
+    const formattedIncidents = incidents
         .filter(i => i.status !== "resolved")
         .slice(0, 1)
         .map(i => {
             const updates = [...i.incident_updates]
                 .reverse()
                 .map(update =>
-                    `**${toTitle(update.status)}** - ${update.body}\n<t:${Math.floor(new Date(update.created_at).getTime() / 1000)}:f>`
+                    `<t:${Math.floor(new Date(update.created_at).getTime() / 1000)}:R> **${toTitle(update.status)}** - ${update.body}`
                 )
                 .join("\n\n");
 
@@ -84,14 +84,14 @@ async function buildStatusEmbed(components: DiscordComponentsResponse, incidents
                 <TextDisplay>## {getEmoji("discord_logo")} [Discord Status](https://discordstatus.com)</TextDisplay>
                 <Separator spacing={SeparatorSpacingSize.SMALL} divider={false} />
                 <TextDisplay>{systemStatus}</TextDisplay>
-
-                {systemOutages && (
-                    <>
-                        <Separator spacing={SeparatorSpacingSize.LARGE} />
-                        <TextDisplay>{systemOutages}</TextDisplay>
-                    </>
-                )}
             </Container>
+            {formattedIncidents && (
+                <Container>
+                    <TextDisplay>## Incidents</TextDisplay>
+                    <Separator spacing={SeparatorSpacingSize.SMALL} divider={false} />
+                    <TextDisplay>{formattedIncidents}</TextDisplay>
+                </Container>
+            )}
         </ComponentMessage>
     );
 }
