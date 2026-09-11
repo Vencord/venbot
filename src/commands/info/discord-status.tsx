@@ -81,7 +81,8 @@ async function buildStatusEmbed(components: DiscordComponentsResponse, incidents
     return (
         <ComponentMessage>
             <Container>
-                <TextDisplay># {getEmoji("discord_logo")} Discord Status</TextDisplay>
+                <TextDisplay>## {getEmoji("discord_logo")} [Discord Status](https://discordstatus.com)</TextDisplay>
+                <Separator spacing={SeparatorSpacingSize.SMALL} divider={false} />
                 <TextDisplay>{systemStatus}</TextDisplay>
 
                 {systemOutages && (
@@ -90,9 +91,6 @@ async function buildStatusEmbed(components: DiscordComponentsResponse, incidents
                         <TextDisplay>{systemOutages}</TextDisplay>
                     </>
                 )}
-
-                <Separator spacing={SeparatorSpacingSize.LARGE} />
-                <TextDisplay>-# Powered by [Discord Status](https://discordstatus.com/)</TextDisplay>
             </Container>
         </ComponentMessage>
     );
