@@ -4,7 +4,7 @@ import { handleError } from "~/index";
 import { getEmoji } from "~/modules/emojiManager";
 import { fetchJson } from "~/util/fetch";
 import { makeConstants } from "~/util/objects";
-import { toInlineCode, toTitle } from "~/util/text";
+import { snakeToTitle, toInlineCode, toTitle } from "~/util/text";
 import { ComponentMessage, Container, Separator, TextDisplay } from "~components";
 
 const StatusEmoji = makeConstants({
@@ -60,7 +60,7 @@ async function getDiscordStatusIncidents(): Promise<DiscordIncidentsResponse | n
 async function buildStatusEmbed(components: DiscordComponentsResponse, incidents: DiscordIncidentsResponse) {
     const systemStatus = components.components
         .filter(c => c.status !== "operational")
-        .map(c => `### ${getStatusEmoji(c.status)} ${toTitle(c.status)}`)
+        .map(c => `### ${getStatusEmoji(c.status)} ${snakeToTitle(c.status)}`)
         .join("\n") || `### ${getStatusEmoji("operational")} All Systems Operational`;
 
     const systemOutages = incidents.incidents
