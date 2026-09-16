@@ -7,6 +7,10 @@ export class Deduper<T> extends Set<T> {
 
     public add(key: T) {
         if (this.expiryMs) {
+            if (this._timers.has(key)) {
+                clearTimeout(this._timers.get(key));
+            }
+
             const timeoutId = setTimeout(() => this.delete(key), this.expiryMs);
             this._timers.set(key, timeoutId);
         }
