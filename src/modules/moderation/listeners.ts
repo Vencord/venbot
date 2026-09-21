@@ -14,6 +14,7 @@ export function initModListeners() {
         if (data.action.type !== AutoModerationActionTypes.SEND_ALERT_MESSAGE) return;
 
         if (data.content.includes("s.undfe.com")) {
+            logAutoModAction(`Banned <@${user.id}> for posting a malware link.`);
             return await Vaius.rest.guilds.createBan(guild.id, user.id, {
                 reason: "malware",
                 deleteMessageDays: 1
