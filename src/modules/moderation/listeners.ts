@@ -13,6 +13,13 @@ export function initModListeners() {
     Vaius.on("autoModerationActionExecution", async (guild, channel, user, data) => {
         if (data.action.type !== AutoModerationActionTypes.SEND_ALERT_MESSAGE) return;
 
+        if (data.content.includes("s.undfe.com")) {
+            return await Vaius.rest.guilds.createBan(guild.id, user.id, {
+                reason: "malware",
+                deleteMessageDays: 1
+            });
+        }
+
         const includesPing = ["@everyone", "@here"].some(s => data.content.includes(s));
         const includesInvite = ["discord.gg/", "discord.com/invite", "discordapp.com/invite"].some(s => data.content.includes(s));
 
