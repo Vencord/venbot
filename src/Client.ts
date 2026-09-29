@@ -6,6 +6,7 @@ import Config from "./config";
 import { Emoji, Millis } from "./constants";
 import { BotState } from "./db/botState";
 import { emojiCacheReady, ensureEmojis, getEmojiForReaction } from "./modules/emojiManager";
+import { handleGithubLines } from "./modules/githubLines";
 import { moderateMessage } from "./modules/moderation";
 import { lobotomiseMaybe } from "./modules/moderation/lobotomy";
 import { Deduper } from "./util/Deduper";
@@ -79,6 +80,7 @@ async function handleMessage(msg: Message, isEdit: boolean) {
 
     moderateMessage(msg, isEdit);
     handleIntroduction(msg);
+    handleGithubLines(msg);
 
     await emojiCacheReady;
 

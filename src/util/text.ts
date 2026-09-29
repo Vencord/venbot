@@ -7,13 +7,15 @@ export function pluralise(amount: number, singular: string, plural = singular + 
 }
 
 export function stripIndent(strings: TemplateStringsArray, ...values: any[]) {
-    const string = String.raw({ raw: strings }, ...values);
+    return stripIndentString(String.raw({ raw: strings }, ...values));
+}
 
-    const match = string.match(/^[ \t]*(?=\S)/gm);
-    if (!match) return string.trim();
+export function stripIndentString(s: string) {
+    const match = s.match(/^[ \t]*(?=\S)/gm);
+    if (!match) return s.trim();
 
     const minIndent = match.reduce((r, a) => Math.min(r, a.length), Infinity);
-    return string.replace(new RegExp(`^[ \\t]{${minIndent}}`, "gm"), "").trim();
+    return s.replace(new RegExp(`^[ \\t]{${minIndent}}`, "gm"), "").trim();
 }
 
 export function indent(s: string, indent: string | number = 4) {
