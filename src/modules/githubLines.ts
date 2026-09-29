@@ -6,7 +6,7 @@ import { silently } from "~/util/functions";
 import { isTruthy } from "~/util/guards";
 import { stripIndentString, toCodeblock } from "~/util/text";
 
-const GITHUB_LINK_REGEX = /https?:\/\/github\.com\/([^\s/]+)\/([^\s/#?]+)\/blob\/([^\s/#?]+)\/([^\s#?]+)#L(\d+)(?:-L?(\d+))?/gi;
+const GITHUB_LINK_REGEX = /(?<!<)https?:\/\/github\.com\/([^\s/]+)\/([^\s/#?]+)\/blob\/([^\s/#?]+)\/([^\s#?]+)#L(\d+)(?:-L?(\d+))?/gi;
 
 function findGithubLineLinks(input: string) {
     return input.matchAll(GITHUB_LINK_REGEX)
