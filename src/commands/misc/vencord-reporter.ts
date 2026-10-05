@@ -48,7 +48,7 @@ defineCommand({
             }
         ).then(
             () => reply(msg, "Now testing! " + getEmoji("shipit")),
-            err => reply(msg, "### Something went wrong\n" + toCodeblock(String(err)))
+            err => reply(msg, "### Something went wrong\n" + toCodeblock(String(err.cause ?? err)))
         );
     },
 });

@@ -13,7 +13,7 @@ type Url = string | URL;
 export class FetchError extends Error {
     name = this.constructor.name;
 
-    constructor(message: string, public readonly code: number, public readonly response: Response) {
+    constructor(message: string, public readonly cause: string | null, public readonly code: number, public readonly response: Response) {
         super(message);
     }
 }
@@ -44,12 +44,13 @@ export async function doFetch(
         return res;
 
     let message = `${init?.method ?? "GET"} ${url}: ${res.status} ${res.statusText}`;
+    let cause: string | null = null;
     try {
-        const reason = await res.text();
-        message += `\n${reason.slice(0, 500)}`;
+        cause = await res.text();
+        message += `\n${cause.slice(0, 500)}`;
     } catch { }
 
-    throw new FetchError(message, res.status, res);
+    throw new FetchError(message, cause, res.status, res);
 }
 
 export async function fetchBuffer(url: Url, init?: RequestInit) {
