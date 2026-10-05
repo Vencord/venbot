@@ -7,6 +7,7 @@ import { Millis } from "~/constants";
 import { BotState } from "~/db/botState";
 import { fastify } from "~/server";
 import { doFetch } from "~/util/fetch";
+import { silently } from "~/util/functions";
 import { TTLMap } from "~/util/TTLMap";
 
 type Branch = "both" | "stable" | "canary";
@@ -186,7 +187,9 @@ async function handleReportSubmit(report: ReportData, data: any) {
     data.embeds[0].description = `Last updated: <t:${Math.round(Date.now() / 1000)}>`;
 
     const messageId = report.branch === "canary" ? canaryMessageId : stableMessageId;
-    Vaius.rest.channels.editMessage(statusChannelId, messageId, data);
+
+    await silently(Vaius.rest.channels.edit(statusChannelId, { archived: false }));
+    await Vaius.rest.channels.editMessage(statusChannelId, messageId, data);
 }
 
 const schema = {

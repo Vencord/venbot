@@ -5,6 +5,7 @@ import { DefaultReporterBranch, ReporterOptions, testDiscordVersion } from "~/mo
 import { getEmoji } from "~/modules/emojiManager";
 import { reply } from "~/util/discord";
 import { isOneOf } from "~/util/guards";
+import { toCodeblock } from "~/util/text";
 
 const PrRegex = /#(\d+)/;
 
@@ -31,7 +32,7 @@ defineCommand({
             options.inputRef = `refs/pull/${prNumber}/head`;
         }
 
-        testDiscordVersion(
+        await testDiscordVersion(
             branch,
             {
                 stable: BotState.discordTracker?.stableHash!,
@@ -45,8 +46,9 @@ defineCommand({
                     reply(msg, data);
                 }
             }
+        ).then(
+            () => reply(msg, "Now testing! " + getEmoji("shipit")),
+            err => reply(msg, "### Something went wrong\n" + toCodeblock(String(err)))
         );
-
-        reply(msg, "Now testing! " + getEmoji("shipit"));
     },
 });
