@@ -7,25 +7,23 @@ const getIntlMap = makeCachedJsonFetch<Record<string, string>>("https://sadan.zi
 
 defineCommand({
     name: "intl",
-    description: "Look up the name of a Discord intl message hash",
-    usage: "<hash>",
-    async execute({ reply }, hash) {
+    aliases: ["hash"],
+    description: "Look up or hash an Intl key. Works both ways",
+    usage: "<hash or key>",
+    async execute({ reply, commandName }, value) {
+        if (!value) return;
+
         const map = await getIntlMap();
-        return reply(map[hash] ?? "Nothing found :(");
+
+        if (map[value])
+            return reply(map[value]);
+
+        if (value.length !== 6 || /^[A-Z0-9_]$/.test(value) || commandName === "hash")
+            return reply(runtimeHashMessageKey(value));
+
+        return reply("Nothing found :(");
     }
 });
-
-defineCommand({
-    name: "hash",
-    description: "Look up the hash of a Discord intl message name",
-    usage: "<name>",
-    async execute({ reply }, name) {
-        if (!name) return reply("Please provide a name to hash.");
-
-        reply(runtimeHashMessageKey(name));
-    }
-});
-
 
 /**
  * discord-intl
