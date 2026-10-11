@@ -46,7 +46,16 @@ const supportedMimeTypes = new Set([
     "audio/flac"
 ]);
 
-export const ai = new GoogleGenAI({ apiKey });
+export const ai = new GoogleGenAI({
+    apiKey,
+    // httpOptions: {
+    //     baseUrl: Config.googleProxy.url,
+    //     headers: {
+    //         "Secret": Config.googleProxy.secret,
+    //         "Proxy-Type": "gemini"
+    //     }
+    // }
+});
 
 const getSystemPrompt = makeLazy(() => readFile(join(ASSET_DIR, "gemini-system-prompt.txt"), "utf-8"));
 
