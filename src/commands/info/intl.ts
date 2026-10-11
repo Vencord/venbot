@@ -18,7 +18,7 @@ defineCommand({
         if (map[value])
             return reply(map[value]);
 
-        if (value.length !== 6 || /^[A-Z0-9_]$/.test(value) || commandName === "hash")
+        if (value.length !== 6 || /^[A-Z0-9_]+$/.test(value) || commandName === "hash")
             return reply(runtimeHashMessageKey(value));
 
         return reply("Nothing found :(");
