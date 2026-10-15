@@ -255,7 +255,7 @@ const handler: CommandInteractionHandler = {
 
         if (subCommand === "add-bulk") {
             const text = data.options.getString("text", true);
-            const optimize = data.options.getBoolean("optimize") ?? false;
+            const optimize = data.options.getBoolean("optimize") ?? true;
 
             i.defer(MessageFlags.EPHEMERAL);
 
@@ -332,7 +332,6 @@ const handler: CommandInteractionHandler = {
         let tooltip = data.options.getString("tooltip");
         const image = data.options.getAttachment("image");
         const imageUrl = data.options.getString("image-url");
-        const optimize = data.options.getBoolean("optimize") ?? false;
 
         let url = image?.url ?? imageUrl;
         url &&= normaliseCdnUrl(url);
@@ -348,6 +347,8 @@ const handler: CommandInteractionHandler = {
             url ??= existing.badge;
             tooltip ??= existing.tooltip;
         }
+
+        const optimize = data.options.getBoolean("optimize") ?? !url.includes(".svg");
 
         i.defer(MessageFlags.EPHEMERAL);
 
