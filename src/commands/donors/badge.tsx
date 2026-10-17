@@ -120,7 +120,7 @@ const handler: CommandInteractionHandler = {
         const { data } = i;
         const guild = i.guild ?? getHomeGuild();
 
-        if (subCommand === "add") {
+        if (subCommand === "copy") {
             const oldUser = data.options.getUser("old-user", true);
             const newUser = data.options.getUser("new-user", true);
 

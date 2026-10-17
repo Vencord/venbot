@@ -29,7 +29,7 @@ Vaius.once("ready", async () => {
     ensureEmojis();
 
     Vaius.rest.oauth.getApplication().then(app => {
-        OwnerId = app.ownerID;
+        OwnerId = app.team?.ownerID ?? app.ownerID;
     });
 
     console.log("hi");
