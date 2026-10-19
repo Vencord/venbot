@@ -38,11 +38,13 @@ export async function ocrMessage(msg: Message) {
         return;
     }
 
+    const isMod = msg.member.permissions.has("MANAGE_MESSAGES") || msg.member.roles.includes(Config.roles.helper);
+
     // Screenshots of auto-mod blocks (auto-mod bypass)
-    if (results.some(r => r.text.includes("This content is blocked by this server"))) {
+    if (!isMod && results.some(r => r.text.includes("This content is blocked by this server"))) {
         silently(msg.delete());
         silently(responseMessage?.delete());
-        silently(msg.member.edit({ communicationDisabledUntil: until(30 * Millis.MINUTE) }));
+        silently(msg.member.edit({ communicationDisabledUntil: until(30 * Millis.MINUTE), reason: "Auto-mod block bypass" }));
         return;
     }
 
