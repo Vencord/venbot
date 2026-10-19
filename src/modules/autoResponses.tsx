@@ -6,6 +6,7 @@ import { AutoResponseContentType, db } from "~/db";
 import { handleInteraction, registerChatInputCommand } from "~/SlashCommands";
 import { reply } from "~/util/discord";
 import { fetchJson } from "~/util/fetch";
+import { toCodeblock } from "~/util/text";
 import { ChannelSelect, ModalLabel, StringOption, StringSelect, TextInput } from "~components";
 
 interface AutoResponse {
@@ -19,7 +20,16 @@ interface AutoResponse {
 const AutoResponseImportSchema = v.array(
     v.object({
         name: v.string(),
-        match: v.pipe(v.string(), v.transform(s => new RegExp(s, "i"))),
+        match: v.pipe(v.string(), v.rawTransform(({ addIssue, dataset, NEVER }) => {
+            try {
+                return new RegExp(dataset.value, "i");
+            } catch {
+                addIssue({
+                    message: "Invalid regular expression: " + dataset.value
+                });
+                return NEVER;
+            }
+        })),
         response: v.string(),
         contentTypes: v.enum(AutoResponseContentType),
         channelIds: v.array(v.string())
@@ -109,7 +119,7 @@ registerChatInputCommand({
         {
             type: ApplicationCommandOptionTypes.SUB_COMMAND,
             name: "import",
-            description: "Import auto-responses from JSON. This can overwrite existing auto-responses. Use export first to create a backup",
+            description: "Import auto-responses from JSON. This can overwrite existing auto-responses. Export first!",
             options: [
                 {
                     type: ApplicationCommandOptionTypes.ATTACHMENT,
@@ -252,7 +262,7 @@ registerChatInputCommand({
                 if (!parseResult.success) {
                     await interaction.reply({
                         flags,
-                        content: `${Emoji.X} Invalid auto-response import data format. Should have the same format as exported auto-responses.`
+                        content: `${Emoji.X} Invalid auto-response import data format. Should have the same format as exported auto-responses.\n\n${toCodeblock(parseResult.issues[0].message)}`
                     });
                     break;
                 }
