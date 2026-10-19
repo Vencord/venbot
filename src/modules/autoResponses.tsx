@@ -44,6 +44,8 @@ export async function maybeAutoRespond(msg: Message<AnyTextableGuildChannel>, te
     return response && await reply(msg, { content: `${response.response}\n\n-# This is an auto-response based on keywords detected in your message.` });
 }
 
+const allowedRoles = [Config.roles.mod, Config.roles.helper];
+
 registerChatInputCommand({
     name: "auto-response",
     description: "Manage auto-responses based on keywords",
@@ -94,7 +96,7 @@ registerChatInputCommand({
         }
     ]
 }, {
-    allowedRoles: [Config.roles.mod, Config.roles.helper],
+    allowedRoles,
 
     async handle(interaction) {
         const [subcommand] = interaction.data.options.getSubCommand(true);
@@ -232,6 +234,7 @@ handleInteraction({
     type: InteractionTypes.MODAL_SUBMIT,
     isMatch: i => i.data.customID === "create-auto-response-modal" || i.data.customID === "edit-auto-response-modal",
     guildOnly: true,
+    allowedRoles,
     async handle(interaction) {
         const name = interaction.data.components.getTextInput("name", true);
         const match = interaction.data.components.getTextInput("match", true);

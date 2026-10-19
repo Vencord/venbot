@@ -1,9 +1,9 @@
 import { AnyInteractionChannel, AnyInteractionGateway, AnyTextableGuildChannel, ApplicationCommandTypes, ApplicationIntegrationTypes, AutocompleteInteraction, CommandInteraction, ComponentInteraction, ComponentTypes, CreateGuildApplicationCommandOptions, CreateGuildChatInputApplicationCommandOptions, InteractionContextTypes, InteractionTypes, MessageFlags, ModalSubmitInteraction, SelectMenuTypes } from "oceanic.js";
 
 import { SetOptional } from "type-fest";
+import Config from "./config";
 import { OwnerId } from "./owner";
 import { handleError } from "./util/handleError";
-import Config from "./config";
 import { Vaius } from "./Vaius";
 
 interface BaseInteractionHandler {
@@ -48,10 +48,10 @@ export interface InteractionTypeMap<GuildOnly extends Boolean> {
     [InteractionTypes.PING]: never;
 }
 
-export type CustomHandler<T extends AnyInteractionGateway> = {
+export interface CustomHandler<T extends AnyInteractionGateway> extends BaseInteractionHandler {
     isMatch(interaction: T): boolean;
     handle(interaction: T): any;
-};
+}
 
 type AnyCustomHandler = CustomHandler<AnyInteractionGateway>;
 
