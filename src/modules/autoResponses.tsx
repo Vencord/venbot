@@ -1,9 +1,11 @@
 import { AnyTextableGuildChannel, ApplicationCommandOptionTypes, ChannelTypes, InteractionTypes, Message, MessageFlags, Permissions, TextInputStyles } from "oceanic.js";
+import * as v from "valibot";
 import Config from "~/config";
 import { Emoji } from "~/constants";
 import { AutoResponseContentType, db } from "~/db";
 import { handleInteraction, registerChatInputCommand } from "~/SlashCommands";
 import { reply } from "~/util/discord";
+import { fetchJson } from "~/util/fetch";
 import { ChannelSelect, ModalLabel, StringOption, StringSelect, TextInput } from "~components";
 
 interface AutoResponse {
@@ -13,6 +15,16 @@ interface AutoResponse {
     contentTypes: AutoResponseContentType;
     channelIds: string[];
 }
+
+const AutoResponseImportSchema = v.array(
+    v.object({
+        name: v.string(),
+        match: v.pipe(v.string(), v.transform(s => new RegExp(s, "i"))),
+        response: v.string(),
+        contentTypes: v.enum(AutoResponseContentType),
+        channelIds: v.array(v.string())
+    })
+);
 
 let autoResponses = [] as AutoResponse[];
 
@@ -93,6 +105,19 @@ registerChatInputCommand({
             type: ApplicationCommandOptionTypes.SUB_COMMAND,
             name: "export",
             description: "Export auto-responses as JSON"
+        },
+        {
+            type: ApplicationCommandOptionTypes.SUB_COMMAND,
+            name: "import",
+            description: "Import auto-responses from JSON. This can overwrite existing auto-responses. Use export first to create a backup",
+            options: [
+                {
+                    type: ApplicationCommandOptionTypes.ATTACHMENT,
+                    name: "file",
+                    description: "The JSON file containing auto-responses",
+                    required: true
+                }
+            ]
         }
     ]
 }, {
@@ -104,7 +129,7 @@ registerChatInputCommand({
         const flags = MessageFlags.EPHEMERAL;
         switch (subcommand) {
             case "add":
-            case "edit":
+            case "edit": {
                 const isEdit = subcommand === "edit";
 
                 const name = isEdit ? interaction.data.options.getString("name", true) : "";
@@ -175,6 +200,7 @@ registerChatInputCommand({
                     </>
                 });
                 break;
+            }
 
             case "remove": {
                 const name = interaction.data.options.getString("name", true);
@@ -198,7 +224,7 @@ registerChatInputCommand({
                 });
                 break;
 
-            case "export":
+            case "export": {
                 if (!autoResponses.length) {
                     await interaction.reply({ content: "No auto-responses to export.", flags });
                     break;
@@ -216,6 +242,40 @@ registerChatInputCommand({
                     }]
                 });
                 break;
+            }
+
+            case "import": {
+                const file = interaction.data.options.getAttachment("file", true);
+                const data = await fetchJson(file.url);
+
+                const parseResult = v.safeParse(AutoResponseImportSchema, data);
+                if (!parseResult.success) {
+                    await interaction.reply({
+                        flags,
+                        content: `${Emoji.X} Invalid auto-response import data format. Should have the same format as exported auto-responses.`
+                    });
+                    break;
+                }
+
+                const { numInsertedOrUpdatedRows } = await db
+                    .replaceInto("autoResponses")
+                    .values(parseResult.output.map(r => ({
+                        ...r,
+                        match: r.match.source,
+                        channelIds: r.channelIds.join(",")
+                    })))
+                    .executeTakeFirst();
+
+                await loadResponses();
+
+                if (Number(numInsertedOrUpdatedRows!) === parseResult.output.length) {
+                    await interaction.reply({ flags, content: `${Emoji.CheckMark} Successfully imported ${numInsertedOrUpdatedRows} auto-responses.` });
+                } else {
+                    await interaction.reply({ flags, content: `${Emoji.RedDot} Imported ${numInsertedOrUpdatedRows!} out of ${parseResult.output.length} auto-responses.` });
+                }
+
+                break;
+            }
         }
     },
 

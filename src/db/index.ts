@@ -29,7 +29,7 @@ export const enum ExpressionFormatType {
     LOTTIE = "lottie"
 }
 
-export const enum AutoResponseContentType {
+export enum AutoResponseContentType {
     ALL = "all",
     TEXT = "text",
     IMAGES = "images"
