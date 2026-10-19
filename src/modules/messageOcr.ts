@@ -1,6 +1,7 @@
 import { Message } from "oceanic.js";
 import Config from "~/config";
 import { Bytes, Millis, PROD } from "~/constants";
+import { AutoResponseContentType } from "~/db";
 import { fetchBuffer } from "~/util/fetch";
 import { silently } from "~/util/functions";
 import { readTextFromImage } from "~/util/ocr";
@@ -19,7 +20,7 @@ export async function ocrMessage(msg: Message) {
 
     // Don't early return here even if we match, we still want to process images for moderation purposes.
     // This can trigger an auto-response even if the message is later moderated but the alternative is delaying the response, which is worse.
-    const responseMessage = await maybeAutoRespond(msg, msg.content, false);
+    const responseMessage = await maybeAutoRespond(msg, msg.content, AutoResponseContentType.TEXT);
 
     const attachments = msg.attachments.filter(att => att.contentType?.startsWith("image/") && att.size < 20 * Bytes.MB);
     if (!attachments.length) return;
@@ -49,6 +50,6 @@ export async function ocrMessage(msg: Message) {
     if (responseMessage) return;
 
     for (const { text } of results) {
-        if (await maybeAutoRespond(msg, text, true)) return;
+        if (await maybeAutoRespond(msg, text, AutoResponseContentType.IMAGES)) return;
     }
 }

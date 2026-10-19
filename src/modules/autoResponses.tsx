@@ -52,12 +52,11 @@ async function loadResponses() {
 
 loadResponses();
 
-export async function maybeAutoRespond(msg: Message<AnyTextableGuildChannel>, text: string, isOcr: boolean) {
+export async function maybeAutoRespond(msg: Message<AnyTextableGuildChannel>, text: string, contentType: AutoResponseContentType) {
     if (!text) return;
 
     const response = autoResponses.find(r => {
-        if (r.contentTypes === AutoResponseContentType.TEXT && !isOcr) return false;
-        if (r.contentTypes === AutoResponseContentType.IMAGES && isOcr) return false;
+        if (r.contentTypes !== AutoResponseContentType.ALL && r.contentTypes !== contentType) return false;
         if (r.channelIds.length && !r.channelIds.includes(msg.channel.id) && !(msg.channel.parentID && r.channelIds.includes(msg.channel.parentID))) return false;
 
         return r.match.test(text);
