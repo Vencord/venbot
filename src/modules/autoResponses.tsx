@@ -1,7 +1,7 @@
 import { AnyTextableGuildChannel, ApplicationCommandOptionTypes, ChannelTypes, InteractionTypes, Message, MessageFlags, Permissions, TextInputStyles } from "oceanic.js";
 import * as v from "valibot";
 import Config from "~/config";
-import { Emoji } from "~/constants";
+import { Emoji, PROD } from "~/constants";
 import { AutoResponseContentType, db } from "~/db";
 import { handleInteraction, registerChatInputCommand } from "~/SlashCommands";
 import { reply } from "~/util/discord";
@@ -69,7 +69,7 @@ export async function maybeAutoRespond(msg: Message<AnyTextableGuildChannel>, te
 const allowedRoles = [Config.roles.mod, Config.roles.helper];
 
 registerChatInputCommand({
-    name: "auto-response",
+    name: PROD ? "auto-response" : "dev-auto-response",
     description: "Manage auto-responses based on keywords",
     defaultMemberPermissions: Permissions.MANAGE_MESSAGES.toString(),
     options: [
@@ -158,7 +158,7 @@ registerChatInputCommand({
 
                 await interaction.createModal({
                     title: isEdit ? "Edit Auto-Response" : "Create Auto-Response",
-                    customID: isEdit ? "edit-auto-response-modal" : "create-auto-response-modal",
+                    customID: isEdit ? `edit-auto-response-modal:${name}` : "create-auto-response-modal",
                     components: <>
                         {!isEdit &&
                             <ModalLabel label="Name" description="Used to identify the auto-response. Must be unique">
@@ -167,6 +167,8 @@ registerChatInputCommand({
                                     style={TextInputStyles.SHORT}
                                     customID="name"
                                     required
+                                    maxLength={32}
+                                    minLength={2}
                                 />
                             </ModalLabel>
                         }
@@ -174,7 +176,7 @@ registerChatInputCommand({
                         <ModalLabel label="Match" description="RegExp pattern to match">
                             <TextInput
                                 value={existingResponse.match?.source}
-                                style={TextInputStyles.SHORT}
+                                style={TextInputStyles.PARAGRAPH}
                                 customID="match"
                                 required
                             />
@@ -302,11 +304,11 @@ registerChatInputCommand({
 
 handleInteraction({
     type: InteractionTypes.MODAL_SUBMIT,
-    isMatch: i => i.data.customID === "create-auto-response-modal" || i.data.customID === "edit-auto-response-modal",
+    isMatch: i => i.data.customID === "create-auto-response-modal" || i.data.customID.startsWith("edit-auto-response-modal:"),
     guildOnly: true,
     allowedRoles,
     async handle(interaction) {
-        const name = interaction.data.components.getTextInput("name", true);
+        const name = interaction.data.components.getTextInput("name") || interaction.data.customID.split(":")[1];
         const match = interaction.data.components.getTextInput("match", true);
         const response = interaction.data.components.getTextInput("response", true);
         const contentTypes = interaction.data.components.getStringSelectValues("contentTypes", true)[0];
