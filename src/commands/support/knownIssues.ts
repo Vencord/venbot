@@ -1,6 +1,5 @@
-import { ChannelTypes, EmbedOptions, MessageTypes, PublicThreadChannel, User } from "oceanic.js";
+import { ChannelTypes, Client, EmbedOptions, MessageTypes, PublicThreadChannel, User } from "oceanic.js";
 
-import { Vaius } from "~/Client";
 import { defineCommand } from "~/Commands";
 import Config from "~/config";
 import { run, silently } from "~/util/functions";
@@ -8,8 +7,8 @@ import { makeEmbedSpaces } from "~/util/text";
 
 const { enabled, knownIssuesForumId } = Config.knownIssues;
 
-export async function findThreads(): Promise<PublicThreadChannel[]> {
-    const forumChannel = Vaius.getChannel(knownIssuesForumId);
+export async function findThreads(client: Client): Promise<PublicThreadChannel[]> {
+    const forumChannel = client.getChannel(knownIssuesForumId);
 
     if (forumChannel?.type !== ChannelTypes.GUILD_FORUM) return [];
 
@@ -73,7 +72,7 @@ defineCommand({
     guildOnly: true,
     usage: "[tag | query]",
     async execute({ msg, createMessage, reply }, query) {
-        const threads = await findThreads();
+        const threads = await findThreads(msg.client);
 
         if (!threads)
             return reply("that ain't a forum channel ⁉️");

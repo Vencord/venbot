@@ -114,7 +114,7 @@ handleInteraction({
                 case Commands.Support:
                     await interaction.channel.createMessage({
                         ...replyOptions,
-                        content: SupportInstructions[choice].content + `\n\n(Auto-response invoked by ${interaction.user.mention})`
+                        content: SupportInstructions[choice].content + `\n\n-# Auto-response invoked by ${interaction.user.mention}`
                     });
                     await defer;
                     break;

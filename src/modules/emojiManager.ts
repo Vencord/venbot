@@ -6,8 +6,8 @@ export { EmojiName };
 import { readdir, readFile } from "fs/promises";
 import { ApplicationEmoji } from "oceanic.js";
 import { join } from "path";
-import { Vaius } from "~/Client";
 import { ASSET_DIR } from "~/constants";
+import { Vaius } from "~/Vaius";
 
 const EMOJI_DIR = join(ASSET_DIR, "emojis");
 

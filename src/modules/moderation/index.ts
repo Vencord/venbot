@@ -1,12 +1,10 @@
 import { Message, MessageTypes } from "oceanic.js";
-import { Vaius } from "~/Client";
 import { sendDm } from "~/util/discord";
 import { silently } from "~/util/functions";
 import { isTruthy } from "~/util/guards";
 import { moderateImageHosts } from "./imageHosts";
 import { moderateInvites } from "./invites";
 import { moderateMultiChannelSpam } from "./multiChannelSpam";
-import { ocrModerate } from "./ocr";
 import { moderateSuspiciousFiles } from "./suspiciousFiles";
 
 const makeSnippetChannelRules = (language?: string) => (m: Message) => {
@@ -40,7 +38,7 @@ const ChannelRules: Record<string, (m: Message) => string | void> = {
 export async function moderateMessage(msg: Message, isEdit: boolean) {
     if (msg.author.bot) return;
     if (!msg.inCachedGuildChannel()) return;
-    if (!msg.channel.permissionsOf(Vaius.user.id).has("MANAGE_MESSAGES")) return;
+    if (!msg.channel.permissionsOf(msg.client.user.id).has("MANAGE_MESSAGES")) return;
 
     // FIXME: make this less bad
     if (msg.messageSnapshots?.length)
@@ -58,8 +56,7 @@ export async function moderateMessage(msg: Message, isEdit: boolean) {
         !isEdit && moderateMultiChannelSpam,
         moderateInvites,
         moderateImageHosts,
-        moderateSuspiciousFiles,
-        ocrModerate
+        moderateSuspiciousFiles
     ].filter(isTruthy);
 
     for (const moderate of moderationFunctions) {

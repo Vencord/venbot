@@ -2,7 +2,6 @@ import { ApiError, ContentListUnion, createModelContent, createPartFromUri, crea
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { Collection, Message } from "oceanic.js";
-import { Vaius } from "~/Client";
 import { defineCommand } from "~/Commands";
 import Config from "~/config";
 import { ASSET_DIR, Bytes, Millis, PROD } from "~/constants";
@@ -12,6 +11,7 @@ import { makeLazy } from "~/util/lazy";
 import { Err, Ok } from "~/util/Result";
 import { stripIndent, toInlineCode, truncateString } from "~/util/text";
 import { sleep, until } from "~/util/time";
+import { Vaius } from "~/Vaius";
 import { fetchFaq } from "../support/faq";
 
 const { apiKey, enabled, allowedRoles, bannedRoles } = Config.gemini;

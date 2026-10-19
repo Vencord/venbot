@@ -1,11 +1,11 @@
 import { AuditLogActionTypes } from "oceanic.js";
 
-import { Vaius } from "~/Client";
 import { defineCommand } from "~/Commands";
 import Config from "~/config";
 import { Emoji } from "~/constants";
 import { BotState } from "~/db/botState";
 import { resolveChannel } from "~/util/resolvers";
+import { Vaius } from "~/Vaius";
 
 defineCommand({
     name: "threads",

@@ -8,7 +8,7 @@
         "editor.defaultFormatter": "vscode.typescript-language-features"
     },
     "[typescriptreact]": {
-        "editor.defaultFormatter": "vscode.typescript-language-features"
+        "editor.defaultFormatter": "TypeScriptTeam.native-preview"
     },
     "javascript.format.semicolons": "insert",
     "typescript.format.semicolons": "insert",
@@ -20,5 +20,6 @@
             "type": "Gitea"
         }
     ],
-    "prettier.enable": false
+    "prettier.enable": false,
+    "js/ts.experimental.useTsgo": true
 }

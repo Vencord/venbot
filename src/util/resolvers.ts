@@ -1,6 +1,6 @@
 import { Guild } from "oceanic.js";
+import { Vaius } from "~/Vaius";
 
-import { Vaius } from "~/Client";
 
 const idRegex = /\d{17,20}/;
 

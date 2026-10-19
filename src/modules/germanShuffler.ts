@@ -1,7 +1,7 @@
 import { GuildChannel } from "oceanic.js";
 
-import { Vaius } from "~/Client";
 import { hourly } from "~/util/hourly";
+import { Vaius } from "~/Vaius";
 
 const GermanChannelId = "1121201005456011366";
 

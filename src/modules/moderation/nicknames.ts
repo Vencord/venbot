@@ -1,11 +1,10 @@
 import { Member } from "oceanic.js";
-import { Vaius } from "~/Client";
 import { silently } from "~/util/functions";
 
 const HoistCharactersRegex = /^[!"#$%'+,.*-\s]+/;
 
 export async function moderateNick(member: Member) {
-    if (member.bot || !member.guild.permissionsOf(Vaius.user.id).has("MANAGE_NICKNAMES")) return;
+    if (member.bot || !member.guild.permissionsOf(member.client.user.id).has("MANAGE_NICKNAMES")) return;
 
     const name = member.displayName;
     const normalizedName = name

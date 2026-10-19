@@ -30,6 +30,8 @@ export function toTitle(s: string, separator: string | RegExp = " ") {
         .join(" ");
 }
 
+export const splitPascal = (s: string) => s.split(/(?=[A-Z])/);
+
 export const snakeToTitle = (s: string) => toTitle(s, "_");
 export const kebabToTitle = (s: string) => toTitle(s, "-");
 

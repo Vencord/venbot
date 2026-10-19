@@ -1,6 +1,6 @@
 import { CreateMessageOptions } from "oceanic.js";
-import { Vaius } from "~/Client";
 import Config from "~/config";
+import { Vaius } from "~/Vaius";
 
 function logAction(channelId: string, data: string | CreateMessageOptions) {
     if (!channelId) return;

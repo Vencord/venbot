@@ -1,6 +1,6 @@
 import { AutoModerationActionTypes } from "oceanic.js";
-import { Vaius } from "~/Client";
 import { logAutoModAction } from "~/util/logAction";
+import { Vaius } from "~/Vaius";
 import { moderateNick } from "./nicknames";
 
 // for some reason, the scam bots LOVE posting to this channel

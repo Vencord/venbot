@@ -3,11 +3,10 @@ import { logUserRestriction } from "~/commands/moderation/utils";
 import Config from "~/config";
 import { Colors, Emoji, Millis, Seconds } from "~/constants";
 import { softBan } from "~/util/discord";
-import { fetchBuffer } from "~/util/fetch";
 import { checkPromise, silently } from "~/util/functions";
 import { logAutoModAction } from "~/util/logAction";
-import { readTextFromImage } from "~/util/ocr";
 import { ComponentMessage, Container, MediaGallery, MediaGalleryItem, TextDisplay } from "~components";
+import { OcrResult } from "../messageOcr";
 
 const scamTerms = [
     "casino",
@@ -26,29 +25,11 @@ const re = new RegExp(scamTerms.map(term => `\\b${term}\\b`).join("|"), "ig");
 
 const currentlySoftBanning = new Set<string>();
 
-export async function ocrModerate(msg: Message<AnyTextableGuildChannel>): Promise<boolean> {
+export async function ocrModerate(msg: Message<AnyTextableGuildChannel>, attachments: OcrResult[]): Promise<boolean> {
     if (!msg.member || msg.member.roles.includes(Config.roles.regular)) return false;
 
-    const attachments = msg.attachments.filter(att => att.contentType?.startsWith("image/"));
-    if (attachments.length === 0) return false;
-
-    const matchedAttachments = (await Promise.all(attachments.map(async att => {
-        try {
-            const buffer = await fetchBuffer(att.url);
-            const text = await readTextFromImage(buffer);
-            const matchedKeywords = text.match(re);
-
-            return {
-                buffer,
-                isMatch: !!matchedKeywords?.length,
-                matchedKeywords
-            };
-        } catch (e) {
-            return null;
-        }
-    })));
-
-    if (!matchedAttachments.some(a => a?.isMatch)) return false;
+    const isScam = attachments.some(att => re.test(att.text));
+    if (!isScam) return false;
 
     silently(msg.delete("Scam message"));
 
@@ -56,9 +37,13 @@ export async function ocrModerate(msg: Message<AnyTextableGuildChannel>): Promis
     currentlySoftBanning.add(msg.member.id);
     setTimeout(() => currentlySoftBanning.delete(msg.member.id), 10 * Millis.SECOND);
 
-    const fileData = matchedAttachments
-        .filter(a => a?.isMatch)
-        .map((a, i) => ({ file: { contents: a!.buffer, name: `image${i + 1}.png` }, matchedKeywords: a!.matchedKeywords }));
+    const fileData = attachments.map((a, i) => ({
+        file: {
+            contents: a.fileContents,
+            name: `image${i + 1}.png`
+        },
+        matchedKeywords: a.text.match(re)
+    }));
 
     const files = fileData.map(({ file }) => file);
     const renderMediaGallery = (useSpoiler: boolean) => (

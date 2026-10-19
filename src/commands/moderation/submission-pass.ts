@@ -1,10 +1,10 @@
 import { ChannelTypes, Guild } from "oceanic.js";
 
-import { Vaius } from "~/Client";
 import { defineCommand } from "~/Commands";
 import Config from "~/config";
 import { Emoji } from "~/constants";
 import { resolveUserId } from "~/util/resolvers";
+import { Vaius } from "~/Vaius";
 
 const { categoryId, enabled, passRoleId } = Config.submissionPass;
 

@@ -1,6 +1,5 @@
 import { spawn } from "child_process";
 import { AnyTextableGuildChannel, Message } from "oceanic.js";
-import { Vaius } from "~/Client";
 import Config from "~/config";
 import { Millis } from "~/constants";
 import { softBan } from "~/util/discord";
@@ -42,7 +41,7 @@ async function getInviteImage(code: string) {
 
 export async function moderateInvites(msg: Message<AnyTextableGuildChannel>) {
     for (const [, code] of msg.content.matchAll(inviteRe)) {
-        const inviteData = await Vaius.rest.channels.getInvite(code, {}).catch(() => null);
+        const inviteData = await msg.client.rest.channels.getInvite(code, {}).catch(() => null);
         if (!inviteData?.guildID || !inviteData.guild) continue;
 
         if (!allowedGuilds.has(inviteData.guildID)) {

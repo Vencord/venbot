@@ -1,9 +1,9 @@
 import type { Message, User } from "oceanic.js";
-import { Vaius } from "~/Client";
 import Config from "~/config";
 import { Millis } from "~/constants";
 import { db } from "~/db";
 import { Deduper } from "~/util/Deduper";
+import { Vaius } from "~/Vaius";
 
 export function getXpForLevel(level: number): number {
     return Math.ceil((5 / 2) * (-1 + 20 * Math.pow(level, 2)));

@@ -1,12 +1,12 @@
 import { Expressions, ExpressionUses } from "kysely-codegen";
 import { AnyTextableGuildChannel, GuildEmoji, Member, PartialEmoji, PossiblyUncachedMessage, StickerFormatTypes, StickerItem, Uncached, User } from "oceanic.js";
 
-import { Vaius } from "~/Client";
 import Config from "~/config";
 import { Millis } from "~/constants";
 import { db, ExpressionFormatType, ExpressionType, ExpressionUsageType } from "~/db";
 import { Deduper } from "~/util/Deduper";
 import { getHomeGuild } from "~/util/discord";
+import { Vaius } from "~/Vaius";
 
 const coolDowns = new Deduper<string>(Millis.MINUTE);
 

@@ -1,11 +1,11 @@
 import { CreateMessageOptions, MessageFlags, SeparatorSpacingSize } from "oceanic.js";
-import { Vaius } from "~/Client";
 import { Commands, defineCommand } from "~/Commands";
 import Config from "~/config";
 import { Emoji } from "~/constants";
 import { getEmoji } from "~/modules/emojiManager";
 import { registerChatInputCommand, registerMessageCommand } from "~/SlashCommands";
 import { formatLanguage, GoogleLanguageMap, Locale, translate } from "~/util/translate";
+import { Vaius } from "~/Vaius";
 import { CommandBooleanOption, CommandStringOption, ComponentMessage, Container, Separator, TextDisplay } from "~components";
 
 async function doTranslate(content: string, sourceLanguage: Locale, targetLanguage: Locale): Promise<CreateMessageOptions> {

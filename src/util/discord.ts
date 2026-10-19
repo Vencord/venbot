@@ -1,9 +1,9 @@
 import { Client, CreateMessageOptions, DiscordRESTError, Member, Message, MessageTypes, PossiblyUncachedMessage, Role, User } from "oceanic.js";
 
-import { Vaius } from "~/Client";
 
 import Config from "~/config";
 import { Millis, SUPPORT_ALLOWED_CHANNELS } from "~/constants";
+import { Vaius } from "~/Vaius";
 import { silently } from "./functions";
 import { sleep, until } from "./time";
 
@@ -91,4 +91,13 @@ export async function softBan(member: Member, deleteMessageSeconds: number, reas
 
     await member.ban({ reason: `Soft-ban: ${reason}`, deleteMessageSeconds });
     await member.unban(`Soft-ban removal: ${reason}`);
+}
+
+/**
+ * Check if a message matches text anywhere (content, embeds or components)
+ * `text` shouldn't be something like "description" to avoid false positives
+ */
+export function messageContainsText(msg: Message, text: string | RegExp) {
+    const texts = [msg.content, JSON.stringify(msg.embeds), JSON.stringify(msg.components)];
+    return texts.some(t => typeof text === "string" ? t.toLowerCase().includes(text.toLowerCase()) : text.test(t));
 }

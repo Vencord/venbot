@@ -1,9 +1,9 @@
 import { readFile } from "fs/promises";
 import { CreateMessageOptions, Message, TextChannel } from "oceanic.js";
 
-import { Vaius } from "~/Client";
 import Config from "~/config";
 import { formatTable, toCodeblock } from "~/util/text";
+import { Vaius } from "~/Vaius";
 
 interface Leaderboard {
     members: Record<string, {

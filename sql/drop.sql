@@ -5,3 +5,4 @@ DROP TABLE IF EXISTS stickyRoles;
 DROP TABLE IF EXISTS linkedGitHubs;
 DROP TABLE IF EXISTS userAvatarEmojis;
 DROP TABLE IF EXISTS xp;
+DROP TABLE IF EXISTS autoResponses;

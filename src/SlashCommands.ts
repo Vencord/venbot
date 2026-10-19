@@ -1,9 +1,10 @@
 import { AnyInteractionChannel, AnyInteractionGateway, AnyTextableGuildChannel, ApplicationCommandTypes, ApplicationIntegrationTypes, AutocompleteInteraction, CommandInteraction, ComponentInteraction, ComponentTypes, CreateGuildApplicationCommandOptions, CreateGuildChatInputApplicationCommandOptions, InteractionContextTypes, InteractionTypes, MessageFlags, ModalSubmitInteraction, SelectMenuTypes } from "oceanic.js";
 
 import { SetOptional } from "type-fest";
-import { handleError } from ".";
-import { OwnerId, Vaius } from "./Client";
+import { OwnerId } from "./owner";
+import { handleError } from "./util/handleError";
 import Config from "./config";
+import { Vaius } from "./Vaius";
 
 interface BaseInteractionHandler {
     ownerOnly?: boolean;
@@ -53,6 +54,8 @@ export type CustomHandler<T extends AnyInteractionGateway> = {
 };
 
 type AnyCustomHandler = CustomHandler<AnyInteractionGateway>;
+
+const SlashCommands = [] as CreateGuildApplicationCommandOptions[];
 
 const CustomHandlers = {} as Partial<Record<InteractionTypes, AnyCustomHandler[]>>;
 const CommandHandlers = {} as Record<string, CommandInteractionHandler>;
@@ -119,7 +122,6 @@ Vaius.on("interactionCreate", async interaction => {
     }
 });
 
-const SlashCommands = [] as CreateGuildApplicationCommandOptions[];
 
 export function registerMessageCommand(handler: NamedCommandInteractionHandler) {
     SlashCommands.push({

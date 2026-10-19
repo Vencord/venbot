@@ -1,5 +1,4 @@
 import { DiscordRESTError, User } from "oceanic.js";
-import { Vaius } from "~/Client";
 import { db } from "~/db";
 import { fetchBuffer } from "~/util/fetch";
 import { emojiCache, getEmojiData, uploadEmoji } from "./emojiManager";
@@ -24,7 +23,7 @@ async function uploadAvatarEmoji(user: User) {
 
 async function uploadUserEmoji(user: User) {
     const oldEmoji = emojiCache.get(getEmojiName(user));
-    if (oldEmoji) await Vaius.application.deleteEmoji(oldEmoji.id);
+    if (oldEmoji) await user.client.application.deleteEmoji(oldEmoji.id);
 
     const emoji = await uploadAvatarEmoji(user);
 

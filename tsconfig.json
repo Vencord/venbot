@@ -9,17 +9,15 @@
             "esnext.symbol"
         ],
         "module": "preserve",
-        "moduleResolution": "node",
         "strict": true,
         "noImplicitAny": false,
         "target": "ESNEXT",
-        "baseUrl": ".",
         "paths": {
             "~components": [
-                "components-jsx/index.ts"
+                "./components-jsx/index.ts"
             ],
             "~/*": [
-                "src/*"
+                "./src/*"
             ],
         },
         "skipLibCheck": true,

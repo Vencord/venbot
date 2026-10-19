@@ -1,5 +1,4 @@
 
-import { Vaius } from "~/Client";
 import { defineCommand } from "~/Commands";
 import Config from "~/config";
 import { Emoji, Millis } from "~/constants";
@@ -7,6 +6,7 @@ import { deduplicate } from "~/util/arrays";
 import { run, silently } from "~/util/functions";
 import { isNonNullish } from "~/util/guards";
 import { ttlLazy } from "~/util/lazy";
+import { Vaius } from "~/Vaius";
 
 const { enabled, rulesChannelId } = Config.rules;
 

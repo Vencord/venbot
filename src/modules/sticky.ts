@@ -1,7 +1,7 @@
 
-import { Vaius } from "~/Client";
 import { BotState } from "~/db/botState";
 import { debounce, silently } from "~/util/functions";
+import { Vaius } from "~/Vaius";
 
 const StickyStates = new Map<string, StickyState>();
 

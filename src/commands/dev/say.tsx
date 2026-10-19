@@ -1,6 +1,5 @@
 import { CreateMessageOptions, MessageFlags } from "oceanic.js";
 
-import { Vaius } from "~/Client";
 import { registerChatInputCommand } from "~/SlashCommands";
 import { CommandStringOption } from "~components";
 
@@ -34,7 +33,7 @@ registerChatInputCommand(
             };
 
             try {
-                await Vaius.rest.channels.createMessage(i.channelID, data);
+                await i.client.rest.channels.createMessage(i.channelID, data);
                 await i.reply({ content: "done", flags: MessageFlags.EPHEMERAL });
             } catch {
                 await i.createMessage(data);

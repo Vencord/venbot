@@ -1,7 +1,6 @@
 import { createHmac, randomUUID, timingSafeEqual } from "crypto";
 import { EmbedOptions } from "oceanic.js";
 
-import { Vaius } from "~/Client";
 import Config from "~/config";
 import { Millis } from "~/constants";
 import { BotState } from "~/db/botState";
@@ -9,13 +8,9 @@ import { fastify } from "~/server";
 import { doFetch } from "~/util/fetch";
 import { silently } from "~/util/functions";
 import { TTLMap } from "~/util/TTLMap";
+import { Vaius } from "~/Vaius";
 
 type Branch = "both" | "stable" | "canary";
-
-interface VersionData {
-    hash: string;
-    required: boolean;
-}
 
 interface ReportData {
     runId: string;

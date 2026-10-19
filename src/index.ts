@@ -1,43 +1,17 @@
 import "./config";
 
-import "./Commands";
-
 import "__modules__";
-
-import {
-    DiscordHTTPError
-} from "oceanic.js";
-
-import { Vaius } from "./Client";
-import { PROD } from "./constants";
+import "./Client";
+import "./Commands";
 
 import { initModListeners } from "./modules/moderation/listeners";
 import { silently } from "./util/functions";
-import { inspect } from "./util/inspect";
-import { logDevDebug } from "./util/logAction";
-import { toCodeblock } from "./util/text";
+import { handleError } from "./util/handleError";
+import { Vaius } from "./Vaius";
+
+export { handleError } from "./util/handleError";
 
 initModListeners();
-
-export async function handleError(title: string, err: unknown) {
-    if (err instanceof DiscordHTTPError && err.status >= 500)
-        return;
-
-    console.error(`${title}:`, err);
-
-    if (!PROD) return;
-
-    const stack = err instanceof Error && err.stack;
-    const text = stack || inspect(err);
-
-    await logDevDebug({
-        embeds: [{
-            title,
-            description: toCodeblock(text, stack ? "js" : ""),
-            color: 0xff0000
-        }]
-    });
-}
 
 process.on("unhandledRejection", err => handleError("Unhandled Rejection", err));
 
@@ -49,7 +23,7 @@ process.on("uncaughtException", async err => {
 Vaius.on("error", err => {
     // Ignore 5xx errors from Discord
     if (String(err).includes("Unexpected server response: 5"))
-        return;
+        return console.error(err);
 
     handleError("Unhandled Client Error", err);
 });

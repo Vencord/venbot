@@ -44,3 +44,11 @@ CREATE TABLE IF NOT EXISTS xp (
     userId  TEXT PRIMARY KEY NOT NULL,
     xp      INTEGER NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS autoResponses (
+    name        TEXT NOT NULL PRIMARY KEY,
+    match       TEXT NOT NULL,
+    response    TEXT NOT NULL,
+    contentTypes TEXT NOT NUll CHECK(contentTypes IN ('all','images','text')),
+    channelIds  TEXT -- Comma separated list of channel IDs. Sqlite doesn't support arrays.
+);

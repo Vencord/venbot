@@ -6,12 +6,13 @@ import { tmpdir } from "os";
 import { join } from "path";
 import { pipeline } from "stream/promises";
 
-import { OwnerId, Vaius } from "~/Client";
 import { Emoji } from "~/constants";
+import { OwnerId } from "~/owner";
 import { execFileP, execP } from "~/util/childProcess";
 import { reply } from "~/util/discord";
 import { downloadToFile } from "~/util/fetch";
 import { silently } from "~/util/functions";
+import { Vaius } from "~/Vaius";
 
 const CHANNEL_ID = "1076188996465590282";
 // you should clone https://github.com/Vencord/plugin-assets in the same dir you cloned the bot.
