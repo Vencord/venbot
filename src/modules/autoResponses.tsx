@@ -308,14 +308,20 @@ handleInteraction({
     guildOnly: true,
     allowedRoles,
     async handle(interaction) {
-        const name = interaction.data.components.getTextInput("name") || interaction.data.customID.split(":")[1];
-        const match = interaction.data.components.getTextInput("match", true);
-        const response = interaction.data.components.getTextInput("response", true);
-        const contentTypes = interaction.data.components.getStringSelectValues("contentTypes", true)[0];
-        const channelIds = interaction.data.components.getChannelSelectValues("channels", true);
+        const { customID, components } = interaction.data;
+
+        const isEdit = customID.startsWith("edit-auto-response-modal:");
+
+        const name = isEdit
+            ? customID.split(":")[1]
+            : components.getTextInput("name", true);
+
+        const match = components.getTextInput("match", true);
+        const response = components.getTextInput("response", true);
+        const contentTypes = components.getStringSelectValues("contentTypes", true)[0];
+        const channelIds = components.getChannelSelectValues("channels", true);
 
         const flags = MessageFlags.EPHEMERAL;
-
         try {
             new RegExp(match);
         } catch (error) {
@@ -330,7 +336,7 @@ handleInteraction({
             channelIds: channelIds.map(c => c.id).join(",")
         };
 
-        if (interaction.data.customID === "edit-auto-response-modal") {
+        if (isEdit) {
             await db
                 .updateTable("autoResponses")
                 .set(values)
