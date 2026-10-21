@@ -64,8 +64,8 @@ defineCommand({
 
             case "delay":
                 const delay = Number(value) * 1000;
-                if (isNaN(delay)) {
-                    response = "Invalid delay value!";
+                if (!Number.isFinite(delay) || delay < 1000 || delay > 600_000) {
+                    response = "Invalid delay value! Must be between 1 and 600 seconds.";
                 } else {
                     state.delayMs = delay;
                     state.enabled = true;
