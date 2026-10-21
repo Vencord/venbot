@@ -45,6 +45,10 @@ export function ttlLazy<Args extends unknown[], Res>(factory: (...args: Args) =>
                     }
 
                     return r;
+                }, err => {
+                    cachedValue = null;
+                    cacheTimestamp = 0;
+                    throw err;
                 }) as any;
             }
 
