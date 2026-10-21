@@ -1,9 +1,10 @@
 import Tesseract, { createScheduler, createWorker, Scheduler } from "tesseract.js";
 
-let scheduler: Scheduler | null = null;
+const OCR_TIMEOUT_MS = 30_000;
+
+let schedulerPromise: Promise<Scheduler> | null = null;
 
 async function initScheduler() {
-    if (scheduler) return;
     const newScheduler = createScheduler();
 
     await Promise.all(Array.from({ length: 3 }, async () => {
@@ -17,13 +18,39 @@ async function initScheduler() {
         newScheduler.addWorker(worker);
     }));
 
-    scheduler = newScheduler;
+    return newScheduler;
+}
+
+function getScheduler() {
+    schedulerPromise ??= initScheduler().catch(err => {
+        schedulerPromise = null;
+        throw err;
+    });
+
+    return schedulerPromise;
 }
 
 export async function readTextFromImage(image: Buffer): Promise<string> {
-    if (!scheduler) await initScheduler();
+    const scheduler = await getScheduler();
 
-    const { data: { text } } = await scheduler!.addJob("recognize", image);
+    let timeout: NodeJS.Timeout | undefined;
+    try {
+        const result = await Promise.race([
+            scheduler.addJob("recognize", image),
+            new Promise<never>((_, reject) => {
+                timeout = setTimeout(() => reject(new Error("OCR job timed out")), OCR_TIMEOUT_MS);
+            })
+        ]);
 
-    return text.replace(/\s+/g, " ").trim();
+        return result.data.text.replace(/\s+/g, " ").trim();
+    } catch (e) {
+        if (e instanceof Error && e.message === "OCR job timed out") {
+            schedulerPromise = null;
+            void scheduler.terminate().catch(() => { });
+        }
+
+        throw e;
+    } finally {
+        if (timeout) clearTimeout(timeout);
+    }
 }

@@ -1,4 +1,5 @@
 import { Message } from "oceanic.js";
+import sharp from "sharp";
 import Config from "~/config";
 import { Bytes, Millis, PROD } from "~/constants";
 import { AutoResponseContentType } from "~/db";
@@ -14,6 +15,11 @@ export interface OcrResult {
     text: string;
 }
 
+const MAX_OCR_FILE_BYTES = 8 * Bytes.MB;
+const MAX_OCR_TOTAL_BYTES = 24 * Bytes.MB;
+const MAX_IMAGE_DIMENSION = 8_000;
+const MAX_IMAGE_PIXELS = 40_000_000;
+
 export async function ocrMessage(msg: Message) {
     if (!PROD && msg.channelID !== Config.channels.dev) return;
     if (!msg.inCachedGuildChannel()) return;
@@ -22,16 +28,35 @@ export async function ocrMessage(msg: Message) {
     // This can trigger an auto-response even if the message is later moderated but the alternative is delaying the response, which is worse.
     const responseMessage = await maybeAutoRespond(msg, msg.content, AutoResponseContentType.TEXT);
 
-    const attachments = msg.attachments.filter(att => att.contentType?.startsWith("image/") && att.size < 20 * Bytes.MB);
+    let totalBytes = 0;
+    const attachments = msg.attachments.filter(att => {
+        if (!att.contentType?.startsWith("image/")) return false;
+        if (att.size > MAX_OCR_FILE_BYTES) return false;
+        if (totalBytes + att.size > MAX_OCR_TOTAL_BYTES) return false;
+
+        totalBytes += att.size;
+        return true;
+    });
     if (!attachments.length) return;
 
-    const results = await Promise.all(attachments.map(att =>
-        fetchBuffer(att.url)
-            .then(async fileContents => ({
+    const results = (await Promise.all(attachments.map(async att => {
+        try {
+            const fileContents = await fetchBuffer(att.url);
+            if (fileContents.byteLength > MAX_OCR_FILE_BYTES) return null;
+
+            const { width, height } = await sharp(fileContents).metadata();
+            if (!width || !height) return null;
+            if (width > MAX_IMAGE_DIMENSION || height > MAX_IMAGE_DIMENSION) return null;
+            if (width * height > MAX_IMAGE_PIXELS) return null;
+
+            return {
                 fileContents,
                 text: await readTextFromImage(fileContents)
-            }))
-    ));
+            } as OcrResult;
+        } catch {
+            return null;
+        }
+    }))).filter((result): result is OcrResult => result !== null);
 
     if (await ocrModerate(msg, results)) {
         silently(responseMessage?.delete());
