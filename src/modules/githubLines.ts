@@ -8,7 +8,56 @@ import { stripIndentString, toCodeblock } from "~/util/text";
 
 const GITHUB_LINK_REGEX = /(?<!<)https?:\/\/github\.com\/([^\s/]+)\/([^\s/#?]+)\/blob\/([^\s/#?]+)\/([^\s#?]+)#L(\d+)(?:-L?(\d+))?/gi;
 
-function findGithubLineLinks(input: string) {
+const MAX_LINKS_PER_MESSAGE = 3;
+const MAX_FILE_BYTES = 1 * 1024 * 1024;
+const FETCH_TIMEOUT_MS = 10_000;
+
+async function fetchFileText(url: string): Promise<string | null> {
+    const res = await doFetch(url, {
+        headers: { "User-Agent": "Venbot" },
+        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS)
+    }, { retryCount: 0 }).catch(() => null);
+
+    if (!res) return null;
+
+    const contentLength = Number(res.headers.get("content-length"));
+    if (Number.isFinite(contentLength) && contentLength > MAX_FILE_BYTES) return null;
+    if (!res.body) return "";
+
+    const reader = res.body.getReader();
+    const chunks: Uint8Array[] = [];
+    let total = 0;
+
+    try {
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            total += value.byteLength;
+            if (total > MAX_FILE_BYTES) {
+                await reader.cancel();
+                return null;
+            }
+
+            chunks.push(value);
+        }
+    } finally {
+        reader.releaseLock();
+    }
+
+    return Buffer.concat(chunks.map(chunk => Buffer.from(chunk))).toString("utf8");
+}
+
+interface GithubLineLink {
+    owner: string;
+    repo: string;
+    ref: string;
+    path: string;
+    start: number;
+    end: number;
+}
+
+function findGithubLineLinks(input: string): GithubLineLink[] {
     return input.matchAll(GITHUB_LINK_REGEX)
         .map(match => {
             const [, owner, repo, ref, encodedPath, firstLine, lastLine] = match;
@@ -28,17 +77,29 @@ function findGithubLineLinks(input: string) {
                 };
             } catch { }
         })
-        .filter(isTruthy);
+        .filter((link): link is GithubLineLink => link != null)
+        .toArray();
 }
 
 export async function resolveGithubLines(input: string) {
-    const links = findGithubLineLinks(input);
+    const seen = new Set<string>();
+    const links: GithubLineLink[] = [];
 
-    return Promise.all(links.map(async ({ owner, repo, ref, path, start, end }) => {
+    for (const link of findGithubLineLinks(input)) {
+        const key = `${link.owner}/${link.repo}/${link.ref}/${link.path}/${link.start}/${link.end}`;
+        if (seen.has(key)) continue;
+
+        seen.add(key);
+        links.push(link);
+
+        if (links.length >= MAX_LINKS_PER_MESSAGE) break;
+    }
+
+    return (await Promise.all(links.map(async ({ owner, repo, ref, path, start, end }) => {
         const url = `https://raw.githubusercontent.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/${ref.split("/").map(encodeURIComponent).join("/")}/${path.split("/").map(encodeURIComponent).join("/")}`;
 
-        const fileContent = await doFetch(url, { headers: { "User-Agent": "Venbot" } })
-            .then(res => res.text());
+        const fileContent = await fetchFileText(url);
+        if (fileContent === null) return;
 
         const lines = stripIndentString(fileContent).split(/\r?\n/);
 
@@ -48,7 +109,7 @@ export async function resolveGithubLines(input: string) {
             content: lines.slice(start - 1, end).join("\n"),
             url: `https://github.com/${owner}/${repo}/blob/${ref}/${path}#L${start}-L${end}`
         };
-    }));
+    }))).filter(isTruthy);
 }
 
 export async function handleGithubLines(msg: Message) {
