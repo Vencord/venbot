@@ -3,10 +3,11 @@ import { CreateMessageOptions } from "oceanic.js";
 
 import { defineCommand } from "~/Commands";
 import { db } from "~/db";
-import { run } from "~/util/functions";
+import { run, silently } from "~/util/functions";
 import { inspect } from "~/util/inspect";
+import { logBotAuditAction } from "~/util/logAction";
 import stringWidth from "~/util/stringWidth";
-import { countOccurrences, pluralise, toCodeblock } from "~/util/text";
+import { countOccurrences, pluralise, toCodeblock, truncateString } from "~/util/text";
 
 defineCommand({
     name: "sql",
@@ -14,10 +15,15 @@ defineCommand({
     usage: "query",
     rawContent: true,
     ownerOnly: true,
-    async execute({ reply }, query) {
+    async execute({ msg, reply }, query) {
         query = query.replace(/(^`{3}(sql)?|`{3}$)/g, "");
 
         const param: TemplateStringsArray = Object.assign([query], { raw: [query] });
+
+        void silently(logBotAuditAction(
+            `**sql** executed by ${msg.author.tag} (${msg.author.id})\n`
+            + toCodeblock(truncateString(query, 1800), "js")
+        ));
 
         const result = await run(async () => {
             try {
