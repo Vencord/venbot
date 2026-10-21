@@ -25,14 +25,37 @@ registerChatInputCommand(
     },
     {
         guildOnly: true,
+        ownerOnly: true,
         async handle(i) {
+            if (i.guild.id !== Config.homeGuildId) {
+                return i.createMessage({
+                    content: "This command can only be used in the home server.",
+                    flags: MessageFlags.EPHEMERAL
+                });
+            }
+
             await i.defer(MessageFlags.EPHEMERAL);
 
             const opts = i.data.options;
             const user = opts.getUser("user", true);
             const name = opts.getString("name", true);
-            const color = opts.getString("color")?.replace(/#/, "") || "000000";
+            const color = opts.getString("color")?.replace(/^#/, "") || "000000";
             const iconUrl = opts.getAttachment("icon")?.url || opts.getString("icon-url");
+
+            if (!/^[0-9a-f]{6}$/i.test(color)) {
+                return i.createFollowup({
+                    content: "Invalid color. Expected a six-digit hex color.",
+                    flags: MessageFlags.EPHEMERAL
+                });
+            }
+
+            const donorRole = i.guild.roles.get(Config.roles.donor);
+            if (!donorRole) {
+                return i.createFollowup({
+                    content: "The donor role is not configured in this server.",
+                    flags: MessageFlags.EPHEMERAL
+                });
+            }
 
             const iconBuf = !iconUrl
                 ? undefined
@@ -52,7 +75,7 @@ registerChatInputCommand(
 
             await i.guild.editRolePositions([{
                 id: role.id,
-                position: i.guild.roles.get(Config.roles.donor)!.position + 1
+                position: donorRole.position + 1
             }]);
 
             await i.guild.addMemberRole(user.id, role.id, "Custom Donor Role");
