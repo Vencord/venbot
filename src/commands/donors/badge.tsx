@@ -219,7 +219,7 @@ const handler: CommandInteractionHandler = {
         }
 
         if (subCommand === "remove") {
-            const existingBadge = BadgeData[user.id][existingBadgeIndex!];
+            const existingBadge = BadgeData[user.id]?.[existingBadgeIndex!];
             if (!existingBadge) return i.createMessage({
                 content: "Badge not found",
                 flags: MessageFlags.EPHEMERAL
