@@ -16,7 +16,12 @@ import { handleError } from "./util/handleError";
 import { Vaius } from "./Vaius";
 
 Vaius.once("ready", async () => {
-    ensureEmojis();
+    try {
+        await ensureEmojis();
+    } catch (err) {
+        await handleError("Failed to initialize emoji cache", err);
+        process.exit(1);
+    }
 
     Vaius.rest.oauth.getApplication().then(app => {
         setOwnerId(app.team?.ownerID ?? app.ownerID);
