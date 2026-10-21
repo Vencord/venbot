@@ -2,8 +2,10 @@
 import { defineCommand } from "~/Commands";
 import Config from "~/config";
 import { AnsiBackgroundColor, ansiFormatText, AnsiTextColor } from "~/util/ansiFormat";
+import { silently } from "~/util/functions";
 import { inspect } from "~/util/inspect";
-import { countOccurrences, toCodeblock } from "~/util/text";
+import { logBotAuditAction } from "~/util/logAction";
+import { countOccurrences, toCodeblock, truncateString } from "~/util/text";
 
 function makeFakeConsole() {
     const lines = [] as string[];
@@ -30,6 +32,8 @@ function makeFakeConsole() {
 const toRedact = [
     Config.token,
     Config.adventOfCode.cookie,
+    Config.gemini.apiKey,
+    Config.googleProxy.secret,
     Config.githubLinking.clientSecret,
     Config.githubLinking.pat,
     Config.reporter.pat,
@@ -71,6 +75,11 @@ defineCommand({
 
         let script = code.replace(/(^`{3}(js|javascript)?|`{3}$)/g, "");
         if (script.includes("await")) script = `(async () => { ${script} })()`;
+
+        void silently(logBotAuditAction(
+            `**eval** executed by ${msg.author.tag} (${msg.author.id})\n`
+            + toCodeblock(truncateString(redactCredentials(script), 1800), "js")
+        ));
 
         try {
             var result = await eval(script);
