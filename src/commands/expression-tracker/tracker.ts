@@ -6,6 +6,7 @@ import { Millis } from "~/constants";
 import { db, ExpressionFormatType, ExpressionType, ExpressionUsageType } from "~/db";
 import { Deduper } from "~/util/Deduper";
 import { getHomeGuild } from "~/util/discord";
+import { handleError } from "~/util/handleError";
 import { Vaius } from "~/Vaius";
 
 const coolDowns = new Deduper<string>(Millis.MINUTE);
@@ -82,10 +83,10 @@ function buildUnicodeEmojiRow(messageId: string, userId: string, usageType: Expr
     };
 }
 
-function insertRows(rows: Row[]) {
-    if (!rows.length || rows.length > 5) return;
+async function insertRows(rows: Row[]) {
+    if (!rows.length || rows.length > 10) return;
 
-    db.transaction().execute(async t => {
+    await db.transaction().execute(async t => {
         const expressions = rows.map(r => r.expression);
         const expressionUses = rows.map(r => r.expressionUsed);
 
@@ -107,7 +108,7 @@ function insertRows(rows: Row[]) {
     });
 }
 
-Vaius.on("messageCreate", msg => {
+Vaius.on("messageCreate", async msg => {
     if (msg.author.bot || msg.guildID !== Config.homeGuildId || !msg.inCachedGuildChannel()) return;
 
     const msgId = msg.id;
@@ -141,7 +142,8 @@ Vaius.on("messageCreate", msg => {
 
     if (!rows.length || rows.length > 10) return;
 
-    insertRows(rows);
+    await insertRows(rows)
+        .catch(err => handleError("Failed to store expression usage", err));
 });
 
 function shouldHandleReactionEvent(msg: PossiblyUncachedMessage, emoji?: PartialEmoji, user?: Uncached | User | Member) {
@@ -165,7 +167,8 @@ Vaius.on("messageReactionAdd", async (msg, user, { emoji }) => {
         ? buildCustomEmojiRow(msg.id, user.id, ExpressionUsageType.REACTION, emoji as GuildEmoji)
         : buildUnicodeEmojiRow(msg.id, user.id, ExpressionUsageType.REACTION, emoji.name);
 
-    if (row) insertRows([row]);
+    if (row) await insertRows([row])
+        .catch(err => handleError("Failed to store reaction usage", err));
 });
 
 Vaius.on("messageReactionRemove", async (msg, user, { emoji }) => {
