@@ -259,6 +259,12 @@ handleInteraction({
 
         if (!paginator) return;
 
+        if (interaction.user.id !== paginator.userId)
+            return interaction.reply({
+                content: `This modal is not for you! ${Emoji.Anger}`,
+                flags: MessageFlags.EPHEMERAL
+            });
+
         const page = Number(interaction.data.components.getTextInput("page"));
         if (isNaN(page) || page < 1 || page > paginator.totalPages) {
             return interaction.reply({
