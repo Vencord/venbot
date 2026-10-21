@@ -2,13 +2,13 @@ import { createHash } from "crypto";
 import { createReadStream } from "fs";
 import { copyFile, mkdir, mkdtemp, rm, stat } from "fs/promises";
 import { Attachment } from "oceanic.js";
-import { tmpdir } from "os";
-import { join } from "path";
+import { homedir, tmpdir } from "os";
+import { extname, join, resolve, sep } from "path";
 import { pipeline } from "stream/promises";
 
 import { Emoji } from "~/constants";
 import { OwnerId } from "~/owner";
-import { execFileP, execP } from "~/util/childProcess";
+import { execFileP } from "~/util/childProcess";
 import { reply } from "~/util/discord";
 import { downloadToFile } from "~/util/fetch";
 import { silently } from "~/util/functions";
@@ -21,7 +21,18 @@ const CHANNEL_ID = "1076188996465590282";
 // change identity:
 // git config user.name shiggybot
 // git config user.email 136832773+shiggybot@users.noreply.github.com
-const FilesDir = "~/plugin-assets";
+const FilesDir = join(homedir(), "plugin-assets");
+
+const PluginNameRegex = /^[a-z0-9][a-z0-9._-]*$/i;
+const AllowedExtensions = new Set([
+    "png", "jpg", "jpeg", "gif", "webp",
+    "mp4", "webm", "mov"
+]);
+
+function getExtension(filename: string) {
+    const ext = extname(filename).slice(1).toLowerCase();
+    return AllowedExtensions.has(ext) ? ext : null;
+}
 
 interface MediaParams {
     directory: string;
@@ -43,7 +54,9 @@ Vaius.on("messageCreate", async msg => {
         return silently(msg.createReaction(Emoji.QuestionMark));
 
 
-    const ext = attachment.filename.split(".").pop()!;
+    const ext = getExtension(attachment.filename);
+    if (!ext)
+        return silently(msg.createReaction(Emoji.QuestionMark));
 
     const { directory, filename, cleanup } = await downloadToTempFile(attachment, ext);
 
@@ -62,7 +75,7 @@ Vaius.on("messageCreate", async msg => {
     }
 });
 
-const formatFileName = (oldName: string) => `input.${oldName.split(".").pop()}`;
+const formatFileName = (oldName: string) => `input.${extname(oldName).slice(1)}`;
 
 async function optimiseImage(d: MediaParams) {
     const filename = formatFileName(d.filename);
@@ -78,11 +91,11 @@ async function optimiseImage(d: MediaParams) {
 async function optimiseVideo(d: MediaParams) {
     const filename = formatFileName(d.filename);
 
-    const cmd =
-        `ffmpeg -i ${filename} -b:v 0 -crf 30 -pass 1 -an -f webm -y /dev/null`
-        + `&& ffmpeg  -i ${filename} -b:v 0 -crf 30 -pass 2 output.webm`;
-
-    await execP(cmd, {
+    const ffmpegArgs = ["-i", filename, "-b:v", "0", "-crf", "30"];
+    await execFileP("ffmpeg", [...ffmpegArgs, "-pass", "1", "-an", "-f", "webm", "-y", "/dev/null"], {
+        cwd: d.directory
+    });
+    await execFileP("ffmpeg", [...ffmpegArgs, "-pass", "2", "output.webm"], {
         cwd: d.directory
     });
 
@@ -120,7 +133,14 @@ async function pickBetter(dir: string, oldName: string, newName: string) {
 }
 
 async function writeAsset(pluginName: string, file: string, author: string) {
-    const dir = join(FilesDir, pluginName);
+    if (!PluginNameRegex.test(pluginName))
+        throw new Error(`Invalid plugin name: ${pluginName}`);
+
+    const base = resolve(FilesDir);
+    const dir = resolve(base, pluginName);
+    if (dir !== base && !dir.startsWith(base + sep))
+        throw new Error(`Invalid plugin path: ${pluginName}`);
+
     await mkdir(dir, { recursive: true });
 
     const hash = createHash("md5");
@@ -128,10 +148,12 @@ async function writeAsset(pluginName: string, file: string, author: string) {
     await pipeline(stream, hash);
     const hashString = hash.digest("hex");
 
-    const ext = file.split(".").pop()!;
+    const ext = extname(file).slice(1);
     const newFileName = join(pluginName, `${hashString}.${ext}`);
+    const name = resolve(base, newFileName);
+    if (!name.startsWith(base + sep))
+        throw new Error(`Invalid asset path: ${newFileName}`);
 
-    const name = join(FilesDir, newFileName);
     await copyFile(file, name);
 
     const git = (...args: string[]) => execFileP("git", args, { cwd: FilesDir });
