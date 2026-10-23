@@ -136,8 +136,10 @@ enabled && fastify.register(
                         const { userId, state } = req.query as Record<string, string>;
                         const storedState = githubAuthStates.get(userId);
 
-                        if (!storedState || storedState.id !== state)
-                            return res.status(400).send("Invalid authorization request");
+                        if (!storedState || storedState.id !== state) {
+                            res.status(400).send("Invalid authorization request");
+                            return;
+                        }
 
                         done();
                     },

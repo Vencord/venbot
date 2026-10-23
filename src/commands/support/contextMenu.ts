@@ -61,7 +61,7 @@ registerMessageCommand({
 registerMessageCommand({
     name: Commands.Issue,
     async handle(interaction) {
-        const [_, issues] = await Promise.all([interaction.defer(MessageFlags.EPHEMERAL), findThreads()]);
+        const [_, issues] = await Promise.all([interaction.defer(MessageFlags.EPHEMERAL), findThreads(interaction.client)]);
 
         if (!issues?.length) {
             return interaction.createFollowup({ content: "No issues found.", flags: MessageFlags.EPHEMERAL });
@@ -126,7 +126,7 @@ handleInteraction({
                     await interaction.channel.createMessage(buildFaqComponents(faq, interaction.user, replyOptions));
                     break;
                 case Commands.Issue:
-                    const threads = await findThreads();
+                    const threads = await findThreads(interaction.client);
                     if (!threads)
                         return interaction.createFollowup({ content: "I can't find any posts :d", flags: MessageFlags.EPHEMERAL });
 

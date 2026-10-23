@@ -7,7 +7,7 @@ import util from "util";
 class MultilineString {
     constructor(public s: string) { }
 
-    [util.inspect.custom](_depth: number, options: util.InspectOptionsStylized) {
+    [util.inspect.custom](_depth: number, options: util.InspectContext) {
         return [
             "",
             ...this.s.split("\n").map(line => options.stylize(line, "string"))
