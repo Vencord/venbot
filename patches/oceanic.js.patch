@@ -1,0 +1,12 @@
+diff --git a/dist/lib/util/parsing/modal-components.js b/dist/lib/util/parsing/modal-components.js
+index f802c1a7f9e15f456f2561bcdcfb6d77663408b1..da33a2ebc5a7caf5b77a0ab1cbe4493887c1a1ce 100644
+--- a/dist/lib/util/parsing/modal-components.js
++++ b/dist/lib/util/parsing/modal-components.js
+@@ -4,6 +4,7 @@ exports.toRaw = exports.fromRaw = void 0;
+ /* eslint-disable @typescript-eslint/explicit-function-return-type */
+ const Constants_1 = require("../../Constants");
+ const FROM_RAW = {
++    [Constants_1.ComponentTypes.TEXT_DISPLAY]: component => component,
+     [Constants_1.ComponentTypes.ACTION_ROW]: component => ({
+         components: component.components.map(c => fromRaw(c)),
+         type: component.type

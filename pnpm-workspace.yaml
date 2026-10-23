@@ -9,3 +9,5 @@ onlyBuiltDependencies:
   - canvas
   - esbuild
   - tesseract.js
+patchedDependencies:
+  oceanic.js: patches/oceanic.js.patch
