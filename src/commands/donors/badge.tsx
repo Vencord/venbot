@@ -12,6 +12,7 @@ import Config from "~/config";
 import { OwnerId } from "~/owner";
 import { atomicWriteFileSync } from "~/util/atomicWriteFile";
 import { getHomeGuild } from "~/util/discord";
+import { lookupKlipyURL, lookupTenorURL } from "~/util/gifs";
 import { logBotAuditAction } from "~/util/logAction";
 import { CommandAttachmentOption, CommandBooleanOption, CommandIntegerOption, CommandStringOption, CommandUserOption } from "~components";
 import { PROD } from "../../constants";
@@ -71,8 +72,10 @@ async function optimizeImage(imgData: Buffer, ext: string) {
     ] as const;
 }
 
-function normaliseCdnUrl(rawUrl: string) {
+async function normaliseUrl(rawUrl: string) {
     const url = new URL(rawUrl);
+    if (url.host === "tenor.com") return lookupTenorURL(url);
+    if (url.host === "klipy.com") return lookupKlipyURL(url);
     if (url.host !== "cdn.discordapp.com" || url.pathname.includes("/attachments/")) return rawUrl;
 
     url.searchParams.set("size", "128");
@@ -81,7 +84,7 @@ function normaliseCdnUrl(rawUrl: string) {
 }
 
 async function fetchAndProcessBadgeImage(rawUrl: string, userId: string, optimize: boolean) {
-    const url = normaliseCdnUrl(rawUrl);
+    const url = await normaliseUrl(rawUrl);
 
     let imgData: Buffer = await fetchBuffer(url);
     let ext = new URL(url).pathname.split(".").pop()!;
@@ -334,7 +337,7 @@ const handler: CommandInteractionHandler = {
         const imageUrl = data.options.getString("image-url");
 
         let url = image?.url ?? imageUrl;
-        url &&= normaliseCdnUrl(url);
+        if (url) url = await normaliseUrl(url);
 
         if (!url || !tooltip) {
             const existing = existingBadgeIndex != null && BadgeData[user.id]?.[existingBadgeIndex];
