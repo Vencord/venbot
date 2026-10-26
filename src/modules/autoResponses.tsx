@@ -52,16 +52,19 @@ async function loadResponses() {
 
 loadResponses();
 
-export async function maybeAutoRespond(msg: Message<AnyTextableGuildChannel>, text: string, contentType: AutoResponseContentType) {
-    if (!text) return;
+export function resolveAutoResponse(text: string, contentType: AutoResponseContentType, msg?: Message<AnyTextableGuildChannel>, ) {
+    if (!text) return null;
 
-    const response = autoResponses.find(r => {
+    return autoResponses.find(r => {
         if (r.contentTypes !== AutoResponseContentType.ALL && r.contentTypes !== contentType) return false;
-        if (r.channelIds.length && !r.channelIds.includes(msg.channel.id) && !(msg.channel.parentID && r.channelIds.includes(msg.channel.parentID))) return false;
+        if (msg && r.channelIds.length && !r.channelIds.includes(msg.channel.id) && !(msg.channel.parentID && r.channelIds.includes(msg.channel.parentID))) return false;
 
         return r.match.test(text);
-    });
+    }) ?? null;
+}
 
+export async function maybeAutoRespond(msg: Message<AnyTextableGuildChannel>, text: string, contentType: AutoResponseContentType) {
+    const response = resolveAutoResponse(text, contentType, msg);
     return response && await reply(msg, { content: `${response.response}\n\n-# This is an auto-response based on keywords detected in your message.` });
 }
 
