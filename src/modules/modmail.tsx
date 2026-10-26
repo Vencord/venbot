@@ -539,7 +539,7 @@ if (enabled) {
             const isModAction = interaction.member.roles.includes(modRoleId);
             if (!isModAction) return;
 
-            const options = MANAGEABLE_ROLES
+            const options = Config.roles.modmailAssignableRoles
                 .map(roleId => interaction.guild.roles.get(roleId))
                 .filter(isNonNullish)
                 .sort((a, b) => a.name.localeCompare(b.name))

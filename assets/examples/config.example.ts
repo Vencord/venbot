@@ -57,6 +57,18 @@ const Config = {
             "1427368278866792669", // no ai
             "1241355250129178775", // angelsachse (no german)
             "1136184488498561035", // snippet dev
+        ],
+
+        // Ordered
+        "modmailAssignableRoles": [
+            "1191202487978438656", // programming
+            "1136184488498561035", // snippet dev
+            "1205614728148422716", // no programming
+            "1061276426478813245", // no support
+            "1018310742874791977", // brain rot
+            "1118620309382254654", // can't talk
+            "1173623814211506207", // can't vc
+            "1088566810976194693", // needy
         ]
     },
 
