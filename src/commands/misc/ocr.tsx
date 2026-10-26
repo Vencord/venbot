@@ -16,7 +16,7 @@ registerMessageCommand({
         if (!msg.attachments.size)
             return interaction.reply({ content: "No attachments found.", flags });
 
-        await interaction.defer();
+        await interaction.defer(flags);
 
         const imageData = await fetchBuffer(msg.attachments.first()!.url);
 
