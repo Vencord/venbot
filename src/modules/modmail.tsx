@@ -542,7 +542,6 @@ if (enabled) {
             const options = Config.roles.modmailAssignableRoles
                 .map(roleId => interaction.guild.roles.get(roleId))
                 .filter(isNonNullish)
-                .sort((a, b) => a.name.localeCompare(b.name))
                 .slice(0, 25)
                 .map(role => <StringOption label={role.name} value={role.id} />);
 
