@@ -25,7 +25,7 @@ const re = new RegExp(scamTerms.map(term => `\\b${term}\\b`).join("|"), "ig");
 const currentlySoftBanning = new Set<string>();
 
 export async function ocrModerate(msg: Message<AnyTextableGuildChannel>, attachments: OcrResult[]): Promise<boolean> {
-    if (!msg.member || !REGULAR_ROLES.some(role => msg.member.roles.includes(role))) return false;
+    if (!msg.member || REGULAR_ROLES.some(role => msg.member.roles.includes(role))) return false;
 
     const isScam = attachments.some(att => re.test(att.text));
     if (!isScam) return false;
