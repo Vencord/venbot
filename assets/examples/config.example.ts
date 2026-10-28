@@ -40,7 +40,7 @@ const Config = {
         // used for github linking and some other things
         "contributor": "1026534353167208489",
         // used for regular cotd
-        "regular": "1564808439241375764",
+        "cotd": "1564808439241375764",
         // legacy regular cotd, used for older members who had the role before the new cotd role was introduced
         "regular_legacy": "1026504932959977532",
 

@@ -54,7 +54,7 @@ export async function rerollCotd(inputHex?: string) {
     const color = parseInt(hex.slice(1), 16);
     const icon = await drawBlobCatCozy(hex);
 
-    await getHomeGuild()!.editRole(Config.roles.regular, {
+    await getHomeGuild()!.editRole(Config.roles.cotd, {
         name: `cozy of the day (${name.toLowerCase()})`,
         colors: {
             primaryColor: color,

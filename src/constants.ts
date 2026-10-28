@@ -19,7 +19,7 @@ export const SUPPORT_ALLOWED_CHANNELS = [
 ];
 
 export const REGULAR_ROLES = [
-    Config.roles.regular,
+    Config.roles.cotd,
     Config.roles.regular_legacy
 ];
 
