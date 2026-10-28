@@ -12,13 +12,6 @@ import { hasHigherRoleThan } from "./utils";
 const Aliases = makeConstants({
     donor: Config.roles.donor,
     d: Config.roles.donor,
-
-    cute: Config.roles.regular,
-    c: Config.roles.regular,
-
-    regular: Config.roles.regular,
-    r: Config.roles.regular,
-
     needy: "1088566810976194693"
 });
 

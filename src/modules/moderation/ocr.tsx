@@ -1,7 +1,6 @@
 import { AnyTextableGuildChannel, Message } from "oceanic.js";
 import { logUserRestriction } from "~/commands/moderation/utils";
-import Config from "~/config";
-import { Colors, Emoji, Millis, Seconds } from "~/constants";
+import { Colors, Emoji, Millis, REGULAR_ROLES, Seconds } from "~/constants";
 import { softBan } from "~/util/discord";
 import { checkPromise, silently } from "~/util/functions";
 import { logAutoModAction } from "~/util/logAction";
@@ -26,7 +25,7 @@ const re = new RegExp(scamTerms.map(term => `\\b${term}\\b`).join("|"), "ig");
 const currentlySoftBanning = new Set<string>();
 
 export async function ocrModerate(msg: Message<AnyTextableGuildChannel>, attachments: OcrResult[]): Promise<boolean> {
-    if (!msg.member || msg.member.roles.includes(Config.roles.regular)) return false;
+    if (!msg.member || !REGULAR_ROLES.some(role => msg.member.roles.includes(role))) return false;
 
     const isScam = attachments.some(att => re.test(att.text));
     if (!isScam) return false;

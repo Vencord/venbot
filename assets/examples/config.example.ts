@@ -40,7 +40,9 @@ const Config = {
         // used for github linking and some other things
         "contributor": "1026534353167208489",
         // used for regular cotd
-        "regular": "1026504932959977532",
+        "regular": "1564808439241375764",
+        // legacy regular cotd, used for older members who had the role before the new cotd role was introduced
+        "regular_legacy": "1026504932959977532",
 
         // roles that can be added or removed using the role management commands.
         // always includes roles.donor, roles.regular, and roles.contributor
@@ -109,6 +111,7 @@ const Config = {
         ],
         "rewards": {
             5: "1136687385434918992", // image sender
+            20: "1564808439241375764", // regular
         }
     },
 
