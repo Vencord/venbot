@@ -9,7 +9,7 @@ defineCommand({
     usage: null,
     guildOnly: true,
     async execute({ msg, reply }, hex: string) {
-        const regularRole = msg.guild!.roles.get(Config.roles.regular)!;
+        const regularRole = msg.guild!.roles.get(Config.roles.cotd)!;
 
         const [, colorName] = regularRole.name.match(/\((.+)\)/i)!;
 

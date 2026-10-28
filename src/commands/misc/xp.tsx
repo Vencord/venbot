@@ -87,7 +87,7 @@ defineCommand({
                     })
                 );
             },
-            `${xpStats.userCount} users have earned XP • ${xpStats.totalXp.toLocaleString()} total XP earned`
+            `${xpStats.userCount.toLocaleString()} users have earned XP • ${xpStats.totalXp.toLocaleString()} total XP earned`
         );
 
         return paginator.create(msg);
