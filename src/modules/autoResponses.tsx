@@ -1,7 +1,7 @@
 import { AnyTextableGuildChannel, ApplicationCommandOptionTypes, ChannelTypes, InteractionTypes, Message, MessageFlags, Permissions, TextInputStyles } from "oceanic.js";
 import * as v from "valibot";
 import Config from "~/config";
-import { Emoji, PROD } from "~/constants";
+import { Colors, PROD } from "~/constants";
 import { AutoResponseContentType, db } from "~/db";
 import { handleInteraction, registerChatInputCommand } from "~/SlashCommands";
 import { reply } from "~/util/discord";
@@ -16,6 +16,10 @@ interface AutoResponse {
     contentTypes: AutoResponseContentType;
     channelIds: string[];
 }
+
+const success = (description: string, flags: MessageFlags) => ({ flags, embeds: [{ color: Colors.Green, description }] });
+const failure = (description: string, flags: MessageFlags) => ({ flags, embeds: [{ color: Colors.Red, description }] });
+const warning = (description: string, flags: MessageFlags) => ({ flags, embeds: [{ color: Colors.Banana, description }] });
 
 const AutoResponseImportSchema = v.array(
     v.object({
@@ -154,7 +158,7 @@ registerChatInputCommand({
                     } as Partial<AutoResponse>;
 
                 if (!existingResponse && subcommand === "edit") {
-                    await interaction.reply({ flags, content: "Auto-response not found" });
+                    await interaction.reply(failure("Auto-response not found", flags));
                     return;
                 }
 
@@ -223,11 +227,9 @@ registerChatInputCommand({
                 const didDelete = numDeletedRows > 0;
                 if (didDelete) await loadResponses();
 
-                await interaction.reply({
-                    content: didDelete
-                        ? `${Emoji.CheckMark} Auto-response "${name}" removed successfully.`
-                        : `${Emoji.X} Auto-response "${name}" not found.`
-                });
+                await interaction.reply(didDelete
+                    ? success(`Auto-response "${name}" removed successfully.`, flags)
+                    : failure(`Auto-response "${name}" not found.`, flags));
 
                 break;
             }
@@ -240,7 +242,7 @@ registerChatInputCommand({
 
             case "export": {
                 if (!autoResponses.length) {
-                    await interaction.reply({ content: "No auto-responses to export.", flags });
+                    await interaction.reply(warning("No auto-responses to export.", flags));
                     break;
                 }
 
@@ -264,10 +266,7 @@ registerChatInputCommand({
 
                 const parseResult = v.safeParse(AutoResponseImportSchema, data);
                 if (!parseResult.success) {
-                    await interaction.reply({
-                        flags,
-                        content: `${Emoji.X} Invalid auto-response import data format. Should have the same format as exported auto-responses.\n\n${toCodeblock(parseResult.issues[0].message)}`
-                    });
+                    await interaction.reply(failure(`Invalid auto-response import data format. Should have the same format as exported auto-responses.\n\n${toCodeblock(parseResult.issues[0].message)}`, flags));
                     break;
                 }
 
@@ -283,9 +282,9 @@ registerChatInputCommand({
                 await loadResponses();
 
                 if (Number(numInsertedOrUpdatedRows!) === parseResult.output.length) {
-                    await interaction.reply({ flags, content: `${Emoji.CheckMark} Successfully imported ${numInsertedOrUpdatedRows} auto-responses.` });
+                    await interaction.reply(success(`Successfully imported ${numInsertedOrUpdatedRows} auto-responses.`, flags));
                 } else {
-                    await interaction.reply({ flags, content: `${Emoji.RedDot} Imported ${numInsertedOrUpdatedRows!} out of ${parseResult.output.length} auto-responses.` });
+                    await interaction.reply(warning(`Imported ${numInsertedOrUpdatedRows!} out of ${parseResult.output.length} auto-responses.`, flags));
                 }
 
                 break;
@@ -345,7 +344,7 @@ handleInteraction({
                 .where("name", "=", name)
                 .executeTakeFirst();
 
-            await interaction.reply({ flags, content: `${Emoji.CheckMark} Auto-response "${name}" updated successfully.` });
+            await interaction.reply(success(`Auto-response "${name}" updated successfully.`, flags));
             await loadResponses();
         } else {
             const res = await db
@@ -355,10 +354,10 @@ handleInteraction({
                 .executeTakeFirst();
 
             if (res.numInsertedOrUpdatedRows) {
-                await interaction.reply({ flags, content: `${Emoji.CheckMark} Auto-response "${name}" created successfully.` });
+                await interaction.reply(success(`Auto-response "${name}" created successfully.`, flags));
                 await loadResponses();
             } else {
-                await interaction.reply({ flags, content: `${Emoji.X} Auto-response "${name}" already exists.` });
+                await interaction.reply(failure(`Auto-response "${name}" already exists.`, flags));
             }
         }
     }
