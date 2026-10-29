@@ -5,6 +5,6 @@ src/_types
 data
 
 .env
-config.ts
+config.toml
 
 .DS_Store

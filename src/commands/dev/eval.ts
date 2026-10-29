@@ -37,7 +37,9 @@ const toRedact = [
     Config.githubLinking.clientSecret,
     Config.githubLinking.pat,
     Config.reporter.pat,
-    Config.reporter.webhookSecret
+    Config.reporter.webhookSecret,
+    Config.googleProxy.secret,
+    Config.wolfram.appId
 ];
 
 function redactCredentials(str: string) {
