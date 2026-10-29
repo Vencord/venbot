@@ -1,6 +1,49 @@
+import { execFile } from "child_process";
 import esbuild from "esbuild";
 import { readdir } from "fs/promises";
 import { join } from "path";
+import { promisify } from "util";
+
+const execFileP = promisify(execFile);
+
+async function getGitRemote() {
+    const { stdout } = await execFileP("git", ["remote", "get-url", "origin"]);
+    return stdout
+        .trim()
+        .replace(/\.git$/, "")
+        .replace(/^git@(.+?):/, "https://$1/");
+}
+
+async function getGitCommitHash() {
+    const { stdout } = await execFileP("git", ["rev-parse", "HEAD"]);
+    return stdout.trim();
+}
+
+/**
+ * @type {esbuild.Plugin}
+ */
+const gitDataPlugin = {
+    name: "git-data",
+    setup(build) {
+        const filter = /^__gitData__$/;
+        const namespace = "git-data";
+
+        build.onResolve({ filter }, args => ({ path: args.path, namespace }));
+
+        build.onLoad({ filter, namespace }, async () => {
+            const remote = process.env.GIT_REMOTE ?? await getGitRemote();
+            const commitHash = process.env.GIT_COMMIT_HASH ?? await getGitCommitHash();
+
+            return {
+                contents: [
+                    `export const gitRemote = ${JSON.stringify(remote)};`,
+                    `export const gitCommitHash = ${JSON.stringify(commitHash)};`,
+                ].join("\n"),
+                loader: "js"
+            };
+        });
+    }
+};
 
 /**
  * @type {esbuild.Plugin}
@@ -80,7 +123,7 @@ const includeDirPlugin = namespace => ({
 await esbuild.build({
     entryPoints: ["src/index.ts"],
     bundle: true,
-    plugins: [includeDirPlugin("commands"), includeDirPlugin("modules"), makeAllPackagesExternalPlugin],
+    plugins: [gitDataPlugin, includeDirPlugin("commands"), includeDirPlugin("modules"), makeAllPackagesExternalPlugin],
     outfile: "dist/index.js",
     minify: false,
     treeShaking: true,
