@@ -46,7 +46,7 @@ defineCommand({
 
         const reasonWithMod = `${msg.author.tag}: ${reason}`;
 
-        const members = await msg.guild.fetchMembers({ userIDs: ids });
+        const members = await msg.guild.requestMembers({ userIDs: ids });
         const authorHighestRolePosition = getHighestRolePosition(msg.member);
 
         const mutedUsers = [] as string[];

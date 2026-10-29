@@ -56,7 +56,7 @@ async function banExecutor({ msg, reply }: CommandContext<true>, args: string[],
 
     const reasonWithMod = `${msg.author.tag}: ${reason}`;
 
-    const members = await msg.guild.fetchMembers({ userIDs: ids });
+    const members = await msg.guild.requestMembers({ userIDs: ids });
     const restIds = ids.filter(id => !members.some(m => m.id === id));
 
     const authorHighestRolePosition = getHighestRolePosition(msg.member);
