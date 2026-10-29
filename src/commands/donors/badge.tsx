@@ -94,7 +94,7 @@ async function normaliseUrl(rawUrl: string) {
     if (url.host === "klipy.com") return lookupKlipyURL(url);
     if (url.host !== "cdn.discordapp.com" || url.pathname.includes("/attachments/")) return rawUrl;
 
-    url.searchParams.set("size", "128");
+    url.searchParams.set("size", "256");
 
     return url.toString();
 }
