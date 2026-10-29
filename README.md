@@ -35,7 +35,8 @@ Prequisites: git, nodejs, pnpm
 4. Enable & Start the quadlet via `systemctl --user daemon-reload && systemctl --user enable --now venbot`
 
 The image contains the bot and its assets. `data/` and `config.toml` are mounted from the host, as is `/var/www/badges.vencord.dev`
-(used by the badge command). The HTTP server port is published according to `httpServer.port` in `config.toml` (8152 by default).
+(used by the badge command). The HTTP server port is published on localhost according to `httpServer.port` in `config.toml`
+(8152 by default), so the reverse proxy can reach it without exposing it publicly.
 
 ### Updating
 

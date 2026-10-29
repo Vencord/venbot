@@ -21,8 +21,8 @@ Volume=%h/venbot/data:/app/data:Z
 Volume=%h/venbot/config.toml:/app/config.toml:ro,Z
 Volume=/var/www/badges.vencord.dev:/var/www/badges.vencord.dev:z
 
-# Must match httpServer.port in config.toml
-PublishPort=8152:8152
+# Must match httpServer.port in config.toml. Bind to localhost so only the reverse proxy can reach it.
+PublishPort=127.0.0.1:8152:8152
 
 [Service]
 Restart=always
