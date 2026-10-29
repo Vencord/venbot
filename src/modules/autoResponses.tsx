@@ -6,7 +6,7 @@ import { AutoResponseContentType, db } from "~/db";
 import { handleInteraction, registerChatInputCommand } from "~/SlashCommands";
 import { reply } from "~/util/discord";
 import { fetchJson } from "~/util/fetch";
-import { toCodeblock } from "~/util/text";
+import { toCodeblock, toInlineCode } from "~/util/text";
 import { ChannelSelect, ModalLabel, StringOption, StringSelect, TextInput } from "~components";
 
 interface AutoResponse {
@@ -228,8 +228,8 @@ registerChatInputCommand({
                 if (didDelete) await loadResponses();
 
                 await interaction.reply(didDelete
-                    ? success(`Auto-response "${name}" removed successfully.`, flags)
-                    : failure(`Auto-response "${name}" not found.`, flags));
+                    ? success(`Auto-response ${toInlineCode(name)} removed successfully.`, flags)
+                    : failure(`Auto-response ${toInlineCode(name)} not found.`, flags));
 
                 break;
             }
@@ -344,7 +344,7 @@ handleInteraction({
                 .where("name", "=", name)
                 .executeTakeFirst();
 
-            await interaction.reply(success(`Auto-response "${name}" updated successfully.`, flags));
+            await interaction.reply(success(`Auto-response ${toInlineCode(name)} updated successfully.`, flags));
             await loadResponses();
         } else {
             const res = await db
@@ -354,10 +354,10 @@ handleInteraction({
                 .executeTakeFirst();
 
             if (res.numInsertedOrUpdatedRows) {
-                await interaction.reply(success(`Auto-response "${name}" created successfully.`, flags));
+                await interaction.reply(success(`Auto-response ${toInlineCode(name)} created successfully.`, flags));
                 await loadResponses();
             } else {
-                await interaction.reply(failure(`Auto-response "${name}" already exists.`, flags));
+                await interaction.reply(failure(`Auto-response ${toInlineCode(name)} already exists.`, flags));
             }
         }
     }
