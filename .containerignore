@@ -1,0 +1,6 @@
+.gitignore
+node_modules
+dist
+data
+config.toml
+.env

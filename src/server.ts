@@ -7,6 +7,7 @@ import { PROD } from "./constants";
 import { makeLazy } from "./util/lazy";
 
 const { enabled, port } = Config.httpServer;
+const host = process.env.HTTP_HOST ?? "127.0.0.1";
 
 export const fastify = Fastify({
     logger: !PROD && {
@@ -33,7 +34,7 @@ if (enabled) {
 
     // defer listen to allow for fastify plugins to be registered before starting the server
     setImmediate(() => {
-        fastify.listen({ port: port }, err => {
+        fastify.listen({ port, host }, err => {
             if (err) {
                 fastify.log.error(err);
                 process.exit(1);

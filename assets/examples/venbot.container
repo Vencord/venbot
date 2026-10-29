@@ -1,0 +1,33 @@
+[Unit]
+Description=Venbot Discord bot
+Wants=network-online.target
+After=network-online.target
+
+[Container]
+Image=localhost/venbot:latest
+ContainerName=venbot
+
+# Run as the host user so mounted files keep their ownership
+UserNS=keep-id
+User=%U
+Group=%G
+
+NoNewPrivileges=true
+DropCapability=ALL
+ReadOnly=true
+
+# data/config are private to the container; the badge directory is shared with the web server
+Volume=%h/venbot/data:/app/data:Z
+Volume=%h/venbot/config.toml:/app/config.toml:ro,Z
+Volume=/var/www/badges.vencord.dev:/var/www/badges.vencord.dev:z
+
+# Must match httpServer.port in config.toml
+PublishPort=8152:8152
+
+[Service]
+Restart=always
+ExecStartPre=%h/venbot/scripts/container-update.sh
+TimeoutStartSec=10min
+
+[Install]
+WantedBy=default.target
