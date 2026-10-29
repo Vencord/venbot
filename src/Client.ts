@@ -73,9 +73,12 @@ async function handleMessage(msg: Message, isEdit: boolean) {
     if (msg.author.bot && msg.author.id !== GEN_AI_ID) return;
 
     moderateMessage(msg, isEdit);
-    ocrMessage(msg);
-    handleIntroduction(msg);
-    handleGithubLines(msg);
+
+    if (!isEdit) {
+        ocrMessage(msg);
+        handleIntroduction(msg);
+        handleGithubLines(msg);
+    }
 
     await emojiCacheReady;
 
