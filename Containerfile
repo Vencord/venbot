@@ -33,6 +33,8 @@ COPY --from=build --chown=node:node /app/package.json ./package.json
 COPY --from=build --chown=node:node /app/dist ./dist
 COPY --from=build --chown=node:node /app/node_modules ./node_modules
 COPY --chown=node:node assets ./assets
+COPY --chown=node:node sql ./sql
+COPY --chown=node:node scripts/container-entrypoint.sh ./scripts/container-entrypoint.sh
 
 RUN mkdir -p data /var/www/badges.vencord.dev \
     && chown -R node:node data /var/www/badges.vencord.dev
@@ -41,4 +43,4 @@ USER node
 
 EXPOSE 8152
 
-CMD ["node", "--enable-source-maps", "."]
+CMD ["/app/scripts/container-entrypoint.sh"]
