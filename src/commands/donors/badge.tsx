@@ -370,6 +370,8 @@ const handler: CommandInteractionHandler = {
         let url = image?.url ?? imageUrl;
         if (url) url = await normaliseUrl(url);
 
+        const hadUrl = !!url;
+
         if (!url || !tooltip) {
             const existing = existingBadgeIndex != null && BadgeData[user.id]?.[existingBadgeIndex];
             if (!existing || (!url && !tooltip))
@@ -382,7 +384,7 @@ const handler: CommandInteractionHandler = {
             tooltip ??= existing.tooltip;
         }
 
-        const optimize = data.options.getBoolean("optimize") ?? !url.includes(".svg");
+        const optimize = hadUrl && (data.options.getBoolean("optimize") ?? !url.includes(".svg"));
 
         i.defer(MessageFlags.EPHEMERAL);
 
