@@ -1,7 +1,7 @@
-import { AnyTextableGuildChannel, ApplicationCommandOptionTypes, ChannelTypes, InteractionTypes, Message, MessageFlags, Permissions, TextInputStyles } from "oceanic.js";
+import { AnyTextableGuildChannel, ApplicationCommandOptionTypes, AutocompleteInteraction, ChannelTypes, InteractionTypes, Message, MessageFlags, Permissions, TextInputStyles } from "oceanic.js";
 import * as v from "valibot";
 import Config from "~/config";
-import { Colors, PROD } from "~/constants";
+import { Colors, PROD, SUPPORT_ALLOWED_CHANNELS } from "~/constants";
 import { AutoResponseContentType, db } from "~/db";
 import { handleInteraction, registerChatInputCommand } from "~/SlashCommands";
 import { reply } from "~/util/discord";
@@ -71,6 +71,52 @@ export async function maybeAutoRespond(msg: Message<AnyTextableGuildChannel>, te
     const response = resolveAutoResponse(text, contentType, msg);
     return response && await reply(msg, { content: `${response.response}\n\n-# This is an auto-response based on keywords detected in your message.` });
 }
+
+function autoCompleteName(interaction: AutocompleteInteraction) {
+    const name = interaction.data.options.getString("name", true);
+
+    interaction.result(
+        autoResponses
+            .filter(r => r.name.toLowerCase().includes(name.toLowerCase()))
+            .map(r => ({ name: r.name, value: r.name }))
+    );
+}
+
+registerChatInputCommand({
+    name: PROD ? "autorespond" : "dev-autorespond",
+    description: "Send an auto-response by name",
+    options: [
+        {
+            type: ApplicationCommandOptionTypes.STRING,
+            name: "name",
+            description: "The name of the auto-response to send",
+            required: true,
+            autocomplete: true
+        }
+    ]
+}, {
+    guildOnly: true,
+
+    async handle(interaction) {
+        const flags = MessageFlags.EPHEMERAL;
+
+        if (!SUPPORT_ALLOWED_CHANNELS.includes(interaction.channel.id)) {
+            await interaction.reply(failure("This command can only be used in support channels.", flags));
+            return;
+        }
+
+        const name = interaction.data.options.getString("name", true);
+        const response = autoResponses.find(r => r.name === name);
+        if (!response) {
+            await interaction.reply(failure(`Auto-response ${toInlineCode(name)} not found.`, flags));
+            return;
+        }
+
+        await interaction.reply({ content: response.response });
+    },
+
+    autoComplete: autoCompleteName
+});
 
 const allowedRoles = [Config.roles.mod, Config.roles.helper];
 
@@ -292,15 +338,7 @@ registerChatInputCommand({
         }
     },
 
-    autoComplete(interaction) {
-        const name = interaction.data.options.getString("name", true);
-
-        interaction.result(
-            autoResponses
-                .filter(r => r.name.toLowerCase().includes(name.toLowerCase()))
-                .map(r => ({ name: r.name, value: r.name }))
-        );
-    }
+    autoComplete: autoCompleteName
 });
 
 handleInteraction({
