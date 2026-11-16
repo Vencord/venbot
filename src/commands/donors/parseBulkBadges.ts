@@ -25,7 +25,7 @@ export async function parseBulkBadges(text: string) {
     `;
 
     const result = await ai.models.generateContent({
-        model: "gemma-4-31b-it",
+        model: "gemini-2.5-flash-lite",
         contents: [
             createUserContent(prompt),
             createUserContent(text)
