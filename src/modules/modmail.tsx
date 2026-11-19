@@ -1,6 +1,7 @@
 import { ActivityTypes, AnyTextableGuildChannel, ButtonStyles, ChannelTypes, CommandInteraction, ComponentInteraction, ComponentTypes, InteractionTypes, MessageFlags, ModalSubmitInteraction, PrivateThreadChannel, SeparatorSpacingSize, TextChannel, TextInputStyles, User } from "oceanic.js";
 
 import { db } from "~/db";
+import { getLevelForXp, getXpForUser } from "~/modules/xp";
 import { handleComponentInteraction, handleInteraction, registerChatInputCommand } from "~/SlashCommands";
 import { kebabToTitle, stripIndent } from "~/util/text";
 
@@ -41,6 +42,9 @@ const ChannelNameAndPrompt: Record<string, [string, string]> = {
 };
 
 const COMMAND_NAME = PROD ? "modmail" : "devmodmail";
+
+const SUBMISSION_REASONS: string[] = [Ids.REASON_PLUGIN, Ids.REASON_CSS, Ids.REASON_JS];
+const SUBMISSION_MIN_LEVEL = 5;
 
 type GuildInteraction = ComponentInteraction<ComponentTypes.BUTTON, AnyTextableGuildChannel> | CommandInteraction<AnyTextableGuildChannel>;
 
@@ -143,6 +147,7 @@ async function createModmailModal(interaction: GuildInteraction) {
                     - Tickets are **only for issues regarding this server** that require moderator attention
                     - Tickets are **not for Vencord support or questions**! Use <#1026515880080842772>
                     - We only moderate things that happen in this server. **Don't report users for things that happened elsewhere**. This includes DMs! Block users to stop them from messaging you.
+                    - Submitting plugins or css/js snippets requires being at least level ${SUBMISSION_MIN_LEVEL}.
                 `}
             </TextDisplay>
 
@@ -275,6 +280,17 @@ if (enabled) {
                     content: "Thanks a lot for donating! Please private message <@343383572805058560> to redeem your perks! Make sure you have your DMs open or it won't work.",
                     flags: MessageFlags.EPHEMERAL
                 });
+            }
+
+            if (SUBMISSION_REASONS.includes(reason) && !interaction.member.roles.includes(Config.roles.contributor)) {
+                const { xp } = await getXpForUser(interaction.user);
+
+                if (getLevelForXp(xp) < SUBMISSION_MIN_LEVEL) {
+                    return interaction.createMessage({
+                        content: `You need to be an active member of our community to submit plugins or snippets.`,
+                        flags: MessageFlags.EPHEMERAL
+                    });
+                }
             }
 
             await interaction.defer(MessageFlags.EPHEMERAL);
