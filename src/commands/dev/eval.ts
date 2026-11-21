@@ -33,6 +33,7 @@ const toRedact = [
     Config.token,
     Config.adventOfCode.cookie,
     Config.gemini.apiKey,
+    Config.braveSearch?.apiKey,
     Config.googleProxy.secret,
     Config.githubLinking.clientSecret,
     Config.githubLinking.pat,
@@ -40,7 +41,7 @@ const toRedact = [
     Config.reporter.webhookSecret,
     Config.googleProxy.secret,
     Config.wolfram.appId
-];
+].filter(Boolean);
 
 function redactCredentials(str: string) {
     for (const secret of toRedact) {

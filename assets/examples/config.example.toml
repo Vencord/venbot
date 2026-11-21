@@ -141,6 +141,10 @@ bannedRoles = [
     "1018310742874791977", # brain rot
 ]
 
+# Optional web search for the Gemini command, 1000 free searches a month. Get key at https://api-dashboard.search.brave.com/
+[braveSearch]
+apiKey = ""
+
 # Wolfram Alpha command. Leave appId empty to disable.
 [wolfram]
 appId = "" # Short Answers API

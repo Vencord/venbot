@@ -71,6 +71,10 @@ const ConfigSchema = pipe(
             bannedRoles: optional(array(string()), [])
         }),
 
+        braveSearch: optional(object({
+            apiKey: optionalString()
+        })),
+
         modmail: enabledConfig({
             channelId: optionalString(),
             logChannelId: optionalString(),
